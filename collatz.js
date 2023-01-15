@@ -1,6 +1,7 @@
 import { BigNumber } from '../api/BigNumber';
 import { ExponentialCost, FirstFreeCost, FreeCost, LinearCost } from '../api/Costs';
 import { Localization } from '../api/Localization';
+import { Theme } from '../api/Settings';
 import { theory } from '../api/Theory';
 import { Utils } from '../api/Utils';
 
@@ -31,6 +32,10 @@ var authors = 'propfeds#5988\n\nThanks to:\nCipher#9599, for the idea';
 var version = 0.02;
 
 let menuLang = Localization.language;
+let cColour = new Map();
+cColour.set(Theme.STANDARD, 'c0c0c0');
+cColour.set(Theme.DARK, 'b5b5b5');
+cColour.set(Theme.LIGHT, '434343');
 
 const locStrings =
 {
@@ -284,7 +289,7 @@ var getPrimaryEquation = () =>
     if(cStr.length > 9)
         cStr = `${cStr.slice(0, 5)}...${cStr.slice(-3)}`;
 
-    let result = `\\begin{matrix}c=\\begin{cases}n/2&\\text{if }c\\equiv0\\text{ (mod 2)}\\\\3c+1&\\text{if }c\\equiv1\\text{ (mod 2)}\\end{cases}\\\\\\\\\\color{#c3c3c3}{=${cStr}}\\end{matrix}`;
+    let result = `\\begin{matrix}c=\\begin{cases}n/2&\\text{if }c\\equiv0\\text{ (mod 2)}\\\\3c+1&\\text{if }c\\equiv1\\text{ (mod 2)}\\end{cases}\\\\\\\\\\color{#${cColour.get(game.settings.theme)}}{=${cStr}}\\end{matrix}`;
 
     return result;
 }
