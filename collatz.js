@@ -87,7 +87,7 @@ const getc2 = (level) => BigNumber.TWO.pow(level);
 const c1Cost = new FirstFreeCost(new ExponentialCost(1, 3.01));
 const c2Cost = new ExponentialCost(1e6, 11);
 
-var getPublicationMultiplier = (tau) => tau.pow(1.2) / BigNumber.from(301);
+var getPublicationMultiplier = (tau) => tau.pow(1.6) / BigNumber.from(301);
 var getTau = () => currency.value.pow(BigNumber.from(0.1));
 var getCurrencyFromTau = (tau) =>
 [
@@ -96,7 +96,7 @@ var getCurrencyFromTau = (tau) =>
 ];
 
 const permaCosts = bigNumArray(['1e12', '1e22', '1e31', '1e66', '1e132']);
-const milestoneCost = new LinearCost(11, 11);
+const milestoneCost = new LinearCost(4.4, 4.4);
 
 const cooldown = [44, 30, 18, 10];
 
@@ -320,7 +320,7 @@ var get2DGraphValue = () =>
 }
 
 var getPublicationMultiplierFormula = (symbol) =>
-`\\frac{{${symbol}}^{1.2}}{301}`;
+`\\frac{{${symbol}}^{1.6}}{301}`;
 
 var prePublish = () =>
 {
