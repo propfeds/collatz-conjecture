@@ -1,8 +1,10 @@
 import { BigNumber } from '../api/BigNumber';
-import { ExponentialCost, FirstFreeCost, FreeCost, LinearCost } from '../api/Costs';
+import { ExponentialCost, FirstFreeCost, FreeCost, LinearCost } from
+'../api/Costs';
 import { Localization } from '../api/Localization';
 import { Theme } from '../api/Settings';
 import { theory } from '../api/Theory';
+import { Color } from '../api/ui/properties/Color';
 import { Utils } from '../api/Utils';
 
 var id = 'collatz_conjecture';
@@ -51,8 +53,10 @@ const locStrings =
         permaPreserveDesc: '\\text{Preserve }c\\text{ after publishing}',
         permaPreserveInfo: '\\text{Preserves }c\\text{ after publishing}',
 
+        cLevelCap: 'c\\text{{ level cap}}',
+        cLevelCapInfo: 'c\\text{{ level cap}}',
         cooldown: '\\text{{interval}}',
-        cooldownCaps: '\\text{{Interval}}',
+        cooldownInfo: 'Interval',
         nTicks: '{{{0}}}\\text{{{{ ticks}}}}',
 
         alternating: ' (alternating)',
@@ -79,25 +83,30 @@ let getLoc = (name, lang = menuLang) =>
 
 let bigNumArray = (array) => array.map(x => BigNumber.from(x));
 
-const inccMaxLevel = 40;
 const getc1 = (level) => Utils.getStepwisePowerSum(level, 2, 5, 1);
-const getc1Exponent = (level) => BigNumber.from(1 + 0.03 * level);
-const c1ExpMaxLevel = 4;
-const getc2 = (level) => BigNumber.TWO.pow(level);
 const c1Cost = new FirstFreeCost(new ExponentialCost(1, 3.01));
+const c1ExpInc = 0.11;
+const c1ExpMaxLevel = 4;
+const getc1Exponent = (level) => BigNumber.from(1 + c1ExpInc * level);
+const getc2 = (level) => BigNumber.TWO.pow(level);
 const c2Cost = new ExponentialCost(1e6, 11);
 
-var getPublicationMultiplier = (tau) => tau.pow(1.6) / BigNumber.from(301);
-var getTau = () => currency.value.pow(BigNumber.from(0.1));
+const pubExp = 1.6;
+const pubMult = 301;
+var getPublicationMultiplier = (tau) => tau.pow(pubExp) /
+BigNumber.from(pubMult);
+const tauRate = 0.1;
+var getTau = () => currency.value.pow(BigNumber.from(tauRate));
 var getCurrencyFromTau = (tau) =>
 [
-    tau.max(BigNumber.ONE).pow(BigNumber.TEN),
+    tau.max(BigNumber.ONE).pow(BigNumber.ONE / tauRate),
     currency.symbol
 ];
 
 const permaCosts = bigNumArray(['1e12', '1e22', '1e31', '1e66', '1e132']);
 const milestoneCost = new LinearCost(4.4, 4.4);
 
+const cLevelCap = [40, 56, 70, 80];
 const cooldown = [44, 30, 18, 10];
 
 let time = 0;
@@ -140,7 +149,7 @@ var init = () =>
             theory.invalidateTertiaryEquation();
         }
         incrementc.isAutoBuyable = false;
-        incrementc.maxLevel = inccMaxLevel;
+        incrementc.maxLevel = cLevelCap[0];
     }
     {
         let getDesc = (level) =>
@@ -197,21 +206,43 @@ var init = () =>
 
     theory.setMilestoneCost(milestoneCost);
     {
-        let getInfo = (level) => `${getLoc('cooldownCaps')}=
-        ${cooldown[level] || cooldown[level - 1]}`;
+        let getInfo = (level, amount = 1) => `${getLoc('cooldownInfo')}=
+        ${cooldown[level] || cooldown[level - amount]}`;
         cooldownMs = theory.createMilestoneUpgrade(0, cooldown.length - 1);
-        cooldownMs.getDescription = (amount) => Localization.
-        getUpgradeDecCustomDesc(getLoc('cooldown'), Localization.format(
-        getLoc('nTicks'),
-        cooldown[cooldownMs.level] - cooldown[cooldownMs.level + amount] || 0));
-        cooldownMs.getInfo = (amount) => Utils.getMathTo(
-        getInfo(cooldownMs.level), getInfo(cooldownMs.level + amount));
+        cooldownMs.getDescription = (amount) =>
+        {
+            let cd = Localization.getUpgradeDecCustomDesc(getLoc(
+            'cooldown'), Localization.format(getLoc('nTicks'),
+            cooldown[cooldownMs.level] - cooldown[cooldownMs.level + amount] ||
+            0));
+            let cap = Localization.getUpgradeIncCustomDesc(getLoc(
+            'cLevelCap'), cLevelCap[cooldownMs.level + amount] -
+            cLevelCap[cooldownMs.level] || 0);
+            return `${cd}; ${cap}`;
+        };
+        cooldownMs.getInfo = (amount) =>
+        {
+            let cd = `${getLoc('cooldownInfo')} = ${Utils.getMathTo(
+            cooldown[cooldownMs.level], cooldown[cooldownMs.level + amount] ||
+            cooldown[cooldownMs.level])}`;
+            let cap = `${Utils.getMath(getLoc('cLevelCapInfo'))} = 
+            ${Utils.getMathTo(cLevelCap[cooldownMs.level],
+            cLevelCap[cooldownMs.level + amount] ||
+            cLevelCap[cooldownMs.level])}`;
+            return `${cd}; ${cap}`;
+        }
+        cooldownMs.boughtOrRefunded = (_) =>
+        {
+            incrementc.maxLevel = totalIncLevel + cLevelCap[cooldownMs.level];
+        };
+        cooldownMs.canBeRefunded = (amount) => incrementc.level <=
+        totalIncLevel + cLevelCap[cooldownMs.level - amount];
     }
     {
         c1ExpMs = theory.createMilestoneUpgrade(1, c1ExpMaxLevel);
         c1ExpMs.description = Localization.getUpgradeIncCustomExpDesc('c_1',
-        '0.03');
-        c1ExpMs.info = Localization.getUpgradeIncCustomExpInfo('c_1', '0.03');
+        c1ExpInc);
+        c1ExpMs.info = Localization.getUpgradeIncCustomExpInfo('c_1', c1ExpInc);
         c1ExpMs.boughtOrRefunded = (_) => theory.invalidateSecondaryEquation();
     }
 
@@ -320,7 +351,7 @@ var get2DGraphValue = () =>
 }
 
 var getPublicationMultiplierFormula = (symbol) =>
-`\\frac{{${symbol}}^{1.6}}{301}`;
+`\\frac{{${symbol}}^{${pubExp}}}{${pubMult}}`;
 
 var prePublish = () =>
 {
@@ -346,7 +377,7 @@ var postPublish = () =>
     incrementc.level = totalIncLevel;
     c = tmpc;
     cBigNum = BigNumber.from(c);
-    incrementc.maxLevel = totalIncLevel + inccMaxLevel;
+    incrementc.maxLevel = totalIncLevel + cLevelCap[cooldownMs.level];
 
     theory.invalidatePrimaryEquation();
     theory.invalidateTertiaryEquation();
@@ -402,7 +433,7 @@ var setInternalState = (stateStr) =>
     if('totalIncLevel' in state)
     {
         totalIncLevel = state.totalIncLevel;
-        incrementc.maxLevel = totalIncLevel + inccMaxLevel;
+        incrementc.maxLevel = totalIncLevel + cLevelCap[cooldownMs.level];
     }
 
     theory.invalidatePrimaryEquation();
