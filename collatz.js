@@ -23,13 +23,14 @@ var getDescription = (language) =>
 `If it's odd, triple it plus one,
 If it's even, divide it by two.
 
-If you woke up today and ate bread, what would you do?`,
+If you woke up today and ate bread,
+what would you do?`,
     };
 
     return descs[language] || descs.en;
 }
 var authors = 'propfeds#5988\n\nThanks to:\nCipher#9599, for the idea';
-var version = 0.02;
+var version = 0.03;
 
 let menuLang = Localization.language;
 let cColour = new Map();
@@ -41,7 +42,7 @@ const locStrings =
 {
     en:
     {
-        versionName: 'v0.02',
+        versionName: 'v0.03',
 
         pausecDesc: 'Freeze c\'s value',
         pausecInfo: 'Can only be used once per publication.',
@@ -86,7 +87,7 @@ const getc2 = (level) => BigNumber.TWO.pow(level);
 const c1Cost = new FirstFreeCost(new ExponentialCost(1, 3.01));
 const c2Cost = new ExponentialCost(1e6, 22);
 
-var getPublicationMultiplier = (tau) => BigNumber.from(2.2) * tau.pow(0.31);
+var getPublicationMultiplier = (tau) => tau.pow(0.44);
 var getTau = () => currency.value.pow(BigNumber.from(0.2));
 var getCurrencyFromTau = (tau) =>
 [
@@ -318,8 +319,7 @@ var get2DGraphValue = () =>
     return (cBigNum.abs().log2() * cBigNum.sign).toNumber();
 }
 
-var getPublicationMultiplierFormula = (symbol) =>
-`2.2\\times{${symbol}}^{0.31}`;
+var getPublicationMultiplierFormula = (symbol) => `{${symbol}}^{0.44}`;
 
 var prePublish = () =>
 {

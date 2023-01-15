@@ -4,4 +4,5 @@
 
 - [ ] Interval milestone also increases level cap?
   - Double?
-- [ ] Raise pub exponent and/or buff c1 & c2?
+- [x] Raise pub exponent to 0.44
+- [ ] Buff c1 & c2?
