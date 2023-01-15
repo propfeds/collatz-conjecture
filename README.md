@@ -1,13 +1,29 @@
-# The Collatz Conjecture
+# Collatz Conjecture
 
-Collatz conjecture puzzle in Exponential Idle.
+A puzzle based on the Collatz conjecture in Exponential Idle.
 
-- Iterates every 1.6 seconds
-- Singular upgrade: toggle decrement / increment
-- Number starts from 0
-- BigInt!
-- Puzzle becomes difficult at high numbers?
-  - It's easy to let it fall off
-  - Freeze number milestone? (warning: same problem with Botched)
-  - Freeze number singular upgrade
-- Milestone to speed up iteration but dangerous
+The Collatz conjecture states that if we take any number, then repeatedly:
+
+- Either divide it by two if it's even,
+- or triple it then plus one if it's odd,
+
+then the number will eventually become 1.
+
+What about negative numbers, you ask?
+
+## Installation
+
+Current version: 0.02
+
+Navigate to [`collatz.js`](./collatz.js) and click on `Raw`. You will be
+delivered to this theory's raw code. Copy the page's URL.
+
+Then, access the custom theory panel within the game (unlocked after finishing
+the Convergence Test) then enter the picking menu. Press the `+` symbol and
+paste the URL in.
+
+## Screenshots
+
+![ss1](screenshots/02.jpg 'Positive')
+
+![ss2](screenshots/01.jpg 'Negative')
