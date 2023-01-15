@@ -85,13 +85,13 @@ const getc1Exponent = (level) => BigNumber.from(1 + 0.03 * level);
 const c1ExpMaxLevel = 4;
 const getc2 = (level) => BigNumber.TWO.pow(level);
 const c1Cost = new FirstFreeCost(new ExponentialCost(1, 3.01));
-const c2Cost = new ExponentialCost(1e6, 22);
+const c2Cost = new ExponentialCost(1e6, 11);
 
-var getPublicationMultiplier = (tau) => tau.pow(0.44) / BigNumber.from(3.01);
-var getTau = () => currency.value.pow(BigNumber.from(0.2));
+var getPublicationMultiplier = (tau) => tau.pow(1.2) / BigNumber.from(301);
+var getTau = () => currency.value.pow(BigNumber.from(0.1));
 var getCurrencyFromTau = (tau) =>
 [
-    tau.max(BigNumber.ONE).pow(BigNumber.FIVE),
+    tau.max(BigNumber.ONE).pow(BigNumber.TEN),
     currency.symbol
 ];
 
@@ -297,7 +297,7 @@ var getPrimaryEquation = () =>
 
 var getSecondaryEquation = () =>
 {
-    let result = `\\begin{matrix}\\dot{\\rho}=c_1${c1ExpMs.level > 0 ? `^{${getc1Exponent(c1ExpMs.level)}}` : ''}c_2|c|,&${theory.latexSymbol}=\\max{\\rho}^{0.2}\\end{matrix}`;
+    let result = `\\begin{matrix}\\dot{\\rho}=c_1${c1ExpMs.level > 0 ? `^{${getc1Exponent(c1ExpMs.level)}}` : ''}c_2|c|,&${theory.latexSymbol}=\\max{\\rho}^{0.1}\\end{matrix}`;
     return result;
 }
 
@@ -320,7 +320,7 @@ var get2DGraphValue = () =>
 }
 
 var getPublicationMultiplierFormula = (symbol) =>
-`\\frac{{${symbol}}^{0.44}}{3.01}`;
+`\\frac{{${symbol}}^{1.2}}{301}`;
 
 var prePublish = () =>
 {

@@ -4,6 +4,6 @@
 
 - [ ] Interval milestone also increases level cap?
   - Double?
-- [x] Raise pub exponent to 0.44
-  - Nerfed pub mult by 3.01
+- [x] Raise pub exponent to 1.2 (still lower than most theories mind you)
+  - Nerfed pub mult to compensate
 - [ ] Buff c1 & c2?
