@@ -28,7 +28,7 @@ If you woke up today and ate bread, what would you do?`,
     return descs[language] || descs.en;
 }
 var authors = 'propfeds#5988\n\nThanks to:\nCipher#9599, for the idea';
-var version = 0.01;
+var version = 0.02;
 
 let menuLang = Localization.language;
 
@@ -36,7 +36,7 @@ const locStrings =
 {
     en:
     {
-        versionName: 'v0.01',
+        versionName: 'v0.02',
 
         pausecDesc: 'Freeze c\'s value',
         pausecInfo: 'Can only be used once per publication.',
@@ -99,6 +99,7 @@ let c = 0n;
 let cBigNum = BigNumber.from(c);
 let tmpTime = 0;
 let tmpc = 0n;
+let totalIncLevel = 0;
 
 var incrementc, pausec;
 var c1, c2;
@@ -280,8 +281,8 @@ var getEquationOverlay = () =>
 var getPrimaryEquation = () =>
 {
     let cStr = c.toString();
-    if(cStr.length > 8)
-        cStr = `${cStr.slice(0, 3)}...${cStr.slice(-4)}`;
+    if(cStr.length > 9)
+        cStr = `${cStr.slice(0, 5)}...${cStr.slice(-3)}`;
 
     let result = `\\begin{matrix}c=\\begin{cases}n/2&\\text{if }c\\equiv0\\text{ (mod 2)}\\\\3c+1&\\text{if }c\\equiv1\\text{ (mod 2)}\\end{cases}\\\\\\\\\\color{#c3c3c3}{=${cStr}}\\end{matrix}`;
 
@@ -297,7 +298,7 @@ var getSecondaryEquation = () =>
 var getTertiaryEquation = () =>
 {
     let result;
-    if(c > 1e8)
+    if(c > 1e9 || c < -1e8)
         result = `c=${cBigNum}`;
     else
         result = '';
@@ -322,6 +323,7 @@ var prePublish = () =>
         tmpTime = time;
         tmpc = c;
     }
+    totalIncLevel = incrementc.level;
 }
 
 var postPublish = () =>
@@ -333,6 +335,12 @@ var postPublish = () =>
         cBigNum = BigNumber.from(c);
     }
     pausec.level = 0;
+    // This is to circumvent the extra levelling
+    tmpc = c;
+    incrementc.level = totalIncLevel;
+    c = tmpc;
+    cBigNum = BigNumber.from(c);
+    incrementc.maxLevel = totalIncLevel + inccMaxLevel;
 
     theory.invalidatePrimaryEquation();
     theory.invalidateTertiaryEquation();
@@ -364,7 +372,8 @@ var getInternalState = () => JSON.stringify
     time: time,
     c: c.toString(),
     tmpTime: tmpTime,
-    tmpc: tmpc.toString()
+    tmpc: tmpc.toString(),
+    totalIncLevel: totalIncLevel
 })
 
 var setInternalState = (stateStr) =>
@@ -384,6 +393,11 @@ var setInternalState = (stateStr) =>
         tmpTime = state.tmpTime;
     if('tmpc' in state)
         tmpc = BigInt(state.tmpc);
+    if('totalIncLevel' in state)
+    {
+        totalIncLevel = state.totalIncLevel;
+        incrementc.maxLevel = totalIncLevel + inccMaxLevel;
+    }
 
     theory.invalidatePrimaryEquation();
     theory.invalidateTertiaryEquation();
