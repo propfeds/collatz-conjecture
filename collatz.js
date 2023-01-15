@@ -87,7 +87,7 @@ const c1Cost = new FirstFreeCost(new ExponentialCost(1, 3.01));
 const c2Cost = new ExponentialCost(1e6, 22);
 
 var getPublicationMultiplier = (tau) => BigNumber.from(2.2) * tau.pow(0.31);
-var getTau = () => currency.value.abs().pow(BigNumber.from(0.2));
+var getTau = () => currency.value.pow(BigNumber.from(0.2));
 var getCurrencyFromTau = (tau) =>
 [
     tau.max(BigNumber.ONE).pow(BigNumber.FIVE),
@@ -296,7 +296,7 @@ var getPrimaryEquation = () =>
 
 var getSecondaryEquation = () =>
 {
-    let result = `\\begin{matrix}\\dot{\\rho}=c_1${c1ExpMs.level > 0 ? `^{${getc1Exponent(c1ExpMs.level)}}` : ''}c_2c,&${theory.latexSymbol}=\\max{|\\rho|}^{0.2}\\end{matrix}`;
+    let result = `\\begin{matrix}\\dot{\\rho}=c_1${c1ExpMs.level > 0 ? `^{${getc1Exponent(c1ExpMs.level)}}` : ''}c_2|c|,&${theory.latexSymbol}=\\max{\\rho}^{0.2}\\end{matrix}`;
     return result;
 }
 
