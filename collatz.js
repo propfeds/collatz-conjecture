@@ -46,8 +46,8 @@ const locStrings =
     {
         versionName: 'v0.03',
 
-        pausecDesc: 'Freeze c\'s value',
-        pausecInfo: 'Can only be used once per publication.',
+        pausecDesc: ['Freeze c', 'Unfreeze c'],
+        pausecInfo: 'Freezes c\'s value',
 
         permaPause: '\\text{{the ability to freeze }}c',
         permaPreserveDesc: '\\text{Preserve }c\\text{ after publishing}',
@@ -83,6 +83,14 @@ let getLoc = (name, lang = menuLang) =>
 
 let bigNumArray = (array) => array.map(x => BigNumber.from(x));
 
+let getShortString = (n) =>
+{
+    let s = n.toString();
+    if(s.length > 9)
+        s = `${s.slice(0, 5)}...${s.slice(-3)}`;
+    return s;
+}
+
 const getc1 = (level) => Utils.getStepwisePowerSum(level, 2, 5, 1);
 const c1Cost = new FirstFreeCost(new ExponentialCost(1, 3.01));
 const c1ExpInc = 0.11;
@@ -91,7 +99,7 @@ const getc1Exponent = (level) => BigNumber.from(1 + c1ExpInc * level);
 const getc2 = (level) => BigNumber.TWO.pow(level);
 const c2Cost = new ExponentialCost(1e6, 11);
 
-const pubExp = 1.6;
+const pubExp = 6.22;
 const pubMult = 301;
 var getPublicationMultiplier = (tau) => tau.pow(pubExp) /
 BigNumber.from(pubMult);
@@ -103,10 +111,10 @@ var getCurrencyFromTau = (tau) =>
     currency.symbol
 ];
 
-const permaCosts = bigNumArray(['1e12', '1e22', '1e31', '1e66', '1e132']);
+const permaCosts = bigNumArray(['1e12', '1e22', '1e31', '1e66', '1e121']);
 const milestoneCost = new LinearCost(4.4, 4.4);
 
-const cLevelCap = [40, 56, 70, 80];
+const cLevelCap = [24, 36, 52, 72];
 const cooldown = [44, 30, 18, 10];
 
 let time = 0;
@@ -126,7 +134,11 @@ var currency;
 var init = () =>
 {
     currency = theory.createCurrency();
-
+    {
+        pausec = theory.createSingularUpgrade(3, currency, new FreeCost);
+        pausec.getDescription = () => getLoc('pausecDesc')[pausec.level & 1];
+        pausec.info = getLoc('pausecInfo');
+    }
     {
         let getDesc = (level) => `c \\leftarrow c${level & 1 ? '-' : '+'}1
         \\text{${getLoc('alternating')}}`;
@@ -174,13 +186,6 @@ var init = () =>
         c2.getDescription = (_) => Utils.getMath(getDesc(c2.level));
         c2.getInfo = (amount) => Utils.getMathTo(getInfo(c2.level),
         getInfo(c2.level + amount));
-    }
-    {
-        pausec = theory.createUpgrade(3, currency, new FreeCost);
-        pausec.description = getLoc('pausecDesc');
-        pausec.info = getLoc('pausecInfo');
-        pausec.isAutoBuyable = false;
-        pausec.maxLevel = 1;
     }
 
     theory.createPublicationUpgrade(0, currency, permaCosts[0]);
@@ -252,14 +257,14 @@ var init = () =>
     theory.primaryEquationScale = 0.9;
 }
 
-let updateAvailability = () =>
+var updateAvailability = () =>
 {
     pausec.isAvailable = pausePerma.level > 0;
 }
 
 var tick = (elapsedTime, multiplier) =>
 {
-    if(pausec.level == 0)
+    if(pausec.level % 2 == 0)
     {
         ++time;
         if(time >= cooldown[cooldownMs.level])
@@ -317,9 +322,7 @@ var getEquationOverlay = () =>
 
 var getPrimaryEquation = () =>
 {
-    let cStr = c.toString();
-    if(cStr.length > 9)
-        cStr = `${cStr.slice(0, 5)}...${cStr.slice(-3)}`;
+    let cStr = getShortString(c);
 
     let result = `\\begin{matrix}c=\\begin{cases}n/2&\\text{if }c\\equiv0\\text{ (mod 2)}\\\\3c+1&\\text{if }c\\equiv1\\text{ (mod 2)}\\end{cases}\\\\\\\\\\color{#${cColour.get(game.settings.theme)}}{=${cStr}}\\end{matrix}`;
 
