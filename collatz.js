@@ -44,7 +44,7 @@ const locStrings =
 {
     en:
     {
-        versionName: 'v0.03',
+        versionName: 'v0.03 – WIP',
 
         pausecDesc: ['\\text{Freeze }c', '\\text{Unfreeze }c'],
         pausecInfo: '\\text{Freezes }c\\text{\'s value}',
