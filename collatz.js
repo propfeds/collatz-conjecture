@@ -46,8 +46,8 @@ const locStrings =
     {
         versionName: 'v0.03',
 
-        pausecDesc: ['Freeze c', 'Unfreeze c'],
-        pausecInfo: 'Freezes c\'s value',
+        pausecDesc: ['\\text{Freeze }c', '\\text{Unfreeze }c'],
+        pausecInfo: '\\text{Freezes }c\\text{\'s value}',
 
         permaPause: '\\text{{the ability to freeze }}c',
         permaPreserveDesc: '\\text{Preserve }c\\text{ after publishing}',
@@ -136,8 +136,9 @@ var init = () =>
     currency = theory.createCurrency();
     {
         pausec = theory.createSingularUpgrade(3, currency, new FreeCost);
-        pausec.getDescription = () => getLoc('pausecDesc')[pausec.level & 1];
-        pausec.info = getLoc('pausecInfo');
+        pausec.getDescription = () => Utils.getMath(getLoc(
+        'pausecDesc')[pausec.level & 1]);
+        pausec.info = Utils.getMath(getLoc('pausecInfo'));
     }
     {
         let getDesc = (level) => `c \\leftarrow c${level & 1 ? '-' : '+'}1
