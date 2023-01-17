@@ -99,7 +99,7 @@ const getc1Exponent = (level) => BigNumber.from(1 + c1ExpInc * level);
 const getc2 = (level) => BigNumber.TWO.pow(level);
 const c2Cost = new ExponentialCost(1e6, 11);
 
-const pubExp = 5.22;
+const pubExp = 5.62;
 const pubMult = 301;
 var getPublicationMultiplier = (tau) => tau.pow(pubExp) /
 BigNumber.from(pubMult);
