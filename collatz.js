@@ -324,7 +324,7 @@ var getPrimaryEquation = () =>
 {
     let cStr = getShortString(c);
 
-    let result = `\\begin{matrix}c=\\begin{cases}n/2&\\text{if }c\\equiv0\\text{ (mod 2)}\\\\3c+1&\\text{if }c\\equiv1\\text{ (mod 2)}\\end{cases}\\\\\\\\\\color{#${cColour.get(game.settings.theme)}}{=${cStr}}\\end{matrix}`;
+    let result = `\\begin{matrix}c=\\begin{cases}c/2&\\text{if }c\\equiv0\\text{ (mod 2)}\\\\3c+1&\\text{if }c\\equiv1\\text{ (mod 2)}\\end{cases}\\\\\\\\\\color{#${cColour.get(game.settings.theme)}}{=${cStr}}\\end{matrix}`;
 
     return result;
 }
@@ -374,7 +374,6 @@ var postPublish = () =>
         c = 0n;
         cBigNum = BigNumber.from(c);
     }
-    pausec.level = 0;
     // This is to circumvent the extra levelling
     tmpc = c;
     incrementc.level = totalIncLevel;
