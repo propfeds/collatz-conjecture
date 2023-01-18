@@ -4,6 +4,7 @@ import { ExponentialCost, FirstFreeCost, FreeCost, LinearCost } from
 import { Localization } from '../api/Localization';
 import { Theme } from '../api/Settings';
 import { theory } from '../api/Theory';
+import { ui } from '../api/ui/UI';
 import { Color } from '../api/ui/properties/Color';
 import { Utils } from '../api/Utils';
 
@@ -44,8 +45,10 @@ const locStrings =
 {
     en:
     {
-        versionName: 'v0.03 – WIP',
+        versionName: 'v0.03',
 
+        historyDesc: 'Show history',
+        historyInfo: 'Shows the last and current runs\' sequences',
         pausecDesc: ['\\text{Freeze }c', '\\text{Unfreeze }c'],
         pausecInfo: '\\text{Freezes }c\\text{\'s value}',
 
@@ -60,6 +63,13 @@ const locStrings =
         nTicks: '{{{0}}}\\text{{{{ ticks}}}}',
 
         alternating: ' (alternating)',
+
+        btnClose: 'Close',
+        btnMode: ['Display: Ending digits', 'Display: Scientific'],
+
+        menuHistory: 'Sequence History',
+        labelCurrentRun: 'Current publication: ',
+        labelLastRun: 'Last publication: ',
 
         reset: 'You are about to reset the current publication.',
     }
@@ -85,10 +95,52 @@ let bigNumArray = (array) => array.map(x => BigNumber.from(x));
 
 let getShortString = (n) =>
 {
-    let s = n.toString();
+    let s = n;
+    if(typeof s !== 'string')
+        s = s.toString();
     if(s.length > 9)
         s = `${s.slice(0, 5)}...${s.slice(-3)}`;
     return s;
+}
+
+let getShorterString = (n) =>
+{
+    let s = n.toString();
+    if(s.length > 7)
+        s = `${s.slice(0, 3)}...${s.slice(-3)}`;
+    return s;
+}
+
+let getSequence = (sequence, mode = 0) =>
+{
+    let result = '\\begin{matrix}';
+    for(key in sequence)
+    {
+        result += `${key}:&${mode ? BigNumber.from(sequence[key]).toString(0) :
+        getShorterString(sequence[key])}&\\leftarrow
+        ${key & 1 ? '+1' : '-1'}\\\\`;
+    }
+    result += '\\end{matrix}';
+
+    return Utils.getMath(result);
+}
+
+let BIObjtoString = (sequence) =>
+{
+    let result = {};
+    for(key in sequence)
+        result[key] = sequence[key].toString();
+    
+    return result;
+}
+
+let stringObjtoBI = (sequence) =>
+{
+    let result = {};
+    for(key in sequence)
+        result[key] = BigInt(sequence[key]);
+    
+    return result;
 }
 
 const getc1 = (level) => Utils.getStepwisePowerSum(level, 2, 5, 1);
@@ -123,9 +175,14 @@ let cBigNum = BigNumber.from(c);
 let tmpTime = 0;
 let tmpc = 0n;
 let totalIncLevel = 0;
+let maxIncLevel = 0;
+let history = {};
+let lastHistory;
+let writeHistory = true;
+let historyMode = 0;
 
-var incrementc, pausec;
-var c1, c2;
+var pausec, historyUpg;
+var incrementc, c1, c2;
 var pausePerma, preservePerma;
 var cooldownMs, c1ExpMs;
 
@@ -134,6 +191,17 @@ var currency;
 var init = () =>
 {
     currency = theory.createCurrency();
+    {
+        historyUpg = theory.createSingularUpgrade(0, currency, new FreeCost);
+        historyUpg.description = getLoc('historyDesc');
+        historyUpg.info = getLoc('historyInfo');
+        historyUpg.bought = (_) =>
+        {
+            historyUpg.level = 0;
+            let menu = createHistoryMenu();
+            menu.show();
+        }
+    }
     {
         pausec = theory.createSingularUpgrade(3, currency, new FreeCost);
         pausec.getDescription = () => Utils.getMath(getLoc(
@@ -151,6 +219,8 @@ var init = () =>
         Localization.getUpgradeIncCustomInfo('c', 1)}${getLoc('alternating')}`;
         incrementc.bought = (_) =>
         {
+            if(writeHistory)
+                history[incrementc.level] = c.toString();
             // even level: -1, odd level: +1, because this is post-processing
             if(incrementc.level & 1)
                 c += 1n;
@@ -290,6 +360,96 @@ var tick = (elapsedTime, multiplier) =>
     currency.value += dt * cBigNum.abs() * vc1 * vc2 * bonus;
 }
 
+let createHistoryMenu = () =>
+{
+    let toggleMode = () =>
+    {
+        historyMode = 1 - historyMode;
+        let children = [];
+        children.push(ui.createLatexLabel
+        ({
+            text: getSequence(history, historyMode),
+            column: 0
+        }));
+        children.push(ui.createLatexLabel
+        ({
+            text: getSequence(lastHistory, historyMode),
+            column: 1
+        }));
+        historyGrid.children = children;
+        toggleButton.text = getLoc('btnMode')[historyMode];
+    }
+    let historyGrid = ui.createGrid
+    ({
+        columnDefinitions: ['1*', '1*'],
+        children:
+        [
+            ui.createLatexLabel
+            ({
+                text: getSequence(history, historyMode),
+                column: 0
+            }),
+            ui.createLatexLabel
+            ({
+                text: getSequence(lastHistory, historyMode),
+                column: 1
+            })
+        ]
+    });
+    let toggleButton = ui.createButton
+    ({
+        text: getLoc('btnMode')[historyMode],
+        onClicked: () =>
+        {
+            Sound.playClick();
+            toggleMode();
+        }
+    })
+
+    let menu = ui.createPopup
+    ({
+        title: getLoc('menuHistory'),
+        content: ui.createStackLayout
+        ({
+            children:
+            [
+                ui.createGrid
+                ({
+                    columnDefinitions: ['1*', '1*'],
+                    heightRequest: 32,
+                    children:
+                    [
+                        ui.createLatexLabel
+                        ({
+                            text: getLoc('labelCurrentRun'),
+                            column: 0,
+                            verticalOptions: LayoutOptions.CENTER
+                        }),
+                        ui.createLatexLabel
+                        ({
+                            text: getLoc('labelLastRun'),
+                            column: 1,
+                            verticalOptions: LayoutOptions.CENTER
+                        })
+                    ]
+                }),
+                ui.createScrollView
+                ({
+                    // heightRequest: ui.screenHeight * 0.32,
+                    content: historyGrid
+                }),
+                ui.createBox
+                ({
+                    heightRequest: 1,
+                    margin: new Thickness(0, 6)
+                }),
+                toggleButton
+            ]
+        })
+    });
+    return menu;
+}
+
 var getEquationOverlay = () =>
 {
     let result = ui.createGrid
@@ -313,7 +473,8 @@ var getEquationOverlay = () =>
                 content: ui.createProgressBar
                 ({
                     margin: new Thickness(6, 0),
-                    progress: () => (time / (cooldown[cooldownMs.level] - 1)) ** 1.5
+                    progress: () => (time / (cooldown[cooldownMs.level] - 1)) **
+                    1.5
                 })
             })
         ]
@@ -324,7 +485,6 @@ var getEquationOverlay = () =>
 var getPrimaryEquation = () =>
 {
     let cStr = getShortString(c);
-
     let result = `\\begin{matrix}c=\\begin{cases}c/2&\\text{if }c\\equiv0\\text{ (mod 2)}\\\\3c+1&\\text{if }c\\equiv1\\text{ (mod 2)}\\end{cases}\\\\\\\\\\color{#${cColour.get(game.settings.theme)}}{=${cStr}}\\end{matrix}`;
 
     return result;
@@ -346,6 +506,10 @@ var getTertiaryEquation = () =>
     return result;
 }
 
+var getPublicationMultiplierFormula = (symbol) =>
+`\\frac{{${symbol}}^{${pubExp}}}{${pubMult}}`;
+
+// Check out the Giant's Causeway in Ireland!
 var get2DGraphValue = () =>
 {
     if(cBigNum == BigNumber.ZERO)
@@ -354,9 +518,7 @@ var get2DGraphValue = () =>
     return (cBigNum.abs().log2() * cBigNum.sign).toNumber();
 }
 
-var getPublicationMultiplierFormula = (symbol) =>
-`\\frac{{${symbol}}^{${pubExp}}}{${pubMult}}`;
-
+// Will not trigger if you press reset.
 var prePublish = () =>
 {
     if(preservePerma.level > 0)
@@ -365,6 +527,7 @@ var prePublish = () =>
         tmpc = c;
     }
     totalIncLevel = incrementc.level;
+    lastHistory = history;
 }
 
 var postPublish = () =>
@@ -376,14 +539,17 @@ var postPublish = () =>
         cBigNum = BigNumber.from(c);
     }
     // This is to circumvent the extra levelling
+    writeHistory = false;
     tmpc = c;
     incrementc.level = totalIncLevel;
     c = tmpc;
+    writeHistory = true;
     cBigNum = BigNumber.from(c);
     incrementc.maxLevel = totalIncLevel + cLevelCap[cooldownMs.level];
 
     theory.invalidatePrimaryEquation();
     theory.invalidateTertiaryEquation();
+    history = {};
 }
 
 var canResetStage = () => true;
@@ -413,7 +579,10 @@ var getInternalState = () => JSON.stringify
     c: c.toString(),
     tmpTime: tmpTime,
     tmpc: tmpc.toString(),
-    totalIncLevel: totalIncLevel
+    totalIncLevel: totalIncLevel,
+    history: history,
+    lastHistory: lastHistory,
+    historyMode: historyMode,
 })
 
 var setInternalState = (stateStr) =>
@@ -438,6 +607,12 @@ var setInternalState = (stateStr) =>
         totalIncLevel = state.totalIncLevel;
         incrementc.maxLevel = totalIncLevel + cLevelCap[cooldownMs.level];
     }
+    if('history' in state)
+        history = state.history;
+    if('lastHistory' in state)
+        lastHistory = state.lastHistory;
+    if('historyMode' in state)
+        historyMode = state.historyMode;
 
     theory.invalidatePrimaryEquation();
     theory.invalidateTertiaryEquation();
