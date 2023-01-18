@@ -13,8 +13,6 @@ What about negative numbers, you ask?
 
 ## Installation
 
-Current version: 0.02
-
 Navigate to [`collatz.js`](./collatz.js) and click on `Raw`. You will be
 delivered to this theory's raw code. Copy the page's URL.
 

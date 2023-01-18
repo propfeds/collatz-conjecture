@@ -1,8 +1,11 @@
 import { BigNumber } from '../api/BigNumber';
-import { ExponentialCost, FirstFreeCost, FreeCost, LinearCost } from '../api/Costs';
+import { ExponentialCost, FirstFreeCost, FreeCost, LinearCost } from
+'../api/Costs';
 import { Localization } from '../api/Localization';
 import { Theme } from '../api/Settings';
 import { theory } from '../api/Theory';
+import { ui } from '../api/ui/UI';
+import { Color } from '../api/ui/properties/Color';
 import { Utils } from '../api/Utils';
 
 var id = 'collatz_conjecture';
@@ -23,13 +26,14 @@ var getDescription = (language) =>
 `If it's odd, triple it plus one,
 If it's even, divide it by two.
 
-If you woke up today and ate bread, what would you do?`,
+If you woke up today and ate bread,
+what would you do?`,
     };
 
     return descs[language] || descs.en;
 }
 var authors = 'propfeds#5988\n\nThanks to:\nCipher#9599, for the idea';
-var version = 0.02;
+var version = 0.03;
 
 let menuLang = Localization.language;
 let cColour = new Map();
@@ -41,20 +45,31 @@ const locStrings =
 {
     en:
     {
-        versionName: 'v0.02',
+        versionName: 'v0.03',
 
-        pausecDesc: 'Freeze c\'s value',
-        pausecInfo: 'Can only be used once per publication.',
+        historyDesc: 'Show history',
+        historyInfo: 'Shows the last and current runs\' sequences',
+        pausecDesc: ['\\text{Freeze }c', '\\text{Unfreeze }c'],
+        pausecInfo: '\\text{Freezes }c\\text{\'s value}',
 
         permaPause: '\\text{{the ability to freeze }}c',
         permaPreserveDesc: '\\text{Preserve }c\\text{ after publishing}',
         permaPreserveInfo: '\\text{Preserves }c\\text{ after publishing}',
 
+        cLevelCap: 'c\\text{{ level cap}}',
+        cLevelCapInfo: 'c\\text{{ level cap}}',
         cooldown: '\\text{{interval}}',
-        cooldownCaps: '\\text{{Interval}}',
+        cooldownInfo: 'Interval',
         nTicks: '{{{0}}}\\text{{{{ ticks}}}}',
 
         alternating: ' (alternating)',
+
+        btnClose: 'Close',
+        btnMode: ['Display: Ending digits', 'Display: Scientific'],
+
+        menuHistory: 'Sequence History',
+        labelCurrentRun: 'Current publication: ',
+        labelLastRun: 'Last publication: ',
 
         reset: 'You are about to reset the current publication.',
     }
@@ -78,25 +93,80 @@ let getLoc = (name, lang = menuLang) =>
 
 let bigNumArray = (array) => array.map(x => BigNumber.from(x));
 
-const inccMaxLevel = 40;
-const getc1 = (level) => Utils.getStepwisePowerSum(level, 2, 5, 1);
-const getc1Exponent = (level) => BigNumber.from(1 + 0.03 * level);
-const c1ExpMaxLevel = 4;
-const getc2 = (level) => BigNumber.TWO.pow(level);
-const c1Cost = new FirstFreeCost(new ExponentialCost(1, 3.01));
-const c2Cost = new ExponentialCost(1e6, 22);
+let getShortString = (n) =>
+{
+    let s = n;
+    if(typeof s !== 'string')
+        s = s.toString();
+    if(s.length > 9)
+        s = `${s.slice(0, 5)}...${s.slice(-3)}`;
+    return s;
+}
 
-var getPublicationMultiplier = (tau) => BigNumber.from(2.2) * tau.pow(0.31);
-var getTau = () => currency.value.abs().pow(BigNumber.from(0.2));
+let getShorterString = (n) =>
+{
+    let s = n.toString();
+    if(s.length > 7)
+        s = `${s.slice(0, 3)}...${s.slice(-3)}`;
+    return s;
+}
+
+let getSequence = (sequence, mode = 0) =>
+{
+    let result = '\\begin{matrix}';
+    for(key in sequence)
+    {
+        result += `${key}:&${mode ? BigNumber.from(sequence[key]).toString(0) :
+        getShorterString(sequence[key])}&\\leftarrow
+        ${key & 1 ? '+1' : '-1'}\\\\`;
+    }
+    result += '\\end{matrix}';
+
+    return Utils.getMath(result);
+}
+
+let BIObjtoString = (sequence) =>
+{
+    let result = {};
+    for(key in sequence)
+        result[key] = sequence[key].toString();
+    
+    return result;
+}
+
+let stringObjtoBI = (sequence) =>
+{
+    let result = {};
+    for(key in sequence)
+        result[key] = BigInt(sequence[key]);
+    
+    return result;
+}
+
+const getc1 = (level) => Utils.getStepwisePowerSum(level, 2, 5, 1);
+const c1Cost = new FirstFreeCost(new ExponentialCost(1, 3.01));
+const c1ExpInc = 0.11;
+const c1ExpMaxLevel = 4;
+const getc1Exponent = (level) => BigNumber.from(1 + c1ExpInc * level);
+const getc2 = (level) => BigNumber.TWO.pow(level);
+const c2Cost = new ExponentialCost(1e6, 11);
+
+const pubExp = 5.62;
+const pubMult = 301;
+var getPublicationMultiplier = (tau) => tau.pow(pubExp) /
+BigNumber.from(pubMult);
+const tauRate = 0.1;
+var getTau = () => currency.value.pow(BigNumber.from(tauRate));
 var getCurrencyFromTau = (tau) =>
 [
-    tau.max(BigNumber.ONE).pow(BigNumber.FIVE),
+    tau.max(BigNumber.ONE).pow(BigNumber.ONE / tauRate),
     currency.symbol
 ];
 
-const permaCosts = bigNumArray(['1e12', '1e22', '1e44', '1e66', '1e132']);
-const milestoneCost = new LinearCost(11, 11);
+const permaCosts = bigNumArray(['1e12', '1e22', '1e31', '1e66', '1e121']);
+const milestoneCost = new LinearCost(4.4, 4.4);
 
+const cLevelCap = [24, 36, 52, 72];
 const cooldown = [44, 30, 18, 10];
 
 let time = 0;
@@ -105,9 +175,14 @@ let cBigNum = BigNumber.from(c);
 let tmpTime = 0;
 let tmpc = 0n;
 let totalIncLevel = 0;
+let maxIncLevel = 0;
+let history = {};
+let lastHistory;
+let writeHistory = true;
+let historyMode = 0;
 
-var incrementc, pausec;
-var c1, c2;
+var pausec, historyUpg;
+var incrementc, c1, c2;
 var pausePerma, preservePerma;
 var cooldownMs, c1ExpMs;
 
@@ -116,7 +191,23 @@ var currency;
 var init = () =>
 {
     currency = theory.createCurrency();
-
+    {
+        historyUpg = theory.createSingularUpgrade(0, currency, new FreeCost);
+        historyUpg.description = getLoc('historyDesc');
+        historyUpg.info = getLoc('historyInfo');
+        historyUpg.bought = (_) =>
+        {
+            historyUpg.level = 0;
+            let menu = createHistoryMenu();
+            menu.show();
+        }
+    }
+    {
+        pausec = theory.createSingularUpgrade(3, currency, new FreeCost);
+        pausec.getDescription = () => Utils.getMath(getLoc(
+        'pausecDesc')[pausec.level & 1]);
+        pausec.info = Utils.getMath(getLoc('pausecInfo'));
+    }
     {
         let getDesc = (level) => `c \\leftarrow c${level & 1 ? '-' : '+'}1
         \\text{${getLoc('alternating')}}`;
@@ -128,6 +219,8 @@ var init = () =>
         Localization.getUpgradeIncCustomInfo('c', 1)}${getLoc('alternating')}`;
         incrementc.bought = (_) =>
         {
+            if(writeHistory)
+                history[incrementc.level] = c.toString();
             // even level: -1, odd level: +1, because this is post-processing
             if(incrementc.level & 1)
                 c += 1n;
@@ -139,7 +232,7 @@ var init = () =>
             theory.invalidateTertiaryEquation();
         }
         incrementc.isAutoBuyable = false;
-        incrementc.maxLevel = inccMaxLevel;
+        incrementc.maxLevel = cLevelCap[0];
     }
     {
         let getDesc = (level) =>
@@ -165,13 +258,6 @@ var init = () =>
         c2.getInfo = (amount) => Utils.getMathTo(getInfo(c2.level),
         getInfo(c2.level + amount));
     }
-    {
-        pausec = theory.createUpgrade(3, currency, new FreeCost);
-        pausec.description = getLoc('pausecDesc');
-        pausec.info = getLoc('pausecInfo');
-        pausec.isAutoBuyable = false;
-        pausec.maxLevel = 1;
-    }
 
     theory.createPublicationUpgrade(0, currency, permaCosts[0]);
     theory.createBuyAllUpgrade(1, currency, permaCosts[1]);
@@ -196,21 +282,43 @@ var init = () =>
 
     theory.setMilestoneCost(milestoneCost);
     {
-        let getInfo = (level) => `${getLoc('cooldownCaps')}=
-        ${cooldown[level] || cooldown[level - 1]}`;
+        let getInfo = (level, amount = 1) => `${getLoc('cooldownInfo')}=
+        ${cooldown[level] || cooldown[level - amount]}`;
         cooldownMs = theory.createMilestoneUpgrade(0, cooldown.length - 1);
-        cooldownMs.getDescription = (amount) => Localization.
-        getUpgradeDecCustomDesc(getLoc('cooldown'), Localization.format(
-        getLoc('nTicks'),
-        cooldown[cooldownMs.level] - cooldown[cooldownMs.level + amount] || 0));
-        cooldownMs.getInfo = (amount) => Utils.getMathTo(
-        getInfo(cooldownMs.level), getInfo(cooldownMs.level + amount));
+        cooldownMs.getDescription = (amount) =>
+        {
+            let cd = Localization.getUpgradeDecCustomDesc(getLoc(
+            'cooldown'), Localization.format(getLoc('nTicks'),
+            cooldown[cooldownMs.level] - cooldown[cooldownMs.level + amount] ||
+            0));
+            let cap = Localization.getUpgradeIncCustomDesc(getLoc(
+            'cLevelCap'), cLevelCap[cooldownMs.level + amount] -
+            cLevelCap[cooldownMs.level] || 0);
+            return `${cd}; ${cap}`;
+        };
+        cooldownMs.getInfo = (amount) =>
+        {
+            let cd = `${getLoc('cooldownInfo')} = ${Utils.getMathTo(
+            cooldown[cooldownMs.level], cooldown[cooldownMs.level + amount] ||
+            cooldown[cooldownMs.level])}`;
+            let cap = `${Utils.getMath(getLoc('cLevelCapInfo'))} = 
+            ${Utils.getMathTo(cLevelCap[cooldownMs.level],
+            cLevelCap[cooldownMs.level + amount] ||
+            cLevelCap[cooldownMs.level])}`;
+            return `${cd}; ${cap}`;
+        }
+        cooldownMs.boughtOrRefunded = (_) =>
+        {
+            incrementc.maxLevel = totalIncLevel + cLevelCap[cooldownMs.level];
+        };
+        cooldownMs.canBeRefunded = (amount) => incrementc.level <=
+        totalIncLevel + cLevelCap[cooldownMs.level - amount];
     }
     {
         c1ExpMs = theory.createMilestoneUpgrade(1, c1ExpMaxLevel);
         c1ExpMs.description = Localization.getUpgradeIncCustomExpDesc('c_1',
-        '0.03');
-        c1ExpMs.info = Localization.getUpgradeIncCustomExpInfo('c_1', '0.03');
+        c1ExpInc);
+        c1ExpMs.info = Localization.getUpgradeIncCustomExpInfo('c_1', c1ExpInc);
         c1ExpMs.boughtOrRefunded = (_) => theory.invalidateSecondaryEquation();
     }
 
@@ -220,14 +328,14 @@ var init = () =>
     theory.primaryEquationScale = 0.9;
 }
 
-let updateAvailability = () =>
+var updateAvailability = () =>
 {
     pausec.isAvailable = pausePerma.level > 0;
 }
 
 var tick = (elapsedTime, multiplier) =>
 {
-    if(pausec.level == 0)
+    if(pausec.level % 2 == 0)
     {
         ++time;
         if(time >= cooldown[cooldownMs.level])
@@ -250,6 +358,96 @@ var tick = (elapsedTime, multiplier) =>
     let bonus = theory.publicationMultiplier;
 
     currency.value += dt * cBigNum.abs() * vc1 * vc2 * bonus;
+}
+
+let createHistoryMenu = () =>
+{
+    let toggleMode = () =>
+    {
+        historyMode = 1 - historyMode;
+        let children = [];
+        children.push(ui.createLatexLabel
+        ({
+            text: getSequence(history, historyMode),
+            column: 0
+        }));
+        children.push(ui.createLatexLabel
+        ({
+            text: getSequence(lastHistory, historyMode),
+            column: 1
+        }));
+        historyGrid.children = children;
+        toggleButton.text = getLoc('btnMode')[historyMode];
+    }
+    let historyGrid = ui.createGrid
+    ({
+        columnDefinitions: ['1*', '1*'],
+        children:
+        [
+            ui.createLatexLabel
+            ({
+                text: getSequence(history, historyMode),
+                column: 0
+            }),
+            ui.createLatexLabel
+            ({
+                text: getSequence(lastHistory, historyMode),
+                column: 1
+            })
+        ]
+    });
+    let toggleButton = ui.createButton
+    ({
+        text: getLoc('btnMode')[historyMode],
+        onClicked: () =>
+        {
+            Sound.playClick();
+            toggleMode();
+        }
+    })
+
+    let menu = ui.createPopup
+    ({
+        title: getLoc('menuHistory'),
+        content: ui.createStackLayout
+        ({
+            children:
+            [
+                ui.createGrid
+                ({
+                    columnDefinitions: ['1*', '1*'],
+                    heightRequest: 32,
+                    children:
+                    [
+                        ui.createLatexLabel
+                        ({
+                            text: getLoc('labelCurrentRun'),
+                            column: 0,
+                            verticalOptions: LayoutOptions.CENTER
+                        }),
+                        ui.createLatexLabel
+                        ({
+                            text: getLoc('labelLastRun'),
+                            column: 1,
+                            verticalOptions: LayoutOptions.CENTER
+                        })
+                    ]
+                }),
+                ui.createScrollView
+                ({
+                    // heightRequest: ui.screenHeight * 0.32,
+                    content: historyGrid
+                }),
+                ui.createBox
+                ({
+                    heightRequest: 1,
+                    margin: new Thickness(0, 6)
+                }),
+                toggleButton
+            ]
+        })
+    });
+    return menu;
 }
 
 var getEquationOverlay = () =>
@@ -275,7 +473,8 @@ var getEquationOverlay = () =>
                 content: ui.createProgressBar
                 ({
                     margin: new Thickness(6, 0),
-                    progress: () => (time / (cooldown[cooldownMs.level] - 1)) ** 1.5
+                    progress: () => (time / (cooldown[cooldownMs.level] - 1)) **
+                    1.5
                 })
             })
         ]
@@ -285,18 +484,15 @@ var getEquationOverlay = () =>
 
 var getPrimaryEquation = () =>
 {
-    let cStr = c.toString();
-    if(cStr.length > 9)
-        cStr = `${cStr.slice(0, 5)}...${cStr.slice(-3)}`;
-
-    let result = `\\begin{matrix}c=\\begin{cases}n/2&\\text{if }c\\equiv0\\text{ (mod 2)}\\\\3c+1&\\text{if }c\\equiv1\\text{ (mod 2)}\\end{cases}\\\\\\\\\\color{#${cColour.get(game.settings.theme)}}{=${cStr}}\\end{matrix}`;
+    let cStr = getShortString(c);
+    let result = `\\begin{matrix}c=\\begin{cases}c/2&\\text{if }c\\equiv0\\text{ (mod 2)}\\\\3c+1&\\text{if }c\\equiv1\\text{ (mod 2)}\\end{cases}\\\\\\\\\\color{#${cColour.get(game.settings.theme)}}{=${cStr}}\\end{matrix}`;
 
     return result;
 }
 
 var getSecondaryEquation = () =>
 {
-    let result = `\\begin{matrix}\\dot{\\rho}=c_1${c1ExpMs.level > 0 ? `^{${getc1Exponent(c1ExpMs.level)}}` : ''}c_2c,&${theory.latexSymbol}=\\max{|\\rho|}^{0.2}\\end{matrix}`;
+    let result = `\\begin{matrix}\\dot{\\rho}=c_1${c1ExpMs.level > 0 ? `^{${getc1Exponent(c1ExpMs.level)}}` : ''}c_2|c|,&${theory.latexSymbol}=\\max{\\rho}^{0.1}\\end{matrix}`;
     return result;
 }
 
@@ -310,6 +506,10 @@ var getTertiaryEquation = () =>
     return result;
 }
 
+var getPublicationMultiplierFormula = (symbol) =>
+`\\frac{{${symbol}}^{${pubExp}}}{${pubMult}}`;
+
+// Check out the Giant's Causeway in Ireland!
 var get2DGraphValue = () =>
 {
     if(cBigNum == BigNumber.ZERO)
@@ -318,9 +518,7 @@ var get2DGraphValue = () =>
     return (cBigNum.abs().log2() * cBigNum.sign).toNumber();
 }
 
-var getPublicationMultiplierFormula = (symbol) =>
-`2.2\\times{${symbol}}^{0.31}`;
-
+// Will not trigger if you press reset.
 var prePublish = () =>
 {
     if(preservePerma.level > 0)
@@ -329,6 +527,7 @@ var prePublish = () =>
         tmpc = c;
     }
     totalIncLevel = incrementc.level;
+    lastHistory = history;
 }
 
 var postPublish = () =>
@@ -339,16 +538,18 @@ var postPublish = () =>
         c = 0n;
         cBigNum = BigNumber.from(c);
     }
-    pausec.level = 0;
     // This is to circumvent the extra levelling
+    writeHistory = false;
     tmpc = c;
     incrementc.level = totalIncLevel;
     c = tmpc;
+    writeHistory = true;
     cBigNum = BigNumber.from(c);
-    incrementc.maxLevel = totalIncLevel + inccMaxLevel;
+    incrementc.maxLevel = totalIncLevel + cLevelCap[cooldownMs.level];
 
     theory.invalidatePrimaryEquation();
     theory.invalidateTertiaryEquation();
+    history = {};
 }
 
 var canResetStage = () => true;
@@ -378,7 +579,10 @@ var getInternalState = () => JSON.stringify
     c: c.toString(),
     tmpTime: tmpTime,
     tmpc: tmpc.toString(),
-    totalIncLevel: totalIncLevel
+    totalIncLevel: totalIncLevel,
+    history: history,
+    lastHistory: lastHistory,
+    historyMode: historyMode,
 })
 
 var setInternalState = (stateStr) =>
@@ -401,8 +605,14 @@ var setInternalState = (stateStr) =>
     if('totalIncLevel' in state)
     {
         totalIncLevel = state.totalIncLevel;
-        incrementc.maxLevel = totalIncLevel + inccMaxLevel;
+        incrementc.maxLevel = totalIncLevel + cLevelCap[cooldownMs.level];
     }
+    if('history' in state)
+        history = state.history;
+    if('lastHistory' in state)
+        lastHistory = state.lastHistory;
+    if('historyMode' in state)
+        historyMode = state.historyMode;
 
     theory.invalidatePrimaryEquation();
     theory.invalidateTertiaryEquation();
