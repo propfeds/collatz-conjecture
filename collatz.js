@@ -51,7 +51,7 @@ const locStrings =
     {
         versionName: 'v0.04 – WIP',
 
-        historyDesc: 'History',
+        historyDesc: ' Seq.\n\nhistory',
         historyInfo: 'Shows the last and current runs\' sequences',
         pausecDesc: ['\\text{Freeze }c', '\\text{Unfreeze }c'],
         pausecInfo: '\\text{Freezes }c\\text{\'s value}',
@@ -155,7 +155,7 @@ const getc1 = (level) =>
     
     return Utils.getStepwisePowerSum(level, 2, 5, 1);
 }
-const c1Cost = new FirstFreeCost(new ExponentialCost(1, 3.01));
+const c1Cost = new ExponentialCost(0.11, 3.01);
 const c1ExpInc = 0.03;
 const c1ExpMaxLevel = 4;
 const getc1Exponent = (level) => BigNumber.from(1 + c1ExpInc * level);
@@ -477,8 +477,8 @@ var getEquationOverlay = () =>
         row: 0,
         column: 2,
         horizontalOptions: LayoutOptions.END,
-        // verticalOptions: LayoutOptions.START,
-        margin: new Thickness(10, 10, 10, 0),
+        verticalOptions: LayoutOptions.START,
+        margin: new Thickness(9, 8, 9, 0),
         heightRequest: 24,
         source: ImageSource.BOOK,
         aspect: Aspect.ASPECT_FIT,
@@ -510,7 +510,7 @@ var getEquationOverlay = () =>
                 row: 0,
                 column: 0,
                 verticalOptions: LayoutOptions.START,
-                margin: new Thickness(5, 2),
+                margin: new Thickness(5, 3),
                 text: getLoc('versionName'),
                 fontSize: 9,
                 textColor: Color.TEXT_MEDIUM
@@ -531,11 +531,11 @@ var getEquationOverlay = () =>
             historyButton,
             ui.createLatexLabel
             ({
-                row: 1,
+                row: 0,
                 column: 2,
                 horizontalOptions: LayoutOptions.END,
-                verticalOptions: LayoutOptions.START,
-                margin: new Thickness(5, 2),
+                verticalOptions: LayoutOptions.END,
+                margin: new Thickness(5, 16, 11, 0),
                 text: getLoc('historyDesc'),
                 fontSize: 10,
                 textColor: Color.TEXT_MEDIUM
