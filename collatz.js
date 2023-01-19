@@ -76,7 +76,7 @@ const locStrings =
         labelCurrentRun: 'Current publication: ',
         labelLastRun: 'Last publication: ',
 
-        reset: 'You are about to reset the current publication.',
+        reset: 'You are about to reset the current publication.\nNote: resetting is only available before publishing opens.',
     }
 };
 
@@ -186,7 +186,7 @@ let cBigNum = BigNumber.from(c);
 let tmpTime = 0;
 let tmpc = 0n;
 let totalIncLevel = 0;
-let maxIncLevel = 0;
+let incRemainder = 0;
 let history = {};
 let lastHistory;
 let writeHistory = true;
@@ -309,7 +309,8 @@ var init = () =>
         }
         cooldownMs.boughtOrRefunded = (_) =>
         {
-            incrementc.maxLevel = totalIncLevel + cLevelCap[cooldownMs.level];
+            incrementc.maxLevel = totalIncLevel + incRemainder +
+            cLevelCap[cooldownMs.level];
         };
         cooldownMs.canBeRefunded = (amount) => incrementc.level <=
         totalIncLevel + cLevelCap[cooldownMs.level - amount];
@@ -589,6 +590,7 @@ var prePublish = () =>
     //     tmpc = c;
     // }
     totalIncLevel = incrementc.level;
+    incRemainder = incrementc.maxLevel - incrementc.level;
     lastHistory = history;
 }
 
@@ -607,19 +609,27 @@ var postPublish = () =>
     c = tmpc;
     writeHistory = true;
     cBigNum = BigNumber.from(c);
-    incrementc.maxLevel = totalIncLevel + cLevelCap[cooldownMs.level];
+    incrementc.maxLevel = totalIncLevel + incRemainder +
+    cLevelCap[cooldownMs.level];
 
     theory.invalidatePrimaryEquation();
     theory.invalidateTertiaryEquation();
     history = {};
 }
 
-var canResetStage = () => true;
+var canResetStage = () => !theory.canPublish;
 
 var getResetStageMessage = () => getLoc('reset');
 
 var resetStage = () =>
 {
+    /*
+    You could exploit the c levelling mechanism by resetting to 0 before a pub
+    and get 24 levels for free. Now you can't.
+    */
+    if(theory.canPublish)
+        return;
+
     for (let i = 0; i < theory.upgrades.length; ++i)
         theory.upgrades[i].level = 0;
 
@@ -642,6 +652,7 @@ var getInternalState = () => JSON.stringify
     tmpTime: tmpTime,
     tmpc: tmpc.toString(),
     totalIncLevel: totalIncLevel,
+    incRemainder: incRemainder,
     history: history,
     lastHistory: lastHistory,
     historyMode: historyMode,
@@ -664,10 +675,17 @@ var setInternalState = (stateStr) =>
         tmpTime = state.tmpTime;
     if('tmpc' in state)
         tmpc = BigInt(state.tmpc);
+
+    incrementc.maxLevel = cLevelCap[cooldownMs.level];
     if('totalIncLevel' in state)
     {
         totalIncLevel = state.totalIncLevel;
-        incrementc.maxLevel = totalIncLevel + cLevelCap[cooldownMs.level];
+        incrementc.maxLevel += totalIncLevel;
+    }
+    if('incRemainder' in state)
+    {
+        incRemainder = state.incRemainder;
+        incrementc.maxLevel += incRemainder;
     }
     if('history' in state)
         history = state.history;

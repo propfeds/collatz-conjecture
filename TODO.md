@@ -2,7 +2,7 @@
 
 ## In consideration
 
-- Turn freeze and history into icons
+- [x] Turn freeze and history into icons
 - [ ] Make pub exponent go down gradually like `y=(10/log(x+1)+6.22)`?
   - This is to make early game more lenient
   - Disproven: early game is very normal at 5.62
@@ -14,7 +14,7 @@
     - Nerf c1 exp to 0.03
     - Nerf pub exp to 5.22
     - Buff pub div to 31
-- [ ] From pietro:
+- [x] From pietro:
   - Save some levels for the next pub if not used up in current one
     - Solves the problem of players being confused by c level
     - But also creates some confusion
