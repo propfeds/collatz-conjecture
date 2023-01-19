@@ -7,6 +7,10 @@ import { theory } from '../api/Theory';
 import { ui } from '../api/ui/UI';
 import { Color } from '../api/ui/properties/Color';
 import { Utils } from '../api/Utils';
+import { LayoutOptions } from '../api/ui/properties/LayoutOptions';
+import { ImageSource } from '../api/ui/properties/ImageSource';
+import { Aspect } from '../api/ui/properties/Aspect';
+import { TouchType } from '../api/ui/properties/TouchType';
 
 var id = 'collatz_conjecture';
 var getName = (language) =>
@@ -45,9 +49,9 @@ const locStrings =
 {
     en:
     {
-        versionName: 'v0.03',
+        versionName: 'v0.04 – WIP',
 
-        historyDesc: 'Show history',
+        historyDesc: 'History',
         historyInfo: 'Shows the last and current runs\' sequences',
         pausecDesc: ['\\text{Freeze }c', '\\text{Unfreeze }c'],
         pausecInfo: '\\text{Freezes }c\\text{\'s value}',
@@ -191,17 +195,17 @@ var currency;
 var init = () =>
 {
     currency = theory.createCurrency();
-    {
-        historyUpg = theory.createSingularUpgrade(0, currency, new FreeCost);
-        historyUpg.description = getLoc('historyDesc');
-        historyUpg.info = getLoc('historyInfo');
-        historyUpg.bought = (_) =>
-        {
-            historyUpg.level = 0;
-            let menu = createHistoryMenu();
-            menu.show();
-        }
-    }
+    // {
+    //     historyUpg = theory.createSingularUpgrade(0, currency, new FreeCost);
+    //     historyUpg.description = getLoc('historyDesc');
+    //     historyUpg.info = getLoc('historyInfo');
+    //     historyUpg.bought = (_) =>
+    //     {
+    //         historyUpg.level = 0;
+    //         let menu = createHistoryMenu();
+    //         menu.show();
+    //     }
+    // }
     {
         pausec = theory.createSingularUpgrade(3, currency, new FreeCost);
         pausec.getDescription = () => Utils.getMath(getLoc(
@@ -413,6 +417,12 @@ let createHistoryMenu = () =>
         ({
             children:
             [
+                toggleButton,
+                ui.createBox
+                ({
+                    heightRequest: 1,
+                    margin: new Thickness(0, 6)
+                }),
                 ui.createGrid
                 ({
                     columnDefinitions: ['1*', '1*'],
@@ -443,7 +453,15 @@ let createHistoryMenu = () =>
                     heightRequest: 1,
                     margin: new Thickness(0, 6)
                 }),
-                toggleButton
+                ui.createButton
+                ({
+                    text: getLoc('btnClose'),
+                    onClicked: () =>
+                    {
+                        Sound.playClick();
+                        menu.hide();
+                    }
+                })
             ]
         })
     });
@@ -452,23 +470,54 @@ let createHistoryMenu = () =>
 
 var getEquationOverlay = () =>
 {
+    let historyButton = ui.createImage
+    ({
+        row: 0,
+        column: 2,
+        horizontalOptions: LayoutOptions.END,
+        // verticalOptions: LayoutOptions.START,
+        margin: new Thickness(10, 10, 10, 0),
+        heightRequest: 24,
+        source: ImageSource.BOOK,
+        aspect: Aspect.ASPECT_FIT,
+        // color: Color.ACHIEVEMENT_CATEGORY, I don't knnow how to tint
+        onTouched: (e) =>
+        {
+            if(e.type == TouchType.CANCELLED)
+            {
+                historyButton.source = ImageSource.BOOK;
+            }
+            else if(e.type == TouchType.SHORTPRESS_RELEASED ||
+            e.type == TouchType.LONGPRESS_RELEASED)
+            {
+                Sound.playClick();
+                let menu = createHistoryMenu();
+                menu.show();
+            }
+        }
+    });
+
     let result = ui.createGrid
     ({
+        rowDefinitions: ['auto', '80*', 'auto'],
         columnDefinitions: ['1*', '2*', '1*'],
-        verticalOptions: LayoutOptions.START,
         children:
         [
             ui.createLatexLabel
             ({
+                row: 0,
                 column: 0,
-                text: getLoc('versionName'),
+                verticalOptions: LayoutOptions.START,
                 margin: new Thickness(5, 2),
+                text: getLoc('versionName'),
                 fontSize: 9,
                 textColor: Color.TEXT_MEDIUM
             }),
             ui.createFrame
             ({
+                row: 0,
                 column: 1,
+                verticalOptions: LayoutOptions.START,
                 cornerRadius: 1,
                 content: ui.createProgressBar
                 ({
@@ -476,7 +525,19 @@ var getEquationOverlay = () =>
                     progress: () => (time / (cooldown[cooldownMs.level] - 1)) **
                     1.5
                 })
-            })
+            }),
+            historyButton,
+            ui.createLatexLabel
+            ({
+                row: 1,
+                column: 2,
+                horizontalOptions: LayoutOptions.END,
+                verticalOptions: LayoutOptions.START,
+                margin: new Thickness(5, 2),
+                text: getLoc('historyDesc'),
+                fontSize: 10,
+                textColor: Color.TEXT_MEDIUM
+            }),
         ]
     });
     return result;
