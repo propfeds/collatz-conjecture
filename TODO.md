@@ -9,11 +9,11 @@
 - [ ] Buff c1?
 - [ ] Buff c2 base to 2.2?
 - [ ] Determine a good preserve unlocking point
-  - [ ] Alternatvely, instead add a milestone to give a bonus based on c's level
+  - [x] Alternatvely, instead add a milestone to give a bonus based on c's level
     - This will have the same implication where you'll be grinding it out, it's
     just gonna grow slower than preserve
     - Nerf c1 exp to 0.03
-    - Nerf pub exp to 5.42
+    - Nerf pub exp to 5.22
     - Buff pub div to 31
 - [ ] From pietro:
   - Save some levels for the next pub if not used up in current one

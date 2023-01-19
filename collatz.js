@@ -60,8 +60,9 @@ const locStrings =
         permaPreserveDesc: '\\text{Preserve }c\\text{ after publishing}',
         permaPreserveInfo: '\\text{Preserves }c\\text{ after publishing}',
 
+        c1Level: 'c_1\\text{{ level}}',
+        cLevel: 'c\\text{{\'s total level}}',
         cLevelCap: 'c\\text{{ level cap}}',
-        cLevelCapInfo: 'c\\text{{ level cap}}',
         cooldown: '\\text{{interval}}',
         cooldownInfo: 'Interval',
         nTicks: '{{{0}}}\\text{{{{ ticks}}}}',
@@ -147,7 +148,13 @@ let stringObjtoBI = (sequence) =>
     return result;
 }
 
-const getc1 = (level) => Utils.getStepwisePowerSum(level, 2, 5, 1);
+const getc1 = (level) =>
+{
+    if(c1BorrowMs.level > 0)
+        return Utils.getStepwisePowerSum(level + incrementc.level, 2, 5, 1);
+    
+    return Utils.getStepwisePowerSum(level, 2, 5, 1);
+}
 const c1Cost = new FirstFreeCost(new ExponentialCost(1, 3.01));
 const c1ExpInc = 0.11;
 const c1ExpMaxLevel = 4;
@@ -185,27 +192,16 @@ let lastHistory;
 let writeHistory = true;
 let historyMode = 0;
 
-var pausec, historyUpg;
+var pausec;
 var incrementc, c1, c2;
 var pausePerma, preservePerma;
-var cooldownMs, c1ExpMs;
+var cooldownMs, c1BorrowMs, c1ExpMs;
 
 var currency;
 
 var init = () =>
 {
     currency = theory.createCurrency();
-    // {
-    //     historyUpg = theory.createSingularUpgrade(0, currency, new FreeCost);
-    //     historyUpg.description = getLoc('historyDesc');
-    //     historyUpg.info = getLoc('historyInfo');
-    //     historyUpg.bought = (_) =>
-    //     {
-    //         historyUpg.level = 0;
-    //         let menu = createHistoryMenu();
-    //         menu.show();
-    //     }
-    // }
     {
         pausec = theory.createSingularUpgrade(3, currency, new FreeCost);
         pausec.getDescription = () => Utils.getMath(getLoc(
@@ -305,7 +301,7 @@ var init = () =>
             let cd = `${getLoc('cooldownInfo')} = ${Utils.getMathTo(
             cooldown[cooldownMs.level], cooldown[cooldownMs.level + amount] ||
             cooldown[cooldownMs.level])}`;
-            let cap = `${Utils.getMath(getLoc('cLevelCapInfo'))} = 
+            let cap = `${Utils.getMath(getLoc('cLevelCap'))} = 
             ${Utils.getMathTo(cLevelCap[cooldownMs.level],
             cLevelCap[cooldownMs.level + amount] ||
             cLevelCap[cooldownMs.level])}`;
@@ -319,7 +315,12 @@ var init = () =>
         totalIncLevel + cLevelCap[cooldownMs.level - amount];
     }
     {
-        c1ExpMs = theory.createMilestoneUpgrade(1, c1ExpMaxLevel);
+        c1BorrowMs = theory.createMilestoneUpgrade(1, 1);
+        c1BorrowMs.description = Localization.getUpgradeIncCustomDesc(getLoc('c1Level'), getLoc('cLevel'));
+        c1BorrowMs.info = Localization.getUpgradeIncCustomInfo(getLoc('c1Level'), getLoc('cLevel'));
+    }
+    {
+        c1ExpMs = theory.createMilestoneUpgrade(2, c1ExpMaxLevel);
         c1ExpMs.description = Localization.getUpgradeIncCustomExpDesc('c_1',
         c1ExpInc);
         c1ExpMs.info = Localization.getUpgradeIncCustomExpInfo('c_1', c1ExpInc);
