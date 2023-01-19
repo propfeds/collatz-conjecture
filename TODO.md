@@ -6,9 +6,8 @@
 - [ ] Make pub exponent go down gradually like `y=(10/log(x+1)+6.22)`?
   - This is to make early game more lenient
   - Disproven: early game is very normal at 5.62
-- [ ] Buff c1?
-- [ ] Buff c2 base to 2.2?
-- [ ] Determine a good preserve unlocking point
+- [x] Buff c1?
+- [x] Scrap preserve
   - [x] Alternatvely, instead add a milestone to give a bonus based on c's level
     - This will have the same implication where you'll be grinding it out, it's
     just gonna grow slower than preserve

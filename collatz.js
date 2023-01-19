@@ -156,14 +156,14 @@ const getc1 = (level) =>
     return Utils.getStepwisePowerSum(level, 2, 5, 1);
 }
 const c1Cost = new FirstFreeCost(new ExponentialCost(1, 3.01));
-const c1ExpInc = 0.11;
+const c1ExpInc = 0.03;
 const c1ExpMaxLevel = 4;
 const getc1Exponent = (level) => BigNumber.from(1 + c1ExpInc * level);
 const getc2 = (level) => BigNumber.TWO.pow(level);
 const c2Cost = new ExponentialCost(1e6, 11);
 
-const pubExp = 5.62;
-const pubMult = 301;
+const pubExp = 5.22;
+const pubMult = 31;
 var getPublicationMultiplier = (tau) => tau.pow(pubExp) /
 BigNumber.from(pubMult);
 const tauRate = 0.1;
@@ -174,7 +174,7 @@ var getCurrencyFromTau = (tau) =>
     currency.symbol
 ];
 
-const permaCosts = bigNumArray(['1e12', '1e22', '1e31', '1e66', '1e121']);
+const permaCosts = bigNumArray(['1e12', '1e22', '1e31', '1e72']);
 const milestoneCost = new LinearCost(4.4, 4.4);
 
 const cLevelCap = [24, 36, 52, 72];
@@ -194,7 +194,7 @@ let historyMode = 0;
 
 var pausec;
 var incrementc, c1, c2;
-var pausePerma, preservePerma;
+var pausePerma;
 var cooldownMs, c1BorrowMs, c1ExpMs;
 
 var currency;
@@ -272,13 +272,13 @@ var init = () =>
         pausePerma.bought = (_) => updateAvailability();
         pausePerma.maxLevel = 1;
     }
-    {
-        preservePerma = theory.createPermanentUpgrade(4, currency,
-        new ConstantCost(permaCosts[4]));
-        preservePerma.description = Utils.getMath(getLoc('permaPreserveDesc'));
-        preservePerma.info = Utils.getMath(getLoc('permaPreserveInfo'));
-        preservePerma.maxLevel = 1;
-    }
+    // {
+    //     preservePerma = theory.createPermanentUpgrade(4, currency,
+    //     new ConstantCost(permaCosts[4]));
+    //     preservePerma.description = Utils.getMath(getLoc('permaPreserveDesc'));
+    //     preservePerma.info = Utils.getMath(getLoc('permaPreserveInfo'));
+    //     preservePerma.maxLevel = 1;
+    // }
 
     theory.setMilestoneCost(milestoneCost);
     {
@@ -583,18 +583,18 @@ var get2DGraphValue = () =>
 // Will not trigger if you press reset.
 var prePublish = () =>
 {
-    if(preservePerma.level > 0)
-    {
-        tmpTime = time;
-        tmpc = c;
-    }
+    // if(preservePerma.level > 0)
+    // {
+    //     tmpTime = time;
+    //     tmpc = c;
+    // }
     totalIncLevel = incrementc.level;
     lastHistory = history;
 }
 
 var postPublish = () =>
 {
-    if(preservePerma.level == 0)
+    if(true/*preservePerma.level == 0*/)
     {
         time = 0;
         c = 0n;
@@ -624,12 +624,12 @@ var resetStage = () =>
         theory.upgrades[i].level = 0;
 
     currency.value = 0;
-    if(preservePerma.level > 0)
-    {
-        time = tmpTime;
-        c = tmpc;
-        cBigNum = BigNumber.from(c);
-    }
+    // if(preservePerma.level > 0)
+    // {
+    //     time = tmpTime;
+    //     c = tmpc;
+    //     cBigNum = BigNumber.from(c);
+    // }
     theory.clearGraph();
     postPublish();
 }
