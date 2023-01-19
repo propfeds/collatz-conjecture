@@ -155,7 +155,7 @@ const getc1 = (level) =>
     
     return Utils.getStepwisePowerSum(level, 2, 5, 1);
 }
-const c1Cost = new ExponentialCost(0.11, 3.01);
+const c1Cost = new FirstFreeCost(new ExponentialCost(1, 3.01));
 const c1ExpInc = 0.03;
 const c1ExpMaxLevel = 4;
 const getc1Exponent = (level) => BigNumber.from(1 + c1ExpInc * level);
@@ -617,7 +617,8 @@ var postPublish = () =>
     history = {};
 }
 
-var canResetStage = () => !theory.canPublish;
+var canResetStage = () => !theory.canPublish ||
+theory.permanentUpgrades[0].level == 0;
 
 var getResetStageMessage = () => getLoc('reset');
 
@@ -627,7 +628,7 @@ var resetStage = () =>
     You could exploit the c levelling mechanism by resetting to 0 before a pub
     and get 24 levels for free. Now you can't.
     */
-    if(theory.canPublish)
+    if(theory.canPublish && theory.permanentUpgrades[0].level > 0)
         return;
 
     for (let i = 0; i < theory.upgrades.length; ++i)
