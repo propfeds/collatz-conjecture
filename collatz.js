@@ -119,11 +119,15 @@ let getShorterString = (n) =>
 let getSequence = (sequence, mode = 0) =>
 {
     let result = '\\begin{matrix}';
+    let i = 0;
     for(key in sequence)
     {
+        if(i)
+            result += '\\\\';
         result += `${key}:&${mode ? BigNumber.from(sequence[key]).toString(0) :
         getShorterString(sequence[key])}&\\leftarrow
-        ${key & 1 ? '+1' : '-1'}\\\\`;
+        ${key & 1 ? '+1' : '-1'}`;
+        ++i;
     }
     result += '\\end{matrix}';
 
@@ -420,15 +424,15 @@ let createHistoryMenu = () =>
             children:
             [
                 toggleButton,
-                ui.createBox
-                ({
-                    heightRequest: 1,
-                    margin: new Thickness(0, 6)
-                }),
+                // ui.createBox
+                // ({
+                //     heightRequest: 1,
+                //     margin: new Thickness(0, 6)
+                // }),
                 ui.createGrid
                 ({
                     columnDefinitions: ['1*', '1*'],
-                    heightRequest: 32,
+                    heightRequest: 28,
                     children:
                     [
                         ui.createLatexLabel
@@ -677,17 +681,19 @@ var setInternalState = (stateStr) =>
     if('tmpc' in state)
         tmpc = BigInt(state.tmpc);
 
-    incrementc.maxLevel = cLevelCap[cooldownMs.level];
+    let tmpIML = cLevelCap[cooldownMs.level];
     if('totalIncLevel' in state)
     {
         totalIncLevel = state.totalIncLevel;
-        incrementc.maxLevel += totalIncLevel;
+        tmpIML += totalIncLevel;
     }
     if('incRemainder' in state)
     {
         incRemainder = state.incRemainder;
-        incrementc.maxLevel += incRemainder;
+        tmpIML += incRemainder;
     }
+    incrementc.maxLevel = tmpIML;
+
     if('history' in state)
         history = state.history;
     if('lastHistory' in state)
