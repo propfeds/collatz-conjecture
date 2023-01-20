@@ -49,7 +49,7 @@ const locStrings =
 {
     en:
     {
-        versionName: 'v0.04 – WIP',
+        versionName: 'v0.04 – Work in\n\nProgress',
 
         historyDesc: ' Seq.\n\nhistory',
         historyInfo: 'Shows the last and current runs\' sequences',
@@ -478,29 +478,10 @@ var getEquationOverlay = () =>
 {
     let historyButton = ui.createImage
     ({
-        row: 0,
-        column: 2,
-        horizontalOptions: LayoutOptions.END,
-        verticalOptions: LayoutOptions.START,
-        margin: new Thickness(9, 8, 9, 0),
-        heightRequest: 24,
+        // margin: new Thickness(2),
         source: ImageSource.BOOK,
         aspect: Aspect.ASPECT_FIT,
-        // color: Color.ACHIEVEMENT_CATEGORY, I don't knnow how to tint
-        onTouched: (e) =>
-        {
-            if(e.type == TouchType.CANCELLED)
-            {
-                historyButton.source = ImageSource.BOOK;
-            }
-            else if(e.type == TouchType.SHORTPRESS_RELEASED ||
-            e.type == TouchType.LONGPRESS_RELEASED)
-            {
-                Sound.playClick();
-                let menu = createHistoryMenu();
-                menu.show();
-            }
-        }
+        useTint: false
     });
 
     let result = ui.createGrid
@@ -523,6 +504,7 @@ var getEquationOverlay = () =>
             ({
                 row: 0,
                 column: 1,
+                hasShadow: true,
                 verticalOptions: LayoutOptions.START,
                 cornerRadius: 1,
                 content: ui.createProgressBar
@@ -532,17 +514,42 @@ var getEquationOverlay = () =>
                     1.5
                 })
             }),
-            historyButton,
+            ui.createFrame
+            ({
+                row: 0,
+                column: 2,
+                cornerRadius: 1,
+                horizontalOptions: LayoutOptions.END,
+                verticalOptions: LayoutOptions.START,
+                margin: new Thickness(9, 8),
+                hasShadow: true,
+                heightRequest: 24,
+                content: historyButton,
+                onTouched: (e) =>
+                {
+                    if(e.type == TouchType.CANCELLED)
+                    {
+                        return;
+                    }
+                    else if(e.type == TouchType.SHORTPRESS_RELEASED ||
+                    e.type == TouchType.LONGPRESS_RELEASED)
+                    {
+                        Sound.playClick();
+                        let menu = createHistoryMenu();
+                        menu.show();
+                    }
+                }
+            }),
             ui.createLatexLabel
             ({
                 row: 0,
                 column: 2,
                 horizontalOptions: LayoutOptions.END,
                 verticalOptions: LayoutOptions.END,
-                margin: new Thickness(5, 16, 11, 0),
+                margin: new Thickness(5, 16, 10, 0),
                 text: getLoc('historyDesc'),
                 fontSize: 10,
-                textColor: Color.TEXT_MEDIUM
+                textColor: () => Color.fromHex(cColour.get(game.settings.theme))
             }),
         ]
     });
