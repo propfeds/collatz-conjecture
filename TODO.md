@@ -14,10 +14,11 @@
     - Nerf c1 exp to 0.03
     - Nerf pub exp to 5.22
     - Buff pub div to 31
-- [x] From pietro:
-  - Save some levels for the next pub if not used up in current one
+- From pietro:
+  - [ ] Save some levels for the next pub if not used up in current one
     - Solves the problem of players being confused by c level
-    - But also creates some confusion
+    - But also trivialises the game by allowing you to farm massive amounts of
+    levels
 - [ ] Solve the problem of being stuck
   - From Gen:
     > possible solutions:

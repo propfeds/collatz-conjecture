@@ -27,17 +27,20 @@ var getDescription = (language) =>
     let descs =
     {
         en:
-`If it's odd, triple it plus one,
-If it's even, divide it by two.
+`A puzzle revolving around nudging a number's value in order to counteract ` +
+`the even clause of the Collatz conjecture.
+
+'If it's odd, triple it plus one,
+If it's even, divide it in two.
 
 If you woke up today and ate bread,
-what would you do?`,
+what would you do?'`,
     };
 
     return descs[language] || descs.en;
 }
 var authors = 'propfeds#5988\n\nThanks to:\nCipher#9599, for the idea';
-var version = 0.03;
+var version = 0.04;
 
 let menuLang = Localization.language;
 let cColour = new Map();
@@ -49,7 +52,7 @@ const locStrings =
 {
     en:
     {
-        versionName: 'v0.04 – Work in\nProgress',
+        versionName: 'v0.04, Work \\\\\nin Progress',
         
         historyDesc: 'History',
         historyInfo: 'Shows the last and current runs\' sequences',
@@ -527,11 +530,7 @@ var getEquationOverlay = () =>
                 content: historyButton,
                 onTouched: (e) =>
                 {
-                    if(e.type == TouchType.CANCELLED)
-                    {
-                        return;
-                    }
-                    else if(e.type == TouchType.SHORTPRESS_RELEASED ||
+                    if(e.type == TouchType.SHORTPRESS_RELEASED ||
                     e.type == TouchType.LONGPRESS_RELEASED)
                     {
                         Sound.playClick();
@@ -601,7 +600,7 @@ var prePublish = () =>
     //     tmpc = c;
     // }
     totalIncLevel = incrementc.level;
-    incRemainder = incrementc.maxLevel - incrementc.level;
+    // incRemainder = incrementc.maxLevel - incrementc.level;
     lastHistory = history;
 }
 
@@ -664,7 +663,7 @@ var getInternalState = () => JSON.stringify
     tmpTime: tmpTime,
     tmpc: tmpc.toString(),
     totalIncLevel: totalIncLevel,
-    incRemainder: incRemainder,
+    // incRemainder: incRemainder,
     history: history,
     lastHistory: lastHistory,
     historyMode: historyMode,
@@ -696,8 +695,8 @@ var setInternalState = (stateStr) =>
     }
     if('incRemainder' in state)
     {
-        incRemainder = state.incRemainder;
-        tmpIML += incRemainder;
+        // incRemainder = state.incRemainder;
+        // tmpIML += incRemainder;
     }
     incrementc.maxLevel = tmpIML;
 
