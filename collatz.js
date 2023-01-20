@@ -49,9 +49,9 @@ const locStrings =
 {
     en:
     {
-        versionName: 'v0.04 – Work in\n\nProgress',
-
-        historyDesc: ' Seq.\n\nhistory',
+        versionName: 'v0.04 – Work in\nProgress',
+        
+        historyDesc: 'History',
         historyInfo: 'Shows the last and current runs\' sequences',
         pausecDesc: ['\\text{Freeze }c', '\\text{Unfreeze }c'],
         pausecInfo: '\\text{Freezes }c\\text{\'s value}',
@@ -521,7 +521,7 @@ var getEquationOverlay = () =>
                 cornerRadius: 1,
                 horizontalOptions: LayoutOptions.END,
                 verticalOptions: LayoutOptions.START,
-                margin: new Thickness(9, 8),
+                margin: new Thickness(10, 6),
                 hasShadow: true,
                 heightRequest: 24,
                 content: historyButton,
@@ -545,8 +545,8 @@ var getEquationOverlay = () =>
                 row: 0,
                 column: 2,
                 horizontalOptions: LayoutOptions.END,
-                verticalOptions: LayoutOptions.END,
-                margin: new Thickness(5, 16, 10, 0),
+                verticalOptions: LayoutOptions.START,
+                margin: new Thickness(1, 34),
                 text: getLoc('historyDesc'),
                 fontSize: 10,
                 textColor: () => Color.fromHex(cColour.get(game.settings.theme))
