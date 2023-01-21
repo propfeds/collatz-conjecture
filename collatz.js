@@ -186,7 +186,7 @@ var getCurrencyFromTau = (tau) =>
 const permaCosts = bigNumArray(['1e12', '1e22', '1e31', '1e72']);
 const milestoneCost = new LinearCost(4.4, 4.4);
 
-const cLevelCap = [24, 36, 52, 72];
+const cLevelCap = [24, 32, 44, 64];
 const cooldown = [44, 30, 18, 10];
 
 let time = 0;
