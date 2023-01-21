@@ -183,7 +183,7 @@ var getCurrencyFromTau = (tau) =>
     currency.symbol
 ];
 
-const permaCosts = bigNumArray(['1e12', '1e22', '1e31', '1e72']);
+const permaCosts = bigNumArray(['1e12', '1e22', '1e31', '1e66']);
 const milestoneCost = new LinearCost(4.4, 4.4);
 
 const cLevelCap = [24, 32, 44, 64];
@@ -211,12 +211,22 @@ var currency;
 var init = () =>
 {
     currency = theory.createCurrency();
+    /* Freeze
+    Freeze c's value and the timer in place, which allows for idling. This will
+    become more important later on, and also helps with farming c levels.
+    */
     {
         pausec = theory.createSingularUpgrade(3, currency, new FreeCost);
         pausec.getDescription = () => Utils.getMath(getLoc(
         'pausecDesc')[pausec.level & 1]);
         pausec.info = Utils.getMath(getLoc('pausecInfo'));
     }
+    /* c
+    The theory's core mechanic revolves around nudging c around. This upgrade
+    alternates between incrementing and decrementing by 1. If an increment nudge
+    is used on a number divisible by 4, the next number will become divisible by
+    4 again, which can be super annoying.
+    */
     {
         let getDesc = (level) => `c \\leftarrow c${level & 1 ? '-' : '+'}1
         \\text{${getLoc('alternating')}}`;
@@ -243,6 +253,13 @@ var init = () =>
         incrementc.isAutoBuyable = false;
         incrementc.maxLevel = cLevelCap[0];
     }
+    /* c1
+    Most theories use a (2, 10) stepwise power, which I criticise to be too weak
+    to be worth putting autobuy on. In Botched, a (3, 6) was used, and c1's cost
+    there would align with c2 near perfectly at ~6 c1 upgrades per c2 upgrade.
+    Collatz uses a (2, 5), which aligns more with tradition, while being twice
+    more powerful.
+    */
     {
         let getDesc = (level) =>
         {
@@ -259,6 +276,9 @@ var init = () =>
         c1.getInfo = (amount) => Utils.getMathTo(getInfo(c1.level),
         getInfo(c1.level + amount));
     }
+    /* c2
+    Standard doubling upgrade.
+    */
     {
         let getDesc = (level) => `c_2=2^{${level}}`;
         let getInfo = (level) => `c_2=${getc2(level).toString(0)}`;
@@ -271,6 +291,9 @@ var init = () =>
     theory.createPublicationUpgrade(0, currency, permaCosts[0]);
     theory.createBuyAllUpgrade(1, currency, permaCosts[1]);
     theory.createAutoBuyerUpgrade(2, currency, permaCosts[2]);
+    /* Unlocks freeze
+    Shame that you unlock such a useful tool really late.
+    */
     {
         pausePerma = theory.createPermanentUpgrade(3, currency,
         new ConstantCost(permaCosts[3]));
@@ -281,6 +304,10 @@ var init = () =>
         pausePerma.bought = (_) => updateAvailability();
         pausePerma.maxLevel = 1;
     }
+    /* Preserve c
+    Shame that we never got the chance to test out this one. Other than breaking
+    progression, it can also pose a threat to the theory's performance.
+    */
     // {
     //     preservePerma = theory.createPermanentUpgrade(4, currency,
     //     new ConstantCost(permaCosts[4]));
@@ -290,6 +317,10 @@ var init = () =>
     // }
 
     theory.setMilestoneCost(milestoneCost);
+    /* Interval speed-up
+    Technically, this is a c level cap milestone coupled with a drawback. This
+    allows you to farm for the borrow milestone faster.
+    */
     {
         let getInfo = (level, amount = 1) => `${getLoc('cooldownInfo')}=
         ${cooldown[level] || cooldown[level - amount]}`;
@@ -324,11 +355,20 @@ var init = () =>
         cooldownMs.canBeRefunded = (amount) => incrementc.level <=
         totalIncLevel + cLevelCap[cooldownMs.level - amount];
     }
+    /* Level borrowing
+    It'll be useless for a while at first when you unlock it at e44. But, it can
+    be farmed simply by doing a bunch of empty publishes at 1.00 multiplier.
+    */
     {
         c1BorrowMs = theory.createMilestoneUpgrade(1, 1);
-        c1BorrowMs.description = Localization.getUpgradeIncCustomDesc(getLoc('c1Level'), Localization.format(getLoc('cLevel'), borrowFactor));
-        c1BorrowMs.info = Localization.getUpgradeIncCustomInfo(getLoc('c1Level'), Localization.format(getLoc('cLevel'), borrowFactor));
+        c1BorrowMs.description = Localization.getUpgradeIncCustomDesc(getLoc(
+        'c1Level'), Localization.format(getLoc('cLevel'), borrowFactor));
+        c1BorrowMs.info = Localization.getUpgradeIncCustomInfo(getLoc(
+        'c1Level'), Localization.format(getLoc('cLevel'), borrowFactor));
     }
+    /* c1 exponent
+    Standard exponent upgrade.
+    */
     {
         c1ExpMs = theory.createMilestoneUpgrade(2, c1ExpMaxLevel);
         c1ExpMs.description = Localization.getUpgradeIncCustomExpDesc('c_1',
