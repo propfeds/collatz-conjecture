@@ -64,7 +64,7 @@ const locStrings =
         permaPreserveInfo: '\\text{Preserves }c\\text{ after publishing}',
 
         c1Level: 'c_1\\text{{ level}}',
-        cLevel: '1/{{{0}}}\\text{{{{ of }}}}c\\text{{{{\'s level}}}}',
+        cLevel: '1/{{{0}}}^\\text{{{{th}}}}\\text{{{{ of }}}}c\\text{{{{\'s level}}}}',
         cLevelCap: 'c\\text{{ level cap}}',
         cooldown: '\\text{{interval}}',
         cooldownInfo: 'Interval',
