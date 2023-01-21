@@ -64,7 +64,7 @@ const locStrings =
         permaPreserveInfo: '\\text{Preserves }c\\text{ after publishing}',
 
         c1Level: 'c_1\\text{{ level}}',
-        cLevel: 'c\\text{{\'s total level}}',
+        cLevel: '1/{{{0}}}\\text{{{{ of }}}}c\\text{{{{\'s level}}}}',
         cLevelCap: 'c\\text{{ level cap}}',
         cooldown: '\\text{{interval}}',
         cooldownInfo: 'Interval',
@@ -158,10 +158,12 @@ let stringObjtoBI = (sequence) =>
 const getc1 = (level) =>
 {
     if(c1BorrowMs.level > 0)
-        return Utils.getStepwisePowerSum(level + incrementc.level, 2, 5, 1);
+        return Utils.getStepwisePowerSum(level + incrementc.level /
+        borrowFactor, 2, 5, 1);
     
     return Utils.getStepwisePowerSum(level, 2, 5, 1);
 }
+const borrowFactor = 4;
 const c1Cost = new FirstFreeCost(new ExponentialCost(1, 3.01));
 const c1ExpInc = 0.03;
 const c1ExpMaxLevel = 4;
@@ -324,8 +326,8 @@ var init = () =>
     }
     {
         c1BorrowMs = theory.createMilestoneUpgrade(1, 1);
-        c1BorrowMs.description = Localization.getUpgradeIncCustomDesc(getLoc('c1Level'), getLoc('cLevel'));
-        c1BorrowMs.info = Localization.getUpgradeIncCustomInfo(getLoc('c1Level'), getLoc('cLevel'));
+        c1BorrowMs.description = Localization.getUpgradeIncCustomDesc(getLoc('c1Level'), Localization.format(getLoc('cLevel'), borrowFactor));
+        c1BorrowMs.info = Localization.getUpgradeIncCustomInfo(getLoc('c1Level'), Localization.format(getLoc('cLevel'), borrowFactor));
     }
     {
         c1ExpMs = theory.createMilestoneUpgrade(2, c1ExpMaxLevel);
