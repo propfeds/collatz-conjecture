@@ -73,11 +73,12 @@ const locStrings =
         alternating: ' (alternating)',
 
         btnClose: 'Close',
-        btnMode: ['Display: Ending digits', 'Display: Scientific'],
+        btnNumDispMode: ['Numbers: Ending digits', 'Numbers: Scientific'],
+        btnLvlDispMode: ['Levels: Total', 'Levels: Offset'],
 
         menuHistory: 'Sequence History',
-        labelCurrentRun: 'Current publication: ',
-        labelLastRun: 'Last publication: ',
+        labelCurrentRun: 'Current publication:',
+        labelLastRun: 'Last publication:',
 
         reset: 'You are about to reset the current publication.\nNote: resetting is only available before publishing opens.',
     }
@@ -119,20 +120,23 @@ let getShorterString = (n) =>
     return s;
 }
 
-let getSequence = (sequence, mode = 0) =>
+let getSequence = (sequence, numMode = 0, lvlMode = 0) =>
 {
-    let result = '\\begin{matrix}';
+    let result = '\\begin{array}{rrr}';
     let i = 0;
+    let start;
     for(key in sequence)
     {
         if(i)
             result += '\\\\';
-        result += `${key}:&${mode ? BigNumber.from(sequence[key]).toString(0) :
-        getShorterString(sequence[key])}&\\leftarrow
-        ${key & 1 ? '+1' : '-1'}`;
+        else
+            start = Number(key) - 1;
+        result += `${lvlMode ? Number(key) - start : key}:&
+        ${numMode ? BigNumber.from(sequence[key]).toString(0) :
+        getShorterString(sequence[key])}&\\leftarrow${key & 1 ? '+1' : '-1'}`;
         ++i;
     }
-    result += '\\end{matrix}';
+    result += '\\end{array}';
 
     return Utils.getMath(result);
 }
@@ -199,7 +203,8 @@ let incRemainder = 0;
 let history = {};
 let lastHistory;
 let writeHistory = true;
-let historyMode = 0;
+let historyNumMode = 0;
+let historyLvlMode = 1;
 
 var pausec;
 var incrementc, c1, c2;
@@ -417,49 +422,72 @@ var tick = (elapsedTime, multiplier) =>
 
 let createHistoryMenu = () =>
 {
-    let toggleMode = () =>
+    let toggleNumMode = () =>
     {
-        historyMode = 1 - historyMode;
-        let children = [];
-        children.push(ui.createLatexLabel
-        ({
-            text: getSequence(history, historyMode),
-            column: 0
-        }));
-        children.push(ui.createLatexLabel
-        ({
-            text: getSequence(lastHistory, historyMode),
-            column: 1
-        }));
-        historyGrid.children = children;
-        toggleButton.text = getLoc('btnMode')[historyMode];
-    }
-    let historyGrid = ui.createGrid
+        historyNumMode = 1 - historyNumMode;
+        currentPubHistory.text = getSequence(history, historyNumMode,
+        historyLvlMode);
+        lastPubHistory.text = getSequence(lastHistory, historyNumMode,
+        historyLvlMode);
+        toggleNumButton.text = getLoc('btnNumDispMode')[historyNumMode];
+    };
+    let toggleNumButton = ui.createButton
     ({
-        columnDefinitions: ['1*', '1*'],
-        children:
-        [
-            ui.createLatexLabel
-            ({
-                text: getSequence(history, historyMode),
-                column: 0
-            }),
-            ui.createLatexLabel
-            ({
-                text: getSequence(lastHistory, historyMode),
-                column: 1
-            })
-        ]
-    });
-    let toggleButton = ui.createButton
-    ({
-        text: getLoc('btnMode')[historyMode],
+        row: 0,
+        column: 0,
+        heightRequest: 40,
+        minimumHeightRequest: 40,
+        text: getLoc('btnNumDispMode')[historyNumMode],
         onClicked: () =>
         {
             Sound.playClick();
-            toggleMode();
+            toggleNumMode();
         }
-    })
+    });
+    let toggleLvlMode = () =>
+    {
+        historyLvlMode = 1 - historyLvlMode;
+        currentPubHistory.text = getSequence(history, historyNumMode,
+        historyLvlMode);
+        lastPubHistory.text = getSequence(lastHistory, historyNumMode,
+        historyLvlMode);
+        toggleLvlButton.text = getLoc('btnLvlDispMode')[historyLvlMode];
+    };
+    let toggleLvlButton = ui.createButton
+    ({
+        row: 0,
+        column: 1,
+        heightRequest: 40,
+        minimumHeightRequest: 40,
+        text: getLoc('btnLvlDispMode')[historyLvlMode],
+        onClicked: () =>
+        {
+            Sound.playClick();
+            toggleLvlMode();
+        }
+    });
+    let currentPubHistory = ui.createLatexLabel
+    ({
+        column: 0,
+        horizontalOptions: LayoutOptions.CENTER,
+        text: getSequence(history, historyNumMode, historyLvlMode)
+    });
+    let lastPubHistory = ui.createLatexLabel
+    ({
+        column: 1,
+        horizontalOptions: LayoutOptions.CENTER,
+        text: getSequence(lastHistory, historyNumMode, historyLvlMode)
+    });
+    let historyGrid = ui.createGrid
+    ({
+        columnDefinitions: ['1*', '1*'],
+        // columnSpacing: 8,
+        children:
+        [
+            currentPubHistory,
+            lastPubHistory
+        ]
+    });
 
     let menu = ui.createPopup
     ({
@@ -468,7 +496,6 @@ let createHistoryMenu = () =>
         ({
             children:
             [
-                toggleButton,
                 // ui.createBox
                 // ({
                 //     heightRequest: 1,
@@ -477,19 +504,25 @@ let createHistoryMenu = () =>
                 ui.createGrid
                 ({
                     columnDefinitions: ['1*', '1*'],
-                    heightRequest: 28,
+                    columnSpacing: 8,
                     children:
                     [
+                        toggleNumButton,
+                        toggleLvlButton,
                         ui.createLatexLabel
                         ({
-                            text: getLoc('labelCurrentRun'),
+                            row: 1,
                             column: 0,
+                            text: getLoc('labelCurrentRun'),
+                            horizontalOptions: LayoutOptions.CENTER,
                             verticalOptions: LayoutOptions.CENTER
                         }),
                         ui.createLatexLabel
                         ({
-                            text: getLoc('labelLastRun'),
+                            row: 1,
                             column: 1,
+                            text: getLoc('labelLastRun'),
+                            horizontalOptions: LayoutOptions.CENTER,
                             verticalOptions: LayoutOptions.CENTER
                         })
                     ]
@@ -708,7 +741,8 @@ var getInternalState = () => JSON.stringify
     // incRemainder: incRemainder,
     history: history,
     lastHistory: lastHistory,
-    historyMode: historyMode,
+    historyNumMode: historyNumMode,
+    historyLvlMode: historyLvlMode
 })
 
 var setInternalState = (stateStr) =>
@@ -746,8 +780,10 @@ var setInternalState = (stateStr) =>
         history = state.history;
     if('lastHistory' in state)
         lastHistory = state.lastHistory;
-    if('historyMode' in state)
-        historyMode = state.historyMode;
+    if('historyNumMode' in state)
+        historyNumMode = state.historyNumMode;
+    if('historyLvlMode' in state)
+        historyLvlMode = state.historyLvlMode;
 
     theory.invalidatePrimaryEquation();
     theory.invalidateTertiaryEquation();
