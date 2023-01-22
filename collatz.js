@@ -435,8 +435,6 @@ let createHistoryMenu = () =>
     ({
         row: 0,
         column: 0,
-        heightRequest: 40,
-        minimumHeightRequest: 40,
         text: getLoc('btnNumDispMode')[historyNumMode],
         onClicked: () =>
         {
@@ -457,8 +455,6 @@ let createHistoryMenu = () =>
     ({
         row: 0,
         column: 1,
-        heightRequest: 40,
-        minimumHeightRequest: 40,
         text: getLoc('btnLvlDispMode')[historyLvlMode],
         onClicked: () =>
         {
@@ -496,15 +492,11 @@ let createHistoryMenu = () =>
         ({
             children:
             [
-                // ui.createBox
-                // ({
-                //     heightRequest: 1,
-                //     margin: new Thickness(0, 6)
-                // }),
                 ui.createGrid
                 ({
+                    rowDefinitions: ['44', '24'],
                     columnDefinitions: ['1*', '1*'],
-                    columnSpacing: 8,
+                    columnSpacing: 12,
                     children:
                     [
                         toggleNumButton,
@@ -515,7 +507,7 @@ let createHistoryMenu = () =>
                             column: 0,
                             text: getLoc('labelCurrentRun'),
                             horizontalOptions: LayoutOptions.CENTER,
-                            verticalOptions: LayoutOptions.CENTER
+                            verticalOptions: LayoutOptions.END
                         }),
                         ui.createLatexLabel
                         ({
@@ -523,9 +515,14 @@ let createHistoryMenu = () =>
                             column: 1,
                             text: getLoc('labelLastRun'),
                             horizontalOptions: LayoutOptions.CENTER,
-                            verticalOptions: LayoutOptions.CENTER
+                            verticalOptions: LayoutOptions.END
                         })
                     ]
+                }),
+                ui.createBox
+                ({
+                    heightRequest: 1,
+                    margin: new Thickness(0, 6)
                 }),
                 ui.createScrollView
                 ({
