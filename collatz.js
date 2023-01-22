@@ -64,7 +64,7 @@ const locStrings =
         permaPreserveInfo: '\\text{Preserves }c\\text{ after publishing}',
 
         c1Level: 'c_1\\text{{ level}}',
-        cLevel: '1/{{{0}}}^\\text{{{{th}}}}\\text{{{{ of }}}}c\\text{{{{\'s level}}}}',
+        cLevel: '1/{{{0}}}\\text{{{{ of }}}}c\\text{{{{\'s level}}}}',
         cLevelCap: 'c\\text{{ level cap}}',
         cooldown: '\\text{{interval}}',
         cooldownInfo: 'Interval',
@@ -163,7 +163,7 @@ const getc1 = (level) =>
     
     return Utils.getStepwisePowerSum(level, 2, 5, 1);
 }
-const borrowFactor = 4;
+const borrowFactor = 2;
 const c1Cost = new FirstFreeCost(new ExponentialCost(1, 3.01));
 const c1ExpInc = 0.03;
 const c1ExpMaxLevel = 4;
@@ -186,7 +186,7 @@ var getCurrencyFromTau = (tau) =>
 const permaCosts = bigNumArray(['1e12', '1e22', '1e31', '1e66']);
 const milestoneCost = new LinearCost(4.4, 4.4);
 
-const cLevelCap = [24, 32, 44, 64];
+const cLevelCap = [24, 36, 52, 72];
 const cooldown = [44, 30, 18, 10];
 
 let time = 0;
