@@ -12,6 +12,7 @@ import { ImageSource } from '../api/ui/properties/ImageSource';
 import { Aspect } from '../api/ui/properties/Aspect';
 import { TouchType } from '../api/ui/properties/TouchType';
 import { Thickness } from '../api/ui/properties/Thickness';
+import { Easing } from '../api/ui/properties/Easing';
 
 var id = 'collatz_conjecture';
 var getName = (language) =>
@@ -43,11 +44,16 @@ what would you do?'`,
 var authors = 'propfeds#5988\n\nThanks to:\nCipher#9599, for the idea';
 var version = 0.04;
 
-let menuLang = Localization.language;
-let cColour = new Map();
+const menuLang = Localization.language;
+const cColour = new Map();
 cColour.set(Theme.STANDARD, 'c0c0c0');
 cColour.set(Theme.DARK, 'b5b5b5');
 cColour.set(Theme.LIGHT, '434343');
+
+const cIterProgBar = ui.createProgressBar
+({
+    margin: new Thickness(6, 0)
+});
 
 const locStrings =
 {
@@ -410,7 +416,11 @@ var tick = (elapsedTime, multiplier) =>
             theory.invalidatePrimaryEquation();
             theory.invalidateTertiaryEquation();
             time -= cooldown[cooldownMs.level];
+            cIterProgBar.progressTo(0, 90, Easing.LINEAR);
         }
+        else
+            cIterProgBar.progressTo((time / (cooldown[cooldownMs.level] - 1)) **
+            2, 90, Easing.LINEAR);
     }
 
     let dt = BigNumber.from(elapsedTime * multiplier);
@@ -435,7 +445,7 @@ let createHistoryMenu = () =>
     let toggleNumButton = ui.createButton
     ({
         row: 0,
-        column: 0,
+        column: 1,
         text: getLoc('btnNumDispMode')[historyNumMode],
         onClicked: () =>
         {
@@ -455,7 +465,7 @@ let createHistoryMenu = () =>
     let toggleLvlButton = ui.createButton
     ({
         row: 0,
-        column: 1,
+        column: 0,
         text: getLoc('btnLvlDispMode')[historyLvlMode],
         onClicked: () =>
         {
@@ -583,12 +593,7 @@ var getEquationOverlay = () =>
                 hasShadow: true,
                 verticalOptions: LayoutOptions.START,
                 cornerRadius: 1,
-                content: ui.createProgressBar
-                ({
-                    margin: new Thickness(6, 0),
-                    progress: () => (time / (cooldown[cooldownMs.level] - 1)) **
-                    1.5
-                })
+                content: cIterProgBar
             }),
             ui.createFrame
             ({
@@ -750,7 +755,11 @@ var setInternalState = (stateStr) =>
 
     let state = JSON.parse(stateStr);
     if('time' in state)
+    {
         time = state.time;
+        cIterProgBar.progressTo((time / (cooldown[cooldownMs.level] - 1)) **
+        2, 301, Easing.CUBIC_INOUT);
+    }
     if('c' in state)
     {
         c = BigInt(state.c);

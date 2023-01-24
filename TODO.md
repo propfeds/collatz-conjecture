@@ -8,6 +8,7 @@
 ## In consideration
 
 - [x] History numbering mode: either full level or level offset
+  - [ ] Binary display?
 - [x] Turn freeze and history into icons
 - [ ] Make pub exponent go down gradually like `y=(10/log(x+1)+6.22)`?
   - This is to make early game more lenient
