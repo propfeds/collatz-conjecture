@@ -11,6 +11,7 @@ import { LayoutOptions } from '../api/ui/properties/LayoutOptions';
 import { ImageSource } from '../api/ui/properties/ImageSource';
 import { Aspect } from '../api/ui/properties/Aspect';
 import { TouchType } from '../api/ui/properties/TouchType';
+import { Thickness } from '../api/ui/properties/Thickness';
 
 var id = 'collatz_conjecture';
 var getName = (language) =>
@@ -136,7 +137,7 @@ let getSequence = (sequence, numMode = 0, lvlMode = 0) =>
         getShorterString(sequence[key])}&\\leftarrow${key & 1 ? '+1' : '-1'}`;
         ++i;
     }
-    result += '\\end{array}';
+    result += '&\\end{array}';
 
     return Utils.getMath(result);
 }
