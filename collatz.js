@@ -416,11 +416,12 @@ var tick = (elapsedTime, multiplier) =>
             theory.invalidatePrimaryEquation();
             theory.invalidateTertiaryEquation();
             time -= cooldown[cooldownMs.level];
-            cIterProgBar.progressTo(0, 90, Easing.LINEAR);
+            cIterProgBar.progressTo(0, 110, Easing.LINEAR);
         }
-        else
+        else// if(time == 1)
             cIterProgBar.progressTo((time / (cooldown[cooldownMs.level] - 1)) **
-            2, 90, Easing.LINEAR);
+            1.5, 99, Easing.LINEAR);
+            // cIterProgBar.progressTo(1, (cooldown[cooldownMs.level] - 1 - time) * 100, Easing.CUBIC_IN);
     }
 
     let dt = BigNumber.from(elapsedTime * multiplier);
@@ -687,6 +688,7 @@ var postPublish = () =>
     if(true/*preservePerma.level == 0*/)
     {
         time = 0;
+        cIterProgBar.progressTo(0, 220, Easing.CUBIC_INOUT);
         c = 0n;
         cBigNum = BigNumber.from(c);
     }
@@ -758,7 +760,7 @@ var setInternalState = (stateStr) =>
     {
         time = state.time;
         cIterProgBar.progressTo((time / (cooldown[cooldownMs.level] - 1)) **
-        2, 301, Easing.CUBIC_INOUT);
+        1.5, 220, Easing.CUBIC_INOUT);
     }
     if('c' in state)
     {
