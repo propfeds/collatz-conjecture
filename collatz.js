@@ -407,6 +407,7 @@ var tick = (elapsedTime, multiplier) =>
         ++time;
         if(time >= cooldown[cooldownMs.level])
         {
+            cIterProgBar.progressTo(0, 110, Easing.LINEAR);
             if(c % 2n != 0)
                 c = 3n * c + 1n;
             else
@@ -416,11 +417,10 @@ var tick = (elapsedTime, multiplier) =>
             theory.invalidatePrimaryEquation();
             theory.invalidateTertiaryEquation();
             time -= cooldown[cooldownMs.level];
-            cIterProgBar.progressTo(0, 110, Easing.LINEAR);
         }
         else// if(time == 1)
             cIterProgBar.progressTo((time / (cooldown[cooldownMs.level] - 1)) **
-            1.5, 99, Easing.LINEAR);
+            1.5, 110, Easing.LINEAR);
             // cIterProgBar.progressTo(1, (cooldown[cooldownMs.level] - 1 - time) * 100, Easing.CUBIC_IN);
     }
 
