@@ -117,9 +117,7 @@ let bigNumArray = (array) => array.map(x => BigNumber.from(x));
 
 let getShortString = (n) =>
 {
-    let s = n;
-    if(typeof s !== 'string')
-        s = s.toString();
+    let s = n.toString();
     if(s.length > 9)
         s = `${s.slice(0, 5)}...${s.slice(-3)}`;
     return s;
@@ -127,9 +125,7 @@ let getShortString = (n) =>
 
 let getShorterString = (n) =>
 {
-    let s = n;
-    if(typeof s !== 'string')
-        s = s.toString();
+    let s = n.toString();
     if(s.length > 7)
         s = `${s.slice(0, 3)}...${s.slice(-3)}`;
     return s;
@@ -137,10 +133,7 @@ let getShorterString = (n) =>
 
 let getShortBinaryString = (n) =>
 {
-    let s = n;
-    if(typeof s === 'string')
-        s = BigInt(s);
-    s = s.toString(2);
+    let s = BigInt(n).toString(2);
     if(s.length > 9)
         s = `${s.slice(0, 3)}...${s.slice(-5)}`;
     return s;
@@ -148,10 +141,7 @@ let getShortBinaryString = (n) =>
 
 let getShorterBinaryString = (n) =>
 {
-    let s = n;
-    if(typeof s === 'string')
-        s = BigInt(s);
-    s = s.toString(2);
+    let s = BigInt(n).toString(2);
     if(s.length > 7)
         s = `${s.slice(0, 1)}...${s.slice(-5)}`;
     return s;
@@ -685,9 +675,9 @@ var getPrimaryEquation = () =>
 {
     let cStr = historyNumMode == 2 ? getShortBinaryString(c) :
     getShortString(c);
-    let result = `\\begin{matrix}c\\leftarrow\\begin{cases}c/2,&\\text{if }c
-    \\equiv0\\text{ (mod 2)}\\\\3c+1,&\\text{if }c\\equiv1\\text{ (mod 2)}
-    \\end{cases}\\\\\\\\\\color{#${cColour.get(game.settings.theme)}}{c=${cStr}}
+    let result = `\\begin{matrix}c\\leftarrow\\begin{cases}c/2&\\text{if }c
+    \\equiv0\\text{ (mod 2)}\\\\3c+1&\\text{if }c\\equiv1\\text{ (mod 2)}
+    \\end{cases}\\\\\\\\\\color{#${cColour.get(game.settings.theme)}}{=${cStr}}
     \\end{matrix}`;
 
     return result;
@@ -695,7 +685,9 @@ var getPrimaryEquation = () =>
 
 var getSecondaryEquation = () =>
 {
-    let result = `\\begin{matrix}\\dot{\\rho}=c_1${c1ExpMs.level > 0 ? `^{${getc1Exponent(c1ExpMs.level)}}` : ''}c_2|c|,&${theory.latexSymbol}=\\max{\\rho}^{0.1}\\end{matrix}`;
+    let result = `\\begin{matrix}\\dot{\\rho}=c_1${c1ExpMs.level > 0 ?
+    `^{${getc1Exponent(c1ExpMs.level)}}` : ''}c_2|c|,&${theory.latexSymbol}
+    =\\max{\\rho}^{0.1}\\end{matrix}`;
     return result;
 }
 
