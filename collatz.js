@@ -80,7 +80,12 @@ const locStrings =
         alternating: ' (alternating)',
 
         btnClose: 'Close',
-        btnNumDispMode: ['Numbers: Ending digits', 'Numbers: Scientific'],
+        btnNumDispMode:
+        [
+            'Numbers: Decimal',
+            'Numbers: Scientific',
+            'Numbers: Binary'
+        ],
         btnLvlDispMode: ['Levels: Total', 'Levels: Offset'],
 
         menuHistory: 'Sequence History',
@@ -407,7 +412,7 @@ var tick = (elapsedTime, multiplier) =>
         ++time;
         if(time >= cooldown[cooldownMs.level])
         {
-            cIterProgBar.progressTo(0, 110, Easing.LINEAR);
+            cIterProgBar.progressTo(0, 99, Easing.LINEAR);
             if(c % 2n != 0)
                 c = 3n * c + 1n;
             else
@@ -603,7 +608,7 @@ var getEquationOverlay = () =>
                 cornerRadius: 1,
                 horizontalOptions: LayoutOptions.END,
                 verticalOptions: LayoutOptions.START,
-                margin: new Thickness(10, 6),
+                margin: new Thickness(10, 9),
                 hasShadow: true,
                 heightRequest: 24,
                 content: historyButton,
@@ -624,7 +629,7 @@ var getEquationOverlay = () =>
                 column: 2,
                 horizontalOptions: LayoutOptions.END,
                 verticalOptions: LayoutOptions.START,
-                margin: new Thickness(1, 34),
+                margin: new Thickness(1, 36),
                 text: getLoc('historyDesc'),
                 fontSize: 10,
                 textColor: () => Color.fromHex(cColour.get(game.settings.theme))
