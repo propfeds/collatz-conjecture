@@ -87,6 +87,7 @@ const locStrings =
             'Numbers: Binary'
         ],
         btnLvlDispMode: ['Levels: Total', 'Levels: Offset'],
+        errorInvalidNumMode: 'Invalid number mode',
 
         menuHistory: 'Sequence History',
         labelCurrentRun: 'Current publication:',
@@ -126,10 +127,49 @@ let getShortString = (n) =>
 
 let getShorterString = (n) =>
 {
-    let s = n.toString();
+    let s = n;
+    if(typeof s !== 'string')
+        s = s.toString();
     if(s.length > 7)
         s = `${s.slice(0, 3)}...${s.slice(-3)}`;
     return s;
+}
+
+let getShortBinaryString = (n) =>
+{
+    let s = n;
+    if(typeof s === 'string')
+        s = BigInt(s);
+    s = s.toString(2);
+    if(s.length > 9)
+        s = `${s.slice(0, 3)}...${s.slice(-5)}`;
+    return s;
+}
+
+let getShorterBinaryString = (n) =>
+{
+    let s = n;
+    if(typeof s === 'string')
+        s = BigInt(s);
+    s = s.toString(2);
+    if(s.length > 7)
+        s = `${s.slice(0, 1)}...${s.slice(-5)}`;
+    return s;
+}
+
+let getStringFromNumMode = (n, numMode = 0) =>
+{ 
+    switch(numMode)
+    {
+        case 0:
+            return getShorterString(n);
+        case 1:
+            return BigNumber.from(n).toString(0);
+        case 2:
+            return getShorterBinaryString(n);
+        default:
+            return getLoc('errorInvalidNumMode');
+    }
 }
 
 let getSequence = (sequence, numMode = 0, lvlMode = 0) =>
@@ -144,8 +184,8 @@ let getSequence = (sequence, numMode = 0, lvlMode = 0) =>
         else
             start = Number(key) - 1;
         result += `${lvlMode ? Number(key) - start : key}:&
-        ${numMode ? BigNumber.from(sequence[key]).toString(0) :
-        getShorterString(sequence[key])}&\\leftarrow${key & 1 ? '+1' : '-1'}`;
+        ${getStringFromNumMode(sequence[key], numMode)}&\\leftarrow
+        ${key & 1 ? '+1' : '-1'}`;
         ++i;
     }
     result += '&\\end{array}';
@@ -441,7 +481,7 @@ let createHistoryMenu = () =>
 {
     let toggleNumMode = () =>
     {
-        historyNumMode = 1 - historyNumMode;
+        historyNumMode = (historyNumMode + 1) % 3;
         currentPubHistory.text = getSequence(history, historyNumMode,
         historyLvlMode);
         lastPubHistory.text = getSequence(lastHistory, historyNumMode,
