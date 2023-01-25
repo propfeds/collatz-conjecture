@@ -234,7 +234,7 @@ const permaCosts = bigNumArray(['1e12', '1e22', '1e31', '1e66']);
 const milestoneCost = new LinearCost(4.4, 4.4);
 
 const cLevelCap = [24, 36, 52, 72];
-const cooldown = [44, 30, 18, 10];
+const cooldown = [42, 30, 20, 12];
 
 let time = 0;
 let c = 0n;
