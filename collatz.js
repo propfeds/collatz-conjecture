@@ -545,6 +545,7 @@ let createHistoryMenu = () =>
 
     let menu = ui.createPopup
     ({
+        isPeekable: true,
         title: getLoc('menuHistory'),
         content: ui.createStackLayout
         ({
@@ -686,8 +687,8 @@ var getPrimaryEquation = () =>
     getShortString(c);
     let result = `\\begin{matrix}c=\\begin{cases}c/2&\\text{if }c\\equiv0
     \\text{ (mod 2)}\\\\3c+1&\\text{if }c\\equiv1\\text{ (mod 2)}\\end{cases}
-    \\\\\\\\\\color{#${cColour.get(game.settings.theme)}}{=${cStr}_
-    ${historyNumMode}}\\end{matrix}`;
+    \\\\\\\\\\color{#${cColour.get(game.settings.theme)}}{=${cStr}}
+    \\end{matrix}`;
 
     return result;
 }
