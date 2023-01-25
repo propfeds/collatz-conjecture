@@ -59,7 +59,8 @@ const locStrings =
 {
     en:
     {
-        versionName: 'v0.04, Work \\\\\nin Progress',
+        versionName: 'v0.04',
+        workInProgress: ', Work \\\\\nin Progress',
         
         historyDesc: 'History',
         historyInfo: 'Shows the last and current runs\' sequences',
