@@ -681,7 +681,8 @@ var getEquationOverlay = () =>
 
 var getPrimaryEquation = () =>
 {
-    let cStr = getShortString(c);
+    let cStr = historyNumMode == 2 ? getShortBinaryString(c) :
+    getShortString(c);
     let result = `\\begin{matrix}c=\\begin{cases}c/2&\\text{if }c\\equiv0\\text{ (mod 2)}\\\\3c+1&\\text{if }c\\equiv1\\text{ (mod 2)}\\end{cases}\\\\\\\\\\color{#${cColour.get(game.settings.theme)}}{=${cStr}}\\end{matrix}`;
 
     return result;
