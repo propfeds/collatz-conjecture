@@ -42,7 +42,7 @@ what would you do?'`,
     return descs[language] || descs.en;
 }
 var authors = 'propfeds#5988\n\nThanks to:\nCipher#9599, for the idea';
-var version = 0.04;
+var version = 0.05;
 
 const menuLang = Localization.language;
 const cColour = new Map();
@@ -59,7 +59,7 @@ const locStrings =
 {
     en:
     {
-        versionName: 'v0.04',
+        versionName: 'v0.05',
         workInProgress: ', Work \\\\\nin Progress',
         
         historyDesc: 'History',
@@ -149,16 +149,16 @@ let getShorterBinaryString = (n) =>
     return s;
 }
 
-let getStringFromNumMode = (n, numMode = 0) =>
+let getStringForm = (n, numMode = 0) =>
 { 
     switch(numMode)
     {
         case 0:
-            return getShorterString(n);
+            return getShortString(n);
         case 1:
             return BigNumber.from(n).toString(0);
         case 2:
-            return getShorterBinaryString(n);
+            return getShortBinaryString(n);
         default:
             return getLoc('errorInvalidNumMode');
     }
@@ -176,11 +176,10 @@ let getSequence = (sequence, numMode = 0, lvlMode = 0) =>
         else
             start = Number(key) - 1;
         result += `${lvlMode ? Number(key) - start : key}:&
-        ${getStringFromNumMode(sequence[key], numMode)}&\\leftarrow
-        ${key & 1 ? '+1' : '-1'}`;
+        ${getStringForm(sequence[key], numMode)}&(${key & 1 ? '+1' : '-1'})`;
         ++i;
     }
-    result += '&\\end{array}';
+    result += '\\end{array}';
 
     return Utils.getMath(result);
 }
@@ -624,7 +623,7 @@ var getEquationOverlay = () =>
                 column: 0,
                 verticalOptions: LayoutOptions.START,
                 margin: new Thickness(5, 3),
-                text: getLoc('versionName'),
+                text: getLoc('versionName') + getLoc('workInProgress'),
                 fontSize: 9,
                 textColor: Color.TEXT_MEDIUM
             }),

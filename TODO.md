@@ -2,24 +2,29 @@
 
 ## In testing
 
-- Current dev build
+- v0.04
 - Old build with c preservation
 
 ## In consideration
 
-- [x] History numbering mode: either full level or level offset
-  - [ ] Binary display?
-- [x] Turn freeze and history into icons
 - [ ] Make pub exponent go down gradually like `y=(10/log(x+1)+6.22)`?
   - This is to make early game more lenient
   - Disproven: early game is very normal at 5.62
-- [x] Buff c1
+- [ ] Counter: make pub exponent go up gradually to 5.22
+  - This is to make early game players not delusional about pub multipliers
 - From pietro:
   - [ ] Save some levels for the next pub if not used up in current one
     - Solves the problem of players being confused by c level
     - But also trivialises the game by allowing you to farm massive amounts of
     levels
-- [ ] Solve the problem of being stuck
+
+## 0.04
+
+- [x] History numbering mode: either full level or level offset
+  - [x] Binary display?
+- [x] Turn ~~freeze and~~ history into icons
+- [x] Buff c1
+- [x] Solve the problem of being stuck
   - From Gen:
     > possible solutions:
     > 1. add Refunds (interferes with autobuy, doesn't work)
