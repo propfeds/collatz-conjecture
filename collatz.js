@@ -656,7 +656,7 @@ var getSecondaryEquation = () =>
 var getTertiaryEquation = () =>
 {
     let result;
-    if(c > 1e9 || c < -1e8)
+    if(c > 1e6 || c < -1e6)
         result = `c=${cBigNum}`;
     else
         result = '';
