@@ -93,7 +93,8 @@ const locStrings =
         labelCurrentRun: 'Current publication:',
         labelLastRun: 'Last publication:',
 
-        reset: 'You are about to reset the current publication.\nNote: resetting is only available before publishing opens.',
+        reset: `You are about to reset the current publication.
+Note: resetting is only available before publishing opens.`
     }
 };
 
@@ -358,7 +359,8 @@ var init = () =>
     // {
     //     preservePerma = theory.createPermanentUpgrade(4, currency,
     //     new ConstantCost(permaCosts[4]));
-    //     preservePerma.description = Utils.getMath(getLoc('permaPreserveDesc'));
+    //     preservePerma.description = Utils.getMath(getLoc(
+    //     'permaPreserveDesc'));
     //     preservePerma.info = Utils.getMath(getLoc('permaPreserveInfo'));
     //     preservePerma.maxLevel = 1;
     // }
@@ -456,7 +458,8 @@ var tick = (elapsedTime, multiplier) =>
         else// if(time == 1)
             cIterProgBar.progressTo((time / (cooldown[cooldownMs.level] - 1)) **
             1.5, 110, Easing.LINEAR);
-            // cIterProgBar.progressTo(1, (cooldown[cooldownMs.level] - 1 - time) * 100, Easing.CUBIC_IN);
+            // cIterProgBar.progressTo(1, (cooldown[cooldownMs.level] - 1 -
+            // time) * 100, Easing.CUBIC_IN);
     }
 
     let dt = BigNumber.from(elapsedTime * multiplier);
@@ -677,8 +680,8 @@ var getPrimaryEquation = () =>
     getShortString(c);
     let result = `\\begin{matrix}c\\leftarrow\\begin{cases}c/2&\\text{if }c
     \\equiv0\\text{ (mod 2)}\\\\3c+1&\\text{if }c\\equiv1\\text{ (mod 2)}
-    \\end{cases}\\\\\\\\\\color{#${cColour.get(game.settings.theme)}}{=${cStr}}
-    \\end{matrix}`;
+    \\end{cases}\\\\\\\\\\color{#${cColour.get(game.settings.theme)}}{=${cStr}
+    ${historyNumMode == 2 ? '_2' : ''}}\\end{matrix}`;
 
     return result;
 }
@@ -821,11 +824,11 @@ var setInternalState = (stateStr) =>
         totalIncLevel = state.totalIncLevel;
         tmpIML += totalIncLevel;
     }
-    if('incRemainder' in state)
-    {
-        // incRemainder = state.incRemainder;
-        // tmpIML += incRemainder;
-    }
+    // if('incRemainder' in state)
+    // {
+    //     incRemainder = state.incRemainder;
+    //     tmpIML += incRemainder;
+    // }
     incrementc.maxLevel = tmpIML;
 
     if('history' in state)
