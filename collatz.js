@@ -87,12 +87,14 @@ const locStrings =
             'Numbers: Binary'
         ],
         btnLvlDispMode: ['Levels: Total', 'Levels: Offset'],
+        errorInvalidNumMode: 'Invalid number mode',
 
         menuHistory: 'Sequence History',
         labelCurrentRun: 'Current publication:',
         labelLastRun: 'Last publication:',
 
-        reset: 'You are about to reset the current publication.\nNote: resetting is only available before publishing opens.',
+        reset: `You are about to reset the current publication.
+Note: resetting is only available before publishing opens.`
     }
 };
 
@@ -116,9 +118,7 @@ let bigNumArray = (array) => array.map(x => BigNumber.from(x));
 
 let getShortString = (n) =>
 {
-    let s = n;
-    if(typeof s !== 'string')
-        s = s.toString();
+    let s = n.toString();
     if(s.length > 9)
         s = `${s.slice(0, 5)}...${s.slice(-3)}`;
     return s;
@@ -130,6 +130,37 @@ let getShorterString = (n) =>
     if(s.length > 7)
         s = `${s.slice(0, 3)}...${s.slice(-3)}`;
     return s;
+}
+
+let getShortBinaryString = (n) =>
+{
+    let s = BigInt(n).toString(2);
+    if(s.length > 9)
+        s = `${s.slice(0, 3)}...${s.slice(-5)}`;
+    return s;
+}
+
+let getShorterBinaryString = (n) =>
+{
+    let s = BigInt(n).toString(2);
+    if(s.length > 7)
+        s = `${s.slice(0, 1)}...${s.slice(-5)}`;
+    return s;
+}
+
+let getStringFromNumMode = (n, numMode = 0) =>
+{ 
+    switch(numMode)
+    {
+        case 0:
+            return getShorterString(n);
+        case 1:
+            return BigNumber.from(n).toString(0);
+        case 2:
+            return getShorterBinaryString(n);
+        default:
+            return getLoc('errorInvalidNumMode');
+    }
 }
 
 let getSequence = (sequence, numMode = 0, lvlMode = 0) =>
@@ -144,8 +175,8 @@ let getSequence = (sequence, numMode = 0, lvlMode = 0) =>
         else
             start = Number(key) - 1;
         result += `${lvlMode ? Number(key) - start : key}:&
-        ${numMode ? BigNumber.from(sequence[key]).toString(0) :
-        getShorterString(sequence[key])}&\\leftarrow${key & 1 ? '+1' : '-1'}`;
+        ${getStringFromNumMode(sequence[key], numMode)}&\\leftarrow
+        ${key & 1 ? '+1' : '-1'}`;
         ++i;
     }
     result += '&\\end{array}';
@@ -328,7 +359,8 @@ var init = () =>
     // {
     //     preservePerma = theory.createPermanentUpgrade(4, currency,
     //     new ConstantCost(permaCosts[4]));
-    //     preservePerma.description = Utils.getMath(getLoc('permaPreserveDesc'));
+    //     preservePerma.description = Utils.getMath(getLoc(
+    //     'permaPreserveDesc'));
     //     preservePerma.info = Utils.getMath(getLoc('permaPreserveInfo'));
     //     preservePerma.maxLevel = 1;
     // }
@@ -426,7 +458,8 @@ var tick = (elapsedTime, multiplier) =>
         else// if(time == 1)
             cIterProgBar.progressTo((time / (cooldown[cooldownMs.level] - 1)) **
             1.5, 110, Easing.LINEAR);
-            // cIterProgBar.progressTo(1, (cooldown[cooldownMs.level] - 1 - time) * 100, Easing.CUBIC_IN);
+            // cIterProgBar.progressTo(1, (cooldown[cooldownMs.level] - 1 -
+            // time) * 100, Easing.CUBIC_IN);
     }
 
     let dt = BigNumber.from(elapsedTime * multiplier);
@@ -441,12 +474,13 @@ let createHistoryMenu = () =>
 {
     let toggleNumMode = () =>
     {
-        historyNumMode = 1 - historyNumMode;
+        historyNumMode = (historyNumMode + 1) % 3;
         currentPubHistory.text = getSequence(history, historyNumMode,
         historyLvlMode);
         lastPubHistory.text = getSequence(lastHistory, historyNumMode,
         historyLvlMode);
         toggleNumButton.text = getLoc('btnNumDispMode')[historyNumMode];
+        theory.invalidatePrimaryEquation();
     };
     let toggleNumButton = ui.createButton
     ({
@@ -504,6 +538,7 @@ let createHistoryMenu = () =>
 
     let menu = ui.createPopup
     ({
+        isPeekable: true,
         title: getLoc('menuHistory'),
         content: ui.createStackLayout
         ({
@@ -641,15 +676,21 @@ var getEquationOverlay = () =>
 
 var getPrimaryEquation = () =>
 {
-    let cStr = getShortString(c);
-    let result = `\\begin{matrix}c=\\begin{cases}c/2&\\text{if }c\\equiv0\\text{ (mod 2)}\\\\3c+1&\\text{if }c\\equiv1\\text{ (mod 2)}\\end{cases}\\\\\\\\\\color{#${cColour.get(game.settings.theme)}}{=${cStr}}\\end{matrix}`;
+    let cStr = historyNumMode == 2 ? getShortBinaryString(c) :
+    getShortString(c);
+    let result = `\\begin{matrix}c\\leftarrow\\begin{cases}c/2&\\text{if }c
+    \\equiv0\\text{ (mod 2)}\\\\3c+1&\\text{if }c\\equiv1\\text{ (mod 2)}
+    \\end{cases}\\\\\\\\\\color{#${cColour.get(game.settings.theme)}}{=${cStr}
+    ${historyNumMode == 2 ? '_2' : ''}}\\end{matrix}`;
 
     return result;
 }
 
 var getSecondaryEquation = () =>
 {
-    let result = `\\begin{matrix}\\dot{\\rho}=c_1${c1ExpMs.level > 0 ? `^{${getc1Exponent(c1ExpMs.level)}}` : ''}c_2|c|,&${theory.latexSymbol}=\\max{\\rho}^{0.1}\\end{matrix}`;
+    let result = `\\begin{matrix}\\dot{\\rho}=c_1${c1ExpMs.level > 0 ?
+    `^{${getc1Exponent(c1ExpMs.level)}}` : ''}c_2|c|,&${theory.latexSymbol}
+    =\\max{\\rho}^{0.1}\\end{matrix}`;
     return result;
 }
 
@@ -783,11 +824,11 @@ var setInternalState = (stateStr) =>
         totalIncLevel = state.totalIncLevel;
         tmpIML += totalIncLevel;
     }
-    if('incRemainder' in state)
-    {
-        // incRemainder = state.incRemainder;
-        // tmpIML += incRemainder;
-    }
+    // if('incRemainder' in state)
+    // {
+    //     incRemainder = state.incRemainder;
+    //     tmpIML += incRemainder;
+    // }
     incrementc.maxLevel = tmpIML;
 
     if('history' in state)
