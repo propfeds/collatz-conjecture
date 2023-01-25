@@ -487,6 +487,7 @@ let createHistoryMenu = () =>
         lastPubHistory.text = getSequence(lastHistory, historyNumMode,
         historyLvlMode);
         toggleNumButton.text = getLoc('btnNumDispMode')[historyNumMode];
+        theory.invalidatePrimaryEquation();
     };
     let toggleNumButton = ui.createButton
     ({
