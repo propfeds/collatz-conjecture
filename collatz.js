@@ -83,8 +83,8 @@ const locStrings =
         btnClose: 'Close',
         btnNumDispMode:
         [
-            'Numbers: Scientific',
             'Numbers: Decimal',
+            'Numbers: Scientific',
             'Numbers: Binary'
         ],
         btnLvlDispMode: ['Levels: Total', 'Levels: Offset'],
@@ -153,9 +153,9 @@ let getStringForm = (n, numMode = 0) =>
     switch(numMode)
     {
         case 0:
-            return BigNumber.from(n).toString(0);
-        case 1:
             return getShortString(n);
+        case 1:
+            return BigNumber.from(n).toString(0);
         case 2:
             return getShortBinaryString(n);
         default:
