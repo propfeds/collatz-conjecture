@@ -413,7 +413,7 @@ var tick = (elapsedTime, multiplier) =>
         ++time;
         if(time >= cooldown[cooldownMs.level])
         {
-            cIterProgBar.progressTo(0, 88, Easing.LINEAR);
+            cIterProgBar.progressTo(0, 33, Easing.CUBIC_IN);
             if(c % 2n != 0)
                 c = 3n * c + 1n;
             else
