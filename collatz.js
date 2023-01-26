@@ -448,6 +448,7 @@ let createHistoryMenu = () =>
         historyLvlMode);
         toggleNumButton.text = getLoc('btnNumDispMode')[historyNumMode];
         theory.invalidatePrimaryEquation();
+        theory.invalidateTertiaryEquation();
     };
     let toggleNumButton = ui.createButton
     ({
@@ -664,8 +665,8 @@ var getSecondaryEquation = () =>
 var getTertiaryEquation = () =>
 {
     let result;
-    if(c > 1e6 || c < -1e6)
-        result = `c=${cBigNum}`;
+    if(historyNumMode == 2 || c > 1e6 || c < -1e6)
+        result = `c=${cBigNum.toString(0)}`;
     else
         result = '';
     return result;
