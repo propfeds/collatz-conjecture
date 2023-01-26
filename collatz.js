@@ -94,8 +94,7 @@ const locStrings =
         labelCurrentRun: 'Current publication:',
         labelLastRun: 'Last publication:',
 
-        reset: `You are about to reset the current publication.
-Note: resetting is only available before publishing opens.`
+        reset: 'You are about to reset the current publication.'
     }
 };
 
@@ -184,24 +183,6 @@ let getSequence = (sequence, numMode = 0, lvlMode = 0) =>
     return Utils.getMath(result);
 }
 
-let BIObjtoString = (sequence) =>
-{
-    let result = {};
-    for(key in sequence)
-        result[key] = sequence[key].toString();
-    
-    return result;
-}
-
-let stringObjtoBI = (sequence) =>
-{
-    let result = {};
-    for(key in sequence)
-        result[key] = BigInt(sequence[key]);
-    
-    return result;
-}
-
 const getc1 = (level) =>
 {
     if(c1BorrowMs.level > 0)
@@ -239,10 +220,7 @@ const cooldown = [42, 30, 20, 12];
 let time = 0;
 let c = 0n;
 let cBigNum = BigNumber.from(c);
-let tmpTime = 0;
-let tmpc = 0n;
 let totalIncLevel = 0;
-let incRemainder = 0;
 let history = {};
 let lastHistory;
 let writeHistory = true;
@@ -353,17 +331,9 @@ var init = () =>
         pausePerma.maxLevel = 1;
     }
     /* Preserve c
-    Shame that we never got the chance to test out this one. Other than breaking
-    progression, it can also pose a threat to the theory's performance.
+    We had the chance to test out this one. It breaks progression, and poses a
+    threat to the theory's performance.
     */
-    // {
-    //     preservePerma = theory.createPermanentUpgrade(4, currency,
-    //     new ConstantCost(permaCosts[4]));
-    //     preservePerma.description = Utils.getMath(getLoc(
-    //     'permaPreserveDesc'));
-    //     preservePerma.info = Utils.getMath(getLoc('permaPreserveInfo'));
-    //     preservePerma.maxLevel = 1;
-    // }
 
     theory.setMilestoneCost(milestoneCost);
     /* Interval speed-up
@@ -398,8 +368,7 @@ var init = () =>
         }
         cooldownMs.boughtOrRefunded = (_) =>
         {
-            incrementc.maxLevel = totalIncLevel + incRemainder +
-            cLevelCap[cooldownMs.level];
+            incrementc.maxLevel = totalIncLevel + cLevelCap[cooldownMs.level];
         };
         cooldownMs.canBeRefunded = (amount) => incrementc.level <=
         totalIncLevel + cLevelCap[cooldownMs.level - amount];
@@ -444,7 +413,7 @@ var tick = (elapsedTime, multiplier) =>
         ++time;
         if(time >= cooldown[cooldownMs.level])
         {
-            cIterProgBar.progressTo(0, 99, Easing.LINEAR);
+            cIterProgBar.progressTo(0, 88, Easing.LINEAR);
             if(c % 2n != 0)
                 c = 3n * c + 1n;
             else
@@ -455,11 +424,9 @@ var tick = (elapsedTime, multiplier) =>
             theory.invalidateTertiaryEquation();
             time -= cooldown[cooldownMs.level];
         }
-        else// if(time == 1)
+        else
             cIterProgBar.progressTo((time / (cooldown[cooldownMs.level] - 1)) **
             1.5, 110, Easing.LINEAR);
-            // cIterProgBar.progressTo(1, (cooldown[cooldownMs.level] - 1 -
-            // time) * 100, Easing.CUBIC_IN);
     }
 
     let dt = BigNumber.from(elapsedTime * multiplier);
@@ -643,7 +610,7 @@ var getEquationOverlay = () =>
                 cornerRadius: 1,
                 horizontalOptions: LayoutOptions.END,
                 verticalOptions: LayoutOptions.START,
-                margin: new Thickness(10, 9),
+                margin: new Thickness(10),
                 hasShadow: true,
                 heightRequest: 24,
                 content: historyButton,
@@ -664,7 +631,7 @@ var getEquationOverlay = () =>
                 column: 2,
                 horizontalOptions: LayoutOptions.END,
                 verticalOptions: LayoutOptions.START,
-                margin: new Thickness(1, 36),
+                margin: new Thickness(1, 38),
                 text: getLoc('historyDesc'),
                 fontSize: 10,
                 textColor: () => Color.fromHex(cColour.get(game.settings.theme))
@@ -719,64 +686,38 @@ var get2DGraphValue = () =>
 // Will not trigger if you press reset.
 var prePublish = () =>
 {
-    // if(preservePerma.level > 0)
-    // {
-    //     tmpTime = time;
-    //     tmpc = c;
-    // }
     totalIncLevel = incrementc.level;
-    // incRemainder = incrementc.maxLevel - incrementc.level;
     lastHistory = history;
 }
 
 var postPublish = () =>
 {
-    if(true/*preservePerma.level == 0*/)
-    {
-        time = 0;
-        cIterProgBar.progressTo(0, 220, Easing.CUBIC_INOUT);
-        c = 0n;
-        cBigNum = BigNumber.from(c);
-    }
+    time = 0;
     // This is to circumvent the extra levelling
     writeHistory = false;
-    tmpc = c;
     incrementc.level = totalIncLevel;
-    c = tmpc;
     writeHistory = true;
+
+    c = 0n;
     cBigNum = BigNumber.from(c);
-    incrementc.maxLevel = totalIncLevel + incRemainder +
-    cLevelCap[cooldownMs.level];
+    cIterProgBar.progressTo(0, 220, Easing.CUBIC_INOUT);
+    incrementc.maxLevel = totalIncLevel + cLevelCap[cooldownMs.level];
 
     theory.invalidatePrimaryEquation();
     theory.invalidateTertiaryEquation();
     history = {};
 }
 
-var canResetStage = () => !theory.canPublish ||
-theory.permanentUpgrades[0].level == 0;
+var canResetStage = () => true;
 
 var getResetStageMessage = () => getLoc('reset');
 
 var resetStage = () =>
 {
-    /*
-    You could exploit the c levelling mechanism by resetting to 0 before a pub
-    and get 24 levels for free. Now you can't.
-    */
-    if(theory.canPublish && theory.permanentUpgrades[0].level > 0)
-        return;
-
     for (let i = 0; i < theory.upgrades.length; ++i)
         theory.upgrades[i].level = 0;
 
     currency.value = 0;
-    // if(preservePerma.level > 0)
-    // {
-    //     time = tmpTime;
-    //     c = tmpc;
-    //     cBigNum = BigNumber.from(c);
-    // }
     theory.clearGraph();
     postPublish();
 }
@@ -786,10 +727,7 @@ var getInternalState = () => JSON.stringify
     version: version,
     time: time,
     c: c.toString(),
-    tmpTime: tmpTime,
-    tmpc: tmpc.toString(),
     totalIncLevel: totalIncLevel,
-    // incRemainder: incRemainder,
     history: history,
     lastHistory: lastHistory,
     historyNumMode: historyNumMode,
@@ -813,10 +751,6 @@ var setInternalState = (stateStr) =>
         c = BigInt(state.c);
         cBigNum = BigNumber.from(c);
     }
-    if('tmpTime' in state)
-        tmpTime = state.tmpTime;
-    if('tmpc' in state)
-        tmpc = BigInt(state.tmpc);
 
     let tmpIML = cLevelCap[cooldownMs.level];
     if('totalIncLevel' in state)
@@ -824,11 +758,6 @@ var setInternalState = (stateStr) =>
         totalIncLevel = state.totalIncLevel;
         tmpIML += totalIncLevel;
     }
-    // if('incRemainder' in state)
-    // {
-    //     incRemainder = state.incRemainder;
-    //     tmpIML += incRemainder;
-    // }
     incrementc.maxLevel = tmpIML;
 
     if('history' in state)
