@@ -50,10 +50,10 @@ const locStrings =
     en:
     {
         versionName: 'v0.05',
-        workInProgress: ', Work \\\\\nin Progress',
+        workInProgress: ', Work in\\\\Progress',
         
-        historyDesc: `\\begin{{matrix}}\\text{{History}}\\\\{{{0}}}/{{{1}}}
-\\end{{matrix}}`,
+        historyDesc: `\\begin{{array}}{{c}}\\text{{History}}\\\\{{{0}}}/{{{1}}}
+\\end{{array}}`,
         historyInfo: 'Shows the last and current runs\' sequences',
         pausecDesc: ['\\text{Freeze }c', '\\text{Unfreeze }c'],
         pausecInfo: '\\text{Freezes }c\\text{\'s value}',
@@ -313,7 +313,7 @@ const historyLabel = ui.createLatexLabel
     column: 2,
     horizontalOptions: LayoutOptions.END,
     verticalOptions: LayoutOptions.START,
-    margin: new Thickness(1, 38),
+    margin: new Thickness(1, 40),
     text: getLoc('historyDesc'),
     fontSize: 10,
     textColor: () => Color.fromHex(cColour.get(game.settings.theme))
