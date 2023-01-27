@@ -44,6 +44,11 @@ what would you do?'`,
 var authors = 'propfeds#5988\n\nThanks to:\nCipher#9599, for the idea';
 var version = 0.05;
 
+const cDispColour = new Map();
+cDispColour.set(Theme.STANDARD, 'c0c0c0');
+cDispColour.set(Theme.DARK, 'b5b5b5');
+cDispColour.set(Theme.LIGHT, '434343');
+
 const menuLang = Localization.language;
 const locStrings =
 {
@@ -270,10 +275,6 @@ var cooldownMs, c1BorrowMs, c1ExpMs;
 
 var currency;
 
-const cColour = new Map();
-cColour.set(Theme.STANDARD, 'c0c0c0');
-cColour.set(Theme.DARK, 'b5b5b5');
-cColour.set(Theme.LIGHT, '434343');
 const cIterProgBar = ui.createProgressBar
 ({
     margin: new Thickness(6, 0)
@@ -318,7 +319,7 @@ const historyLabel = ui.createLatexLabel
     text: () => Utils.getMath(Localization.format(getLoc('historyDesc'),
     (incrementc ? incrementc.level : 0) - totalIncLevel, lastHistoryLength)),
     fontSize: 9,
-    textColor: () => Color.fromHex(cColour.get(game.settings.theme))
+    textColor: () => Color.fromHex(cDispColour.get(game.settings.theme))
 });
 
 var init = () =>
@@ -526,6 +527,73 @@ var tick = (elapsedTime, multiplier) =>
     currency.value += dt * cBigNum.abs() * vc1 * vc2 * bonus;
 }
 
+var getEquationOverlay = () =>
+{
+    let result = ui.createGrid
+    ({
+        rowDefinitions: ['auto', '80*', 'auto'],
+        columnDefinitions: ['1*', '2*', '1*'],
+        children:
+        [
+            ui.createLatexLabel
+            ({
+                row: 0,
+                column: 0,
+                verticalOptions: LayoutOptions.START,
+                margin: new Thickness(5, 3),
+                text: getLoc('versionName'),
+                fontSize: 9,
+                textColor: Color.TEXT_MEDIUM
+            }),
+            ui.createFrame
+            ({
+                row: 0,
+                column: 1,
+                hasShadow: true,
+                verticalOptions: LayoutOptions.START,
+                cornerRadius: 1,
+                content: cIterProgBar
+            }),
+            historyFrame,
+            historyLabel
+        ]
+    });
+    return result;
+}
+
+var getPrimaryEquation = () =>
+{
+    let cStr = historyNumMode & 2 ? getShortBinaryString(c) :
+    getShortString(c);
+    let result = `\\begin{matrix}c\\leftarrow\\begin{cases}c/2&\\text{if }c
+    \\equiv0\\text{ (mod 2)}\\\\3c+1&\\text{if }c\\equiv1\\text{ (mod 2)}
+    \\end{cases}\\\\\\\\\\color{#${cDispColour.get(game.settings.theme)}}
+    {=${cStr}${historyNumMode & 2 ? '_2' : ''}}\\end{matrix}`;
+
+    return result;
+}
+
+var getSecondaryEquation = () =>
+{
+    let result = `\\begin{matrix}\\dot{\\rho}=c_1${c1ExpMs.level > 0 ?
+    `^{${getc1Exponent(c1ExpMs.level)}}` : ''}c_2|c|,&${theory.latexSymbol}
+    =\\max{\\rho}^{0.1}\\end{matrix}`;
+    return result;
+}
+
+var getTertiaryEquation = () =>
+{
+    let result;
+    if(historyNumMode & 2 || c > 1e6 || c < -1e6)
+        result = `c=${cBigNum.toString(0)}`;
+    else
+        result = '';
+    return result;
+}
+
+var getPublicationMultiplierFormula = (symbol) =>
+`\\frac{{${symbol}}^{${pubExp}}}{${pubMult}}`;
+
 let createHistoryMenu = () =>
 {
     let toggleBaseMode = () =>
@@ -658,73 +726,6 @@ let createHistoryMenu = () =>
     });
     return menu;
 }
-
-var getEquationOverlay = () =>
-{
-    let result = ui.createGrid
-    ({
-        rowDefinitions: ['auto', '80*', 'auto'],
-        columnDefinitions: ['1*', '2*', '1*'],
-        children:
-        [
-            ui.createLatexLabel
-            ({
-                row: 0,
-                column: 0,
-                verticalOptions: LayoutOptions.START,
-                margin: new Thickness(5, 3),
-                text: getLoc('versionName') + getLoc('workInProgress'),
-                fontSize: 9,
-                textColor: Color.TEXT_MEDIUM
-            }),
-            ui.createFrame
-            ({
-                row: 0,
-                column: 1,
-                hasShadow: true,
-                verticalOptions: LayoutOptions.START,
-                cornerRadius: 1,
-                content: cIterProgBar
-            }),
-            historyFrame,
-            historyLabel
-        ]
-    });
-    return result;
-}
-
-var getPrimaryEquation = () =>
-{
-    let cStr = historyNumMode & 2 ? getShortBinaryString(c) :
-    getShortString(c);
-    let result = `\\begin{matrix}c\\leftarrow\\begin{cases}c/2&\\text{if }c
-    \\equiv0\\text{ (mod 2)}\\\\3c+1&\\text{if }c\\equiv1\\text{ (mod 2)}
-    \\end{cases}\\\\\\\\\\color{#${cColour.get(game.settings.theme)}}{=${cStr}
-    ${historyNumMode & 2 ? '_2' : ''}}\\end{matrix}`;
-
-    return result;
-}
-
-var getSecondaryEquation = () =>
-{
-    let result = `\\begin{matrix}\\dot{\\rho}=c_1${c1ExpMs.level > 0 ?
-    `^{${getc1Exponent(c1ExpMs.level)}}` : ''}c_2|c|,&${theory.latexSymbol}
-    =\\max{\\rho}^{0.1}\\end{matrix}`;
-    return result;
-}
-
-var getTertiaryEquation = () =>
-{
-    let result;
-    if(historyNumMode & 2 || c > 1e6 || c < -1e6)
-        result = `c=${cBigNum.toString(0)}`;
-    else
-        result = '';
-    return result;
-}
-
-var getPublicationMultiplierFormula = (symbol) =>
-`\\frac{{${symbol}}^{${pubExp}}}{${pubMult}}`;
 
 // Check out the Giant's Causeway in Ireland!
 var get2DGraphValue = () =>

@@ -22,10 +22,5 @@ paste the URL in.
 
 ## Screenshots
 
-![ss0](screenshots/07.jpg 'Collatz conjecture')
+![ss0](screenshots/09.jpg 'Collatz Conjecture')
 
-![ss1](screenshots/08.jpg 'Binary')
-
-![ss2](screenshots/06.jpg 'History')
-
-![ss3](screenshots/01.jpg 'Negativity')

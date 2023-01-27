@@ -6,22 +6,25 @@
 
 ## In consideration
 
-- [ ] Show this run's level count in 3rd eq: `l_c=0/24`
-  - [ ] Alternatively, show on bottom right or under history: `0/24`
+- Make pub exponent go down gradually like `y=(10/log(x+1)+6.22)`?
+  - This is to make early game more lenient
+  - Disproven: early game is very normal at 5.22
+- [ ] Counter: make pub exponent go up gradually to 5.22
+  - This is to make early game players not delusional about pub multipliers
+- From pietro:
+  - Save some levels for the next pub if not used up in current one
+    - Solves the problem of players being confused by c level
+    - But also trivialises the game by allowing you to farm massive amounts of
+    levels
+
+## 0.05
+
+- Show this run's level count in 3rd eq: `l_c=0/24`
+  - [x] Alternatively, show on ~~bottom right~~ or under history: `0/24`
   - History unlocks after first perma
 - [x] Add 4th number mode that makes binary numbers in sci notation (lol)
   - Two toggles that flip bit flags: base and notation
   - Something funny like `1.01e369` (max 8 chars)
-- [ ] Make pub exponent go down gradually like `y=(10/log(x+1)+6.22)`?
-  - This is to make early game more lenient
-  - Disproven: early game is very normal at 5.62
-- [ ] Counter: make pub exponent go up gradually to 5.22
-  - This is to make early game players not delusional about pub multipliers
-- From pietro:
-  - [ ] Save some levels for the next pub if not used up in current one
-    - Solves the problem of players being confused by c level
-    - But also trivialises the game by allowing you to farm massive amounts of
-    levels
 
 ## 0.04
 
