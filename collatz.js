@@ -213,7 +213,7 @@ let getSequence = (sequence, numMode = 0, lvlMode = 0) =>
         ${getStringForm(sequence[key], numMode)}&(${key & 1 ? '+1' : '-1'})`;
         ++i;
     }
-    result += '\\end{array}';
+    result += '&\\end{array}';
 
     return Utils.getMath(result);
 }
@@ -258,6 +258,7 @@ let cBigNum = BigNumber.from(c);
 let totalIncLevel = 0;
 let history = {};
 let lastHistory;
+let lastHistoryLength = 0;
 let writeHistory = true;
 let historyNumMode = 0;
 let historyLvlMode = 1;
@@ -313,9 +314,10 @@ const historyLabel = ui.createLatexLabel
     column: 2,
     horizontalOptions: LayoutOptions.END,
     verticalOptions: LayoutOptions.START,
-    margin: new Thickness(1, 40),
-    text: getLoc('historyDesc'),
-    fontSize: 10,
+    margin: new Thickness(3, 40),
+    text: () => Utils.getMath(Localization.format(getLoc('historyDesc'),
+    (incrementc ? incrementc.level : 0) - totalIncLevel, lastHistoryLength)),
+    fontSize: 9,
     textColor: () => Color.fromHex(cColour.get(game.settings.theme))
 });
 
@@ -484,9 +486,6 @@ var init = () =>
     theory.primaryEquationHeight = 66;
     theory.primaryEquationScale = 0.9;
 
-    historyLabel.text = () => Utils.getMath(Localization.format(getLoc(
-    'historyDesc'), incrementc.level - totalIncLevel,
-    cLevelCap[cooldownMs.level]));
 }
 
 var updateAvailability = () =>
@@ -741,6 +740,7 @@ var prePublish = () =>
 {
     totalIncLevel = incrementc.level;
     lastHistory = history;
+    lastHistoryLength = Object.keys(lastHistory).length;
 }
 
 var postPublish = () =>
@@ -815,7 +815,10 @@ var setInternalState = (stateStr) =>
     if('history' in state)
         history = state.history;
     if('lastHistory' in state)
-        lastHistory = state.lastHistory;
+    {
+        lastHistory = state.lastHistory;    
+        lastHistoryLength = Object.keys(lastHistory).length;
+    }
     if('historyNumMode' in state)
         historyNumMode = state.historyNumMode;
 
