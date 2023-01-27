@@ -45,16 +45,6 @@ var authors = 'propfeds#5988\n\nThanks to:\nCipher#9599, for the idea';
 var version = 0.05;
 
 const menuLang = Localization.language;
-const cColour = new Map();
-cColour.set(Theme.STANDARD, 'c0c0c0');
-cColour.set(Theme.DARK, 'b5b5b5');
-cColour.set(Theme.LIGHT, '434343');
-
-const cIterProgBar = ui.createProgressBar
-({
-    margin: new Thickness(6, 0)
-});
-
 const locStrings =
 {
     en:
@@ -62,7 +52,8 @@ const locStrings =
         versionName: 'v0.05',
         workInProgress: ', Work \\\\\nin Progress',
         
-        historyDesc: 'History',
+        historyDesc: `\\begin{{matrix}}\\text{{History}}\\\\{{{0}}}/{{{1}}}
+\\end{{matrix}}`,
         historyInfo: 'Shows the last and current runs\' sequences',
         pausecDesc: ['\\text{Freeze }c', '\\text{Unfreeze }c'],
         pausecInfo: '\\text{Freezes }c\\text{\'s value}',
@@ -84,6 +75,7 @@ const locStrings =
         btnNotationMode: ['Notation: Digits', 'Notation: Scientific'],
         btnBaseMode: ['Base: 10', 'Base: 2'],
         errorInvalidNumMode: 'Invalid number mode',
+        errorBinExpLimit: 'Too big',
 
         menuHistory: 'Sequence History',
         labelCurrentRun: 'Current publication:',
@@ -140,6 +132,8 @@ let getSciBinString = (n) =>
     let exponent = s.length - offset;
     if(s[0] == '-')
     {
+        if(exponent >= 1000000)
+            return getLoc('errorBinExpLimit');
         if(exponent >= 100000)  // -e100000
             return `${s[0]}e${exponent}`;
         if(exponent >= 10000)   // -1e10000
@@ -153,6 +147,8 @@ let getSciBinString = (n) =>
                                 // -1.000e9
         return `${s.slice(0, 2)}.${s.slice(2, 5)}e${exponent}`;
     }
+    if(exponent >= 10000000)
+        return getLoc('errorBinExpLimit');
     if(exponent >= 1000000) // e1000000
         return `e${exponent}`;
     if(exponent >= 100000)  // 1e100000
@@ -273,6 +269,56 @@ var cooldownMs, c1BorrowMs, c1ExpMs;
 
 var currency;
 
+const cColour = new Map();
+cColour.set(Theme.STANDARD, 'c0c0c0');
+cColour.set(Theme.DARK, 'b5b5b5');
+cColour.set(Theme.LIGHT, '434343');
+const cIterProgBar = ui.createProgressBar
+({
+    margin: new Thickness(6, 0)
+});
+const historyFrame = ui.createFrame
+({
+    isVisible: false,
+    row: 0,
+    column: 2,
+    cornerRadius: 1,
+    horizontalOptions: LayoutOptions.END,
+    verticalOptions: LayoutOptions.START,
+    margin: new Thickness(10),
+    hasShadow: true,
+    heightRequest: 24,
+    content: ui.createImage
+    ({
+        // margin: new Thickness(2),
+        source: ImageSource.BOOK,
+        aspect: Aspect.ASPECT_FIT,
+        useTint: false
+    }),
+    onTouched: (e) =>
+    {
+        if(e.type == TouchType.SHORTPRESS_RELEASED ||
+        e.type == TouchType.LONGPRESS_RELEASED)
+        {
+            Sound.playClick();
+            let menu = createHistoryMenu();
+            menu.show();
+        }
+    }
+});
+const historyLabel = ui.createLatexLabel
+({
+    isVisible: false,
+    row: 0,
+    column: 2,
+    horizontalOptions: LayoutOptions.END,
+    verticalOptions: LayoutOptions.START,
+    margin: new Thickness(1, 38),
+    text: getLoc('historyDesc'),
+    fontSize: 10,
+    textColor: () => Color.fromHex(cColour.get(game.settings.theme))
+});
+
 var init = () =>
 {
     currency = theory.createCurrency();
@@ -326,16 +372,15 @@ var init = () =>
     more powerful.
     */
     {
-        let getDesc = (level) =>
+        let getDesc = (level) => `c_1=${getc1(level).toString(0)}`;
+        let getInfo = (level) =>
         {
             if(c1ExpMs.level > 0)
-                return `c_1=${getc1(level).toString(0)}^{${getc1Exponent(
-                c1ExpMs.level)}}`;
+                return `c_1^{${getc1Exponent(c1ExpMs.level)}}=
+                ${getc1(level).pow(getc1Exponent(c1ExpMs.level)).toString()}`;
             
-            return `c_1=${getc1(level).toString(0)}`;
+            return getDesc(level);
         }
-        let getInfo = (level) => `c_1=${getc1(level).pow(
-        getc1Exponent(c1ExpMs.level)).toString()}`;
         c1 = theory.createUpgrade(1, currency, c1Cost);
         c1.getDescription = (_) => Utils.getMath(getDesc(c1.level));
         c1.getInfo = (amount) => Utils.getMathTo(getInfo(c1.level),
@@ -438,11 +483,17 @@ var init = () =>
 
     theory.primaryEquationHeight = 66;
     theory.primaryEquationScale = 0.9;
+
+    historyLabel.text = () => Utils.getMath(Localization.format(getLoc(
+    'historyDesc'), incrementc.level - totalIncLevel,
+    cLevelCap[cooldownMs.level]));
 }
 
 var updateAvailability = () =>
 {
     pausec.isAvailable = pausePerma.level > 0;
+    historyFrame.isVisible = theory.permanentUpgrades[0].level > 0;
+    historyLabel.isVisible = theory.permanentUpgrades[0].level > 0;
 }
 
 var tick = (elapsedTime, multiplier) =>
@@ -611,14 +662,6 @@ let createHistoryMenu = () =>
 
 var getEquationOverlay = () =>
 {
-    let historyButton = ui.createImage
-    ({
-        // margin: new Thickness(2),
-        source: ImageSource.BOOK,
-        aspect: Aspect.ASPECT_FIT,
-        useTint: false
-    });
-
     let result = ui.createGrid
     ({
         rowDefinitions: ['auto', '80*', 'auto'],
@@ -644,39 +687,8 @@ var getEquationOverlay = () =>
                 cornerRadius: 1,
                 content: cIterProgBar
             }),
-            ui.createFrame
-            ({
-                row: 0,
-                column: 2,
-                cornerRadius: 1,
-                horizontalOptions: LayoutOptions.END,
-                verticalOptions: LayoutOptions.START,
-                margin: new Thickness(10),
-                hasShadow: true,
-                heightRequest: 24,
-                content: historyButton,
-                onTouched: (e) =>
-                {
-                    if(e.type == TouchType.SHORTPRESS_RELEASED ||
-                    e.type == TouchType.LONGPRESS_RELEASED)
-                    {
-                        Sound.playClick();
-                        let menu = createHistoryMenu();
-                        menu.show();
-                    }
-                }
-            }),
-            ui.createLatexLabel
-            ({
-                row: 0,
-                column: 2,
-                horizontalOptions: LayoutOptions.END,
-                verticalOptions: LayoutOptions.START,
-                margin: new Thickness(1, 38),
-                text: getLoc('historyDesc'),
-                fontSize: 10,
-                textColor: () => Color.fromHex(cColour.get(game.settings.theme))
-            }),
+            historyFrame,
+            historyLabel
         ]
     });
     return result;
@@ -705,7 +717,7 @@ var getSecondaryEquation = () =>
 var getTertiaryEquation = () =>
 {
     let result;
-    if(historyNumMode == 2 || c > 1e6 || c < -1e6)
+    if(historyNumMode & 2 || c > 1e6 || c < -1e6)
         result = `c=${cBigNum.toString(0)}`;
     else
         result = '';
