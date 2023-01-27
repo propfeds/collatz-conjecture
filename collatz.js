@@ -540,7 +540,7 @@ var getEquationOverlay = () =>
                 row: 0,
                 column: 0,
                 verticalOptions: LayoutOptions.START,
-                margin: new Thickness(5, 3),
+                margin: new Thickness(6, 3),
                 text: getLoc('versionName'),
                 fontSize: 9,
                 textColor: Color.TEXT_MEDIUM
