@@ -42,27 +42,23 @@ what would you do?'`,
     return descs[language] || descs.en;
 }
 var authors = 'propfeds#5988\n\nThanks to:\nCipher#9599, for the idea';
-var version = 0.04;
+var version = 0.05;
+
+const cDispColour = new Map();
+cDispColour.set(Theme.STANDARD, 'c0c0c0');
+cDispColour.set(Theme.DARK, 'b5b5b5');
+cDispColour.set(Theme.LIGHT, '434343');
 
 const menuLang = Localization.language;
-const cColour = new Map();
-cColour.set(Theme.STANDARD, 'c0c0c0');
-cColour.set(Theme.DARK, 'b5b5b5');
-cColour.set(Theme.LIGHT, '434343');
-
-const cIterProgBar = ui.createProgressBar
-({
-    margin: new Thickness(6, 0)
-});
-
 const locStrings =
 {
     en:
     {
-        versionName: 'v0.04',
-        workInProgress: ', Work \\\\\nin Progress',
+        versionName: 'v0.05',
+        workInProgress: ', Work in\\\\Progress',
         
-        historyDesc: 'History',
+        historyDesc: `\\begin{{array}}{{c}}\\text{{History}}\\\\{{{0}}}/{{{1}}}
+\\end{{array}}`,
         historyInfo: 'Shows the last and current runs\' sequences',
         pausecDesc: ['\\text{Freeze }c', '\\text{Unfreeze }c'],
         pausecInfo: '\\text{Freezes }c\\text{\'s value}',
@@ -81,21 +77,16 @@ const locStrings =
         alternating: ' (alternating)',
 
         btnClose: 'Close',
-        btnNumDispMode:
-        [
-            'Numbers: Decimal',
-            'Numbers: Scientific',
-            'Numbers: Binary'
-        ],
-        btnLvlDispMode: ['Levels: Total', 'Levels: Offset'],
+        btnNotationMode: ['Notation: Digits', 'Notation: Scientific'],
+        btnBaseMode: ['Base: 10', 'Base: 2'],
         errorInvalidNumMode: 'Invalid number mode',
+        errorBinExpLimit: 'Too big',
 
         menuHistory: 'Sequence History',
         labelCurrentRun: 'Current publication:',
         labelLastRun: 'Last publication:',
 
-        reset: `You are about to reset the current publication.
-Note: resetting is only available before publishing opens.`
+        reset: 'You are about to reset the current publication.'
     }
 };
 
@@ -125,19 +116,65 @@ let getShortString = (n) =>
     return s;
 }
 
-let getShorterString = (n) =>
-{
-    let s = n.toString();
-    if(s.length > 7)
-        s = `${s.slice(0, 3)}...${s.slice(-3)}`;
-    return s;
-}
-
 let getShortBinaryString = (n) =>
 {
     let s = BigInt(n).toString(2);
     if(s.length > 9)
         s = `${s.slice(0, 3)}...${s.slice(-5)}`;
+    return s;
+}
+
+let getSciBinString = (n) =>
+{
+    let offset = 1;
+    let s = BigInt(n).toString(2);
+    if(s[0] == '-')
+        offset = 2;
+    
+    if(s.length < 9)
+        return s;
+
+    let exponent = s.length - offset;
+    if(s[0] == '-')
+    {
+        if(exponent >= 1000000)
+            return getLoc('errorBinExpLimit');
+        if(exponent >= 100000)  // -e100000
+            return `${s[0]}e${exponent}`;
+        if(exponent >= 10000)   // -1e10000
+            return `${s.slice(0, 2)}e${exponent}`;
+        if(exponent >= 1000)    // -1.e1000
+            return `${s.slice(0, 2)}.e${exponent}`;
+        if(exponent >= 100)     // -1.0e100
+            return `${s.slice(0, 2)}.${s[2]}e${exponent}`;
+        if(exponent >= 10)      // -1.00e10
+            return `${s.slice(0, 2)}.${s.slice(2, 4)}e${exponent}`;
+                                // -1.000e9
+        return `${s.slice(0, 2)}.${s.slice(2, 5)}e${exponent}`;
+    }
+    if(exponent >= 10000000)
+        return getLoc('errorBinExpLimit');
+    if(exponent >= 1000000) // e1000000
+        return `e${exponent}`;
+    if(exponent >= 100000)  // 1e100000
+        return `${s[0]}e${exponent}`;
+    if(exponent >= 10000)   // 1.e10000
+        return `${s[0]}.e${exponent}`;
+    if(exponent >= 1000)    // 1.0e1000
+        return `${s[0]}.${s[1]}e${exponent}`;
+    if(exponent >= 100)     // 1.00e100
+        return `${s[0]}.${s.slice(1, 3)}e${exponent}`;
+    if(exponent >= 10)      // 1.000e10
+        return `${s[0]}.${s.slice(1, 4)}e${exponent}`;
+                            // 1.0000e9
+    return `${s[0]}.${s.slice(1, 5)}e${exponent}`;
+}
+
+let getShorterString = (n) =>
+{
+    let s = n.toString();
+    if(s.length > 7)
+        s = `${s.slice(0, 3)}...${s.slice(-3)}`;
     return s;
 }
 
@@ -149,16 +186,18 @@ let getShorterBinaryString = (n) =>
     return s;
 }
 
-let getStringFromNumMode = (n, numMode = 0) =>
+let getStringForm = (n, numMode = 0) =>
 { 
     switch(numMode)
     {
         case 0:
-            return getShorterString(n);
+            return getShortString(n);
         case 1:
             return BigNumber.from(n).toString(0);
         case 2:
-            return getShorterBinaryString(n);
+            return getShortBinaryString(n);
+        case 3:
+            return getSciBinString(n);
         default:
             return getLoc('errorInvalidNumMode');
     }
@@ -176,31 +215,12 @@ let getSequence = (sequence, numMode = 0, lvlMode = 0) =>
         else
             start = Number(key) - 1;
         result += `${lvlMode ? Number(key) - start : key}:&
-        ${getStringFromNumMode(sequence[key], numMode)}&\\leftarrow
-        ${key & 1 ? '+1' : '-1'}`;
+        ${getStringForm(sequence[key], numMode)}&(${key & 1 ? '+1' : '-1'})`;
         ++i;
     }
     result += '&\\end{array}';
 
     return Utils.getMath(result);
-}
-
-let BIObjtoString = (sequence) =>
-{
-    let result = {};
-    for(key in sequence)
-        result[key] = sequence[key].toString();
-    
-    return result;
-}
-
-let stringObjtoBI = (sequence) =>
-{
-    let result = {};
-    for(key in sequence)
-        result[key] = BigInt(sequence[key]);
-    
-    return result;
 }
 
 const getc1 = (level) =>
@@ -235,17 +255,15 @@ const permaCosts = bigNumArray(['1e12', '1e22', '1e31', '1e66']);
 const milestoneCost = new LinearCost(4.4, 4.4);
 
 const cLevelCap = [24, 36, 52, 72];
-const cooldown = [44, 30, 18, 10];
+const cooldown = [42, 30, 20, 12];
 
 let time = 0;
 let c = 0n;
 let cBigNum = BigNumber.from(c);
-let tmpTime = 0;
-let tmpc = 0n;
 let totalIncLevel = 0;
-let incRemainder = 0;
 let history = {};
 let lastHistory;
+let lastHistoryLength = 0;
 let writeHistory = true;
 let historyNumMode = 0;
 let historyLvlMode = 1;
@@ -256,6 +274,53 @@ var pausePerma;
 var cooldownMs, c1BorrowMs, c1ExpMs;
 
 var currency;
+
+const cIterProgBar = ui.createProgressBar
+({
+    margin: new Thickness(6, 0)
+});
+const historyFrame = ui.createFrame
+({
+    isVisible: false,
+    row: 0,
+    column: 2,
+    cornerRadius: 1,
+    horizontalOptions: LayoutOptions.END,
+    verticalOptions: LayoutOptions.START,
+    margin: new Thickness(10),
+    hasShadow: true,
+    heightRequest: 24,
+    content: ui.createImage
+    ({
+        // margin: new Thickness(2),
+        source: ImageSource.BOOK,
+        aspect: Aspect.ASPECT_FIT,
+        useTint: false
+    }),
+    onTouched: (e) =>
+    {
+        if(e.type == TouchType.SHORTPRESS_RELEASED ||
+        e.type == TouchType.LONGPRESS_RELEASED)
+        {
+            Sound.playClick();
+            let menu = createHistoryMenu();
+            menu.show();
+        }
+    }
+});
+const historyLabel = ui.createLatexLabel
+({
+    isVisible: false,
+    row: 0,
+    column: 2,
+    horizontalOptions: LayoutOptions.END,
+    verticalOptions: LayoutOptions.START,
+    margin: new Thickness(3, 40),
+    text: () => Utils.getMath(Localization.format(getLoc('historyDesc'),
+    (incrementc ? incrementc.level : 0) - totalIncLevel, lastHistoryLength)),
+    fontSize: 9,
+    textColor: () => Color.fromHex(cDispColour.get(game.settings.theme))
+});
 
 var init = () =>
 {
@@ -310,16 +375,15 @@ var init = () =>
     more powerful.
     */
     {
-        let getDesc = (level) =>
+        let getDesc = (level) => `c_1=${getc1(level).toString(0)}`;
+        let getInfo = (level) =>
         {
             if(c1ExpMs.level > 0)
-                return `c_1=${getc1(level).toString(0)}^{${getc1Exponent(
-                c1ExpMs.level)}}`;
+                return `c_1^{${getc1Exponent(c1ExpMs.level)}}=
+                ${getc1(level).pow(getc1Exponent(c1ExpMs.level)).toString()}`;
             
-            return `c_1=${getc1(level).toString(0)}`;
+            return getDesc(level);
         }
-        let getInfo = (level) => `c_1=${getc1(level).pow(
-        getc1Exponent(c1ExpMs.level)).toString()}`;
         c1 = theory.createUpgrade(1, currency, c1Cost);
         c1.getDescription = (_) => Utils.getMath(getDesc(c1.level));
         c1.getInfo = (amount) => Utils.getMathTo(getInfo(c1.level),
@@ -354,17 +418,9 @@ var init = () =>
         pausePerma.maxLevel = 1;
     }
     /* Preserve c
-    Shame that we never got the chance to test out this one. Other than breaking
-    progression, it can also pose a threat to the theory's performance.
+    We had the chance to test out this one. It breaks progression, and poses a
+    threat to the theory's performance.
     */
-    // {
-    //     preservePerma = theory.createPermanentUpgrade(4, currency,
-    //     new ConstantCost(permaCosts[4]));
-    //     preservePerma.description = Utils.getMath(getLoc(
-    //     'permaPreserveDesc'));
-    //     preservePerma.info = Utils.getMath(getLoc('permaPreserveInfo'));
-    //     preservePerma.maxLevel = 1;
-    // }
 
     theory.setMilestoneCost(milestoneCost);
     /* Interval speed-up
@@ -399,8 +455,7 @@ var init = () =>
         }
         cooldownMs.boughtOrRefunded = (_) =>
         {
-            incrementc.maxLevel = totalIncLevel + incRemainder +
-            cLevelCap[cooldownMs.level];
+            incrementc.maxLevel = totalIncLevel + cLevelCap[cooldownMs.level];
         };
         cooldownMs.canBeRefunded = (amount) => incrementc.level <=
         totalIncLevel + cLevelCap[cooldownMs.level - amount];
@@ -431,11 +486,14 @@ var init = () =>
 
     theory.primaryEquationHeight = 66;
     theory.primaryEquationScale = 0.9;
+
 }
 
 var updateAvailability = () =>
 {
     pausec.isAvailable = pausePerma.level > 0;
+    historyFrame.isVisible = theory.permanentUpgrades[0].level > 0;
+    historyLabel.isVisible = theory.permanentUpgrades[0].level > 0;
 }
 
 var tick = (elapsedTime, multiplier) =>
@@ -445,7 +503,7 @@ var tick = (elapsedTime, multiplier) =>
         ++time;
         if(time >= cooldown[cooldownMs.level])
         {
-            cIterProgBar.progressTo(0, 99, Easing.LINEAR);
+            cIterProgBar.progressTo(0, 33, Easing.CUBIC_IN);
             if(c % 2n != 0)
                 c = 3n * c + 1n;
             else
@@ -456,11 +514,9 @@ var tick = (elapsedTime, multiplier) =>
             theory.invalidateTertiaryEquation();
             time -= cooldown[cooldownMs.level];
         }
-        else// if(time == 1)
+        else
             cIterProgBar.progressTo((time / (cooldown[cooldownMs.level] - 1)) **
             1.5, 110, Easing.LINEAR);
-            // cIterProgBar.progressTo(1, (cooldown[cooldownMs.level] - 1 -
-            // time) * 100, Easing.CUBIC_IN);
     }
 
     let dt = BigNumber.from(elapsedTime * multiplier);
@@ -471,47 +527,116 @@ var tick = (elapsedTime, multiplier) =>
     currency.value += dt * cBigNum.abs() * vc1 * vc2 * bonus;
 }
 
+var getEquationOverlay = () =>
+{
+    let result = ui.createGrid
+    ({
+        rowDefinitions: ['auto', '80*', 'auto'],
+        columnDefinitions: ['1*', '2*', '1*'],
+        children:
+        [
+            ui.createLatexLabel
+            ({
+                row: 0,
+                column: 0,
+                verticalOptions: LayoutOptions.START,
+                margin: new Thickness(6, 3),
+                text: getLoc('versionName'),
+                fontSize: 9,
+                textColor: Color.TEXT_MEDIUM
+            }),
+            ui.createFrame
+            ({
+                row: 0,
+                column: 1,
+                hasShadow: true,
+                verticalOptions: LayoutOptions.START,
+                cornerRadius: 1,
+                content: cIterProgBar
+            }),
+            historyFrame,
+            historyLabel
+        ]
+    });
+    return result;
+}
+
+var getPrimaryEquation = () =>
+{
+    let cStr = historyNumMode & 2 ? getShortBinaryString(c) :
+    getShortString(c);
+    let result = `\\begin{matrix}c\\leftarrow\\begin{cases}c/2&\\text{if }c
+    \\equiv0\\text{ (mod 2)}\\\\3c+1&\\text{if }c\\equiv1\\text{ (mod 2)}
+    \\end{cases}\\\\\\\\\\color{#${cDispColour.get(game.settings.theme)}}
+    {=${cStr}${historyNumMode & 2 ? '_2' : ''}}\\end{matrix}`;
+
+    return result;
+}
+
+var getSecondaryEquation = () =>
+{
+    let result = `\\begin{matrix}\\dot{\\rho}=c_1${c1ExpMs.level > 0 ?
+    `^{${getc1Exponent(c1ExpMs.level)}}` : ''}c_2|c|,&${theory.latexSymbol}
+    =\\max{\\rho}^{0.1}\\end{matrix}`;
+    return result;
+}
+
+var getTertiaryEquation = () =>
+{
+    let result;
+    if(historyNumMode & 2 || c > 1e6 || c < -1e6)
+        result = `c=${cBigNum.toString(0)}`;
+    else
+        result = '';
+    return result;
+}
+
+var getPublicationMultiplierFormula = (symbol) =>
+`\\frac{{${symbol}}^{${pubExp}}}{${pubMult}}`;
+
 let createHistoryMenu = () =>
 {
-    let toggleNumMode = () =>
+    let toggleBaseMode = () =>
     {
-        historyNumMode = (historyNumMode + 1) % 3;
+        historyNumMode = historyNumMode ^ 2;
         currentPubHistory.text = getSequence(history, historyNumMode,
         historyLvlMode);
         lastPubHistory.text = getSequence(lastHistory, historyNumMode,
         historyLvlMode);
-        toggleNumButton.text = getLoc('btnNumDispMode')[historyNumMode];
-        theory.invalidatePrimaryEquation();
-    };
-    let toggleNumButton = ui.createButton
-    ({
-        row: 0,
-        column: 1,
-        text: getLoc('btnNumDispMode')[historyNumMode],
-        onClicked: () =>
-        {
-            Sound.playClick();
-            toggleNumMode();
-        }
-    });
-    let toggleLvlMode = () =>
-    {
-        historyLvlMode = 1 - historyLvlMode;
-        currentPubHistory.text = getSequence(history, historyNumMode,
-        historyLvlMode);
-        lastPubHistory.text = getSequence(lastHistory, historyNumMode,
-        historyLvlMode);
-        toggleLvlButton.text = getLoc('btnLvlDispMode')[historyLvlMode];
+        toggleLvlButton.text = getLoc('btnBaseMode')[(historyNumMode & 2) >>
+        1];
     };
     let toggleLvlButton = ui.createButton
     ({
         row: 0,
         column: 0,
-        text: getLoc('btnLvlDispMode')[historyLvlMode],
+        text: getLoc('btnBaseMode')[(historyNumMode & 2) >> 1],
         onClicked: () =>
         {
             Sound.playClick();
-            toggleLvlMode();
+            toggleBaseMode();
+        }
+    });
+    let toggleNotationMode = () =>
+    {
+        historyNumMode = historyNumMode ^ 1;
+        currentPubHistory.text = getSequence(history, historyNumMode,
+        historyLvlMode);
+        lastPubHistory.text = getSequence(lastHistory, historyNumMode,
+        historyLvlMode);
+        toggleNumButton.text = getLoc('btnNotationMode')[historyNumMode & 1];
+        theory.invalidatePrimaryEquation();
+        theory.invalidateTertiaryEquation();
+    };
+    let toggleNumButton = ui.createButton
+    ({
+        row: 0,
+        column: 1,
+        text: getLoc('btnNotationMode')[historyNumMode & 1],
+        onClicked: () =>
+        {
+            Sound.playClick();
+            toggleNotationMode();
         }
     });
     let currentPubHistory = ui.createLatexLabel
@@ -602,112 +727,6 @@ let createHistoryMenu = () =>
     return menu;
 }
 
-var getEquationOverlay = () =>
-{
-    let historyButton = ui.createImage
-    ({
-        // margin: new Thickness(2),
-        source: ImageSource.BOOK,
-        aspect: Aspect.ASPECT_FIT,
-        useTint: false
-    });
-
-    let result = ui.createGrid
-    ({
-        rowDefinitions: ['auto', '80*', 'auto'],
-        columnDefinitions: ['1*', '2*', '1*'],
-        children:
-        [
-            ui.createLatexLabel
-            ({
-                row: 0,
-                column: 0,
-                verticalOptions: LayoutOptions.START,
-                margin: new Thickness(5, 3),
-                text: getLoc('versionName'),
-                fontSize: 9,
-                textColor: Color.TEXT_MEDIUM
-            }),
-            ui.createFrame
-            ({
-                row: 0,
-                column: 1,
-                hasShadow: true,
-                verticalOptions: LayoutOptions.START,
-                cornerRadius: 1,
-                content: cIterProgBar
-            }),
-            ui.createFrame
-            ({
-                row: 0,
-                column: 2,
-                cornerRadius: 1,
-                horizontalOptions: LayoutOptions.END,
-                verticalOptions: LayoutOptions.START,
-                margin: new Thickness(10, 9),
-                hasShadow: true,
-                heightRequest: 24,
-                content: historyButton,
-                onTouched: (e) =>
-                {
-                    if(e.type == TouchType.SHORTPRESS_RELEASED ||
-                    e.type == TouchType.LONGPRESS_RELEASED)
-                    {
-                        Sound.playClick();
-                        let menu = createHistoryMenu();
-                        menu.show();
-                    }
-                }
-            }),
-            ui.createLatexLabel
-            ({
-                row: 0,
-                column: 2,
-                horizontalOptions: LayoutOptions.END,
-                verticalOptions: LayoutOptions.START,
-                margin: new Thickness(1, 36),
-                text: getLoc('historyDesc'),
-                fontSize: 10,
-                textColor: () => Color.fromHex(cColour.get(game.settings.theme))
-            }),
-        ]
-    });
-    return result;
-}
-
-var getPrimaryEquation = () =>
-{
-    let cStr = historyNumMode == 2 ? getShortBinaryString(c) :
-    getShortString(c);
-    let result = `\\begin{matrix}c\\leftarrow\\begin{cases}c/2&\\text{if }c
-    \\equiv0\\text{ (mod 2)}\\\\3c+1&\\text{if }c\\equiv1\\text{ (mod 2)}
-    \\end{cases}\\\\\\\\\\color{#${cColour.get(game.settings.theme)}}{=${cStr}
-    ${historyNumMode == 2 ? '_2' : ''}}\\end{matrix}`;
-
-    return result;
-}
-
-var getSecondaryEquation = () =>
-{
-    let result = `\\begin{matrix}\\dot{\\rho}=c_1${c1ExpMs.level > 0 ?
-    `^{${getc1Exponent(c1ExpMs.level)}}` : ''}c_2|c|,&${theory.latexSymbol}
-    =\\max{\\rho}^{0.1}\\end{matrix}`;
-    return result;
-}
-
-var getTertiaryEquation = () =>
-{
-    let result;
-    if(c > 1e6 || c < -1e6)
-        result = `c=${cBigNum}`;
-    else
-        result = '';
-    return result;
-}
-
-var getPublicationMultiplierFormula = (symbol) =>
-`\\frac{{${symbol}}^{${pubExp}}}{${pubMult}}`;
-
 // Check out the Giant's Causeway in Ireland!
 var get2DGraphValue = () =>
 {
@@ -720,64 +739,39 @@ var get2DGraphValue = () =>
 // Will not trigger if you press reset.
 var prePublish = () =>
 {
-    // if(preservePerma.level > 0)
-    // {
-    //     tmpTime = time;
-    //     tmpc = c;
-    // }
     totalIncLevel = incrementc.level;
-    // incRemainder = incrementc.maxLevel - incrementc.level;
     lastHistory = history;
+    lastHistoryLength = Object.keys(lastHistory).length;
 }
 
 var postPublish = () =>
 {
-    if(true/*preservePerma.level == 0*/)
-    {
-        time = 0;
-        cIterProgBar.progressTo(0, 220, Easing.CUBIC_INOUT);
-        c = 0n;
-        cBigNum = BigNumber.from(c);
-    }
+    time = 0;
     // This is to circumvent the extra levelling
     writeHistory = false;
-    tmpc = c;
     incrementc.level = totalIncLevel;
-    c = tmpc;
     writeHistory = true;
+
+    c = 0n;
     cBigNum = BigNumber.from(c);
-    incrementc.maxLevel = totalIncLevel + incRemainder +
-    cLevelCap[cooldownMs.level];
+    cIterProgBar.progressTo(0, 220, Easing.CUBIC_INOUT);
+    incrementc.maxLevel = totalIncLevel + cLevelCap[cooldownMs.level];
 
     theory.invalidatePrimaryEquation();
     theory.invalidateTertiaryEquation();
     history = {};
 }
 
-var canResetStage = () => !theory.canPublish ||
-theory.permanentUpgrades[0].level == 0;
+var canResetStage = () => true;
 
 var getResetStageMessage = () => getLoc('reset');
 
 var resetStage = () =>
 {
-    /*
-    You could exploit the c levelling mechanism by resetting to 0 before a pub
-    and get 24 levels for free. Now you can't.
-    */
-    if(theory.canPublish && theory.permanentUpgrades[0].level > 0)
-        return;
-
     for (let i = 0; i < theory.upgrades.length; ++i)
         theory.upgrades[i].level = 0;
 
     currency.value = 0;
-    // if(preservePerma.level > 0)
-    // {
-    //     time = tmpTime;
-    //     c = tmpc;
-    //     cBigNum = BigNumber.from(c);
-    // }
     theory.clearGraph();
     postPublish();
 }
@@ -787,14 +781,10 @@ var getInternalState = () => JSON.stringify
     version: version,
     time: time,
     c: c.toString(),
-    tmpTime: tmpTime,
-    tmpc: tmpc.toString(),
     totalIncLevel: totalIncLevel,
-    // incRemainder: incRemainder,
     history: history,
     lastHistory: lastHistory,
-    historyNumMode: historyNumMode,
-    historyLvlMode: historyLvlMode
+    historyNumMode: historyNumMode
 })
 
 var setInternalState = (stateStr) =>
@@ -814,10 +804,6 @@ var setInternalState = (stateStr) =>
         c = BigInt(state.c);
         cBigNum = BigNumber.from(c);
     }
-    if('tmpTime' in state)
-        tmpTime = state.tmpTime;
-    if('tmpc' in state)
-        tmpc = BigInt(state.tmpc);
 
     let tmpIML = cLevelCap[cooldownMs.level];
     if('totalIncLevel' in state)
@@ -825,21 +811,17 @@ var setInternalState = (stateStr) =>
         totalIncLevel = state.totalIncLevel;
         tmpIML += totalIncLevel;
     }
-    // if('incRemainder' in state)
-    // {
-    //     incRemainder = state.incRemainder;
-    //     tmpIML += incRemainder;
-    // }
     incrementc.maxLevel = tmpIML;
 
     if('history' in state)
         history = state.history;
     if('lastHistory' in state)
-        lastHistory = state.lastHistory;
+    {
+        lastHistory = state.lastHistory;    
+        lastHistoryLength = Object.keys(lastHistory).length;
+    }
     if('historyNumMode' in state)
         historyNumMode = state.historyNumMode;
-    if('historyLvlMode' in state)
-        historyLvlMode = state.historyLvlMode;
 
     theory.invalidatePrimaryEquation();
     theory.invalidateTertiaryEquation();
