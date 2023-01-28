@@ -1,5 +1,5 @@
 import { BigNumber } from '../api/BigNumber';
-import { ExponentialCost, FirstFreeCost, FreeCost, LinearCost } from
+import { CompositeCost, ExponentialCost, FirstFreeCost, FreeCost, LinearCost } from
 '../api/Costs';
 import { Localization } from '../api/Localization';
 import { Theme } from '../api/Settings';
@@ -42,7 +42,7 @@ what would you do?'`,
     return descs[language] || descs.en;
 }
 var authors = 'propfeds#5988\n\nThanks to:\nCipher#9599, for the idea';
-var version = 0.05;
+var version = 0.06;
 
 const cDispColour = new Map();
 cDispColour.set(Theme.STANDARD, 'c0c0c0');
@@ -54,7 +54,7 @@ const locStrings =
 {
     en:
     {
-        versionName: 'v0.05',
+        versionName: 'v0.06',
         workInProgress: ', Work in\\\\Progress',
         
         historyDesc: `\\begin{{array}}{{c}}\\text{{History}}\\\\{{{0}}}/{{{1}}}
@@ -69,6 +69,7 @@ const locStrings =
 
         c1Level: 'c_1\\text{{ level}}',
         cLevel: '1/{{{0}}}\\text{{{{ of }}}}c\\text{{{{\'s level}}}}',
+        cLevelth: '1/{{{0}}}^\\text{{{{th}}}}\\text{{{{ of }}}}c\\text{{{{\'s level}}}}',
         cLevelCap: 'c\\text{{ level cap}}',
         cooldown: '\\text{{interval}}',
         cooldownInfo: 'Interval',
@@ -231,15 +232,15 @@ const getc1 = (level) =>
     
     return Utils.getStepwisePowerSum(level, 2, 5, 1);
 }
-const borrowFactor = 2;
+const borrowFactor = 4;
 const c1Cost = new FirstFreeCost(new ExponentialCost(1, 3.01));
-const c1ExpInc = 0.03;
+const c1ExpInc = 0.07;
 const c1ExpMaxLevel = 4;
-const getc1Exponent = (level) => BigNumber.from(1 + c1ExpInc * level);
+const getc1Exponent = (level) => 1 + c1ExpInc * level;
 const getc2 = (level) => BigNumber.TWO.pow(level);
 const c2Cost = new ExponentialCost(1e6, 11);
 
-const pubExp = 5.22;
+const pubExp = 5.12;
 const pubMult = 31;
 var getPublicationMultiplier = (tau) => tau.pow(pubExp) /
 BigNumber.from(pubMult);
@@ -252,7 +253,8 @@ var getCurrencyFromTau = (tau) =>
 ];
 
 const permaCosts = bigNumArray(['1e12', '1e22', '1e31', '1e66']);
-const milestoneCost = new LinearCost(4.4, 4.4);
+const milestoneCost = new CompositeCost(2, new LinearCost(4.4, 4.4),
+new CompositeCost(2, new LinearCost(17.6, 8.8), new LinearCost(35.2, 17.6)));
 
 const cLevelCap = [24, 36, 52, 72];
 const cooldown = [42, 30, 20, 12];
@@ -402,6 +404,7 @@ var init = () =>
     }
 
     theory.createPublicationUpgrade(0, currency, permaCosts[0]);
+    theory.permanentUpgrades[0].bought = (_) => updateAvailability();
     theory.createBuyAllUpgrade(1, currency, permaCosts[1]);
     theory.createAutoBuyerUpgrade(2, currency, permaCosts[2]);
     /* Unlocks freeze
@@ -467,9 +470,9 @@ var init = () =>
     {
         c1BorrowMs = theory.createMilestoneUpgrade(1, 1);
         c1BorrowMs.description = Localization.getUpgradeIncCustomDesc(getLoc(
-        'c1Level'), Localization.format(getLoc('cLevel'), borrowFactor));
+        'c1Level'), Localization.format(getLoc('cLevelth'), borrowFactor));
         c1BorrowMs.info = Localization.getUpgradeIncCustomInfo(getLoc(
-        'c1Level'), Localization.format(getLoc('cLevel'), borrowFactor));
+        'c1Level'), Localization.format(getLoc('cLevelth'), borrowFactor));
     }
     /* c1 exponent
     Standard exponent upgrade.
@@ -541,7 +544,7 @@ var getEquationOverlay = () =>
                 column: 0,
                 verticalOptions: LayoutOptions.START,
                 margin: new Thickness(6, 3),
-                text: getLoc('versionName'),
+                text: getLoc('versionName') + getLoc('workInProgress'),
                 fontSize: 9,
                 textColor: Color.TEXT_MEDIUM
             }),
@@ -605,6 +608,8 @@ let createHistoryMenu = () =>
         historyLvlMode);
         toggleLvlButton.text = getLoc('btnBaseMode')[(historyNumMode & 2) >>
         1];
+        theory.invalidatePrimaryEquation();
+        theory.invalidateTertiaryEquation();
     };
     let toggleLvlButton = ui.createButton
     ({
@@ -625,8 +630,6 @@ let createHistoryMenu = () =>
         lastPubHistory.text = getSequence(lastHistory, historyNumMode,
         historyLvlMode);
         toggleNumButton.text = getLoc('btnNotationMode')[historyNumMode & 1];
-        theory.invalidatePrimaryEquation();
-        theory.invalidateTertiaryEquation();
     };
     let toggleNumButton = ui.createButton
     ({
@@ -747,19 +750,19 @@ var prePublish = () =>
 var postPublish = () =>
 {
     time = 0;
-    // This is to circumvent the extra levelling
+    // Disabling history write circumvents the extra levelling
     writeHistory = false;
+    incrementc.maxLevel = totalIncLevel + cLevelCap[cooldownMs.level];
     incrementc.level = totalIncLevel;
     writeHistory = true;
-
+    history = {};
+    // c is reset to 0 afterwards
     c = 0n;
     cBigNum = BigNumber.from(c);
     cIterProgBar.progressTo(0, 220, Easing.CUBIC_INOUT);
-    incrementc.maxLevel = totalIncLevel + cLevelCap[cooldownMs.level];
 
     theory.invalidatePrimaryEquation();
     theory.invalidateTertiaryEquation();
-    history = {};
 }
 
 var canResetStage = () => true;
