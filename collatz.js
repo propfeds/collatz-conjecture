@@ -224,14 +224,8 @@ let getSequence = (sequence, numMode = 0, lvlMode = 0) =>
     return Utils.getMath(result);
 }
 
-const getc1 = (level) =>
-{
-    if(c1BorrowMs.level > 0)
-        return Utils.getStepwisePowerSum(level + incrementc.level /
-        borrowFactor, 2, 5, 1);
-    
-    return Utils.getStepwisePowerSum(level, 2, 5, 1);
-}
+const getc1 = (level) => Utils.getStepwisePowerSum(level + Math.floor(
+c1BorrowMs.level * incrementc.level / borrowFactor), 2, 5, 1);
 const borrowFactor = 4;
 const c1Cost = new FirstFreeCost(new ExponentialCost(1, 3.01));
 const c1ExpInc = 0.07;
