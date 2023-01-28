@@ -56,7 +56,7 @@ const locStrings =
     {
         versionName: 'v0.06',
         workInProgress: ', Work in\\\\Progress',
-        
+
         historyDesc: `\\begin{{array}}{{c}}\\text{{History}}\\\\{{{0}}}/{{{1}}}
 \\end{{array}}`,
         historyInfo: 'Shows the last and current runs\' sequences',
@@ -131,7 +131,7 @@ let getSciBinString = (n) =>
     let s = BigInt(n).toString(2);
     if(s[0] == '-')
         offset = 2;
-    
+
     if(s.length < 9)
         return s;
 
@@ -248,7 +248,7 @@ var getCurrencyFromTau = (tau) =>
 
 const permaCosts = bigNumArray(['1e12', '1e22', '1e31', '1e66']);
 const milestoneCost = new CompositeCost(2, new LinearCost(4.4, 4.4),
-new CompositeCost(2, new LinearCost(17.6, 8.8), new LinearCost(35.2, 17.6)));
+new CompositeCost(2, new LinearCost(13.2, 8.8), new LinearCost(30.8, 13.2)));
 
 const cLevelCap = [24, 36, 52, 72];
 const cooldown = [42, 30, 20, 12];
@@ -377,7 +377,7 @@ var init = () =>
             if(c1ExpMs.level > 0)
                 return `c_1^{${getc1Exponent(c1ExpMs.level)}}=
                 ${getc1(level).pow(getc1Exponent(c1ExpMs.level)).toString()}`;
-            
+
             return getDesc(level);
         }
         c1 = theory.createUpgrade(1, currency, c1Cost);

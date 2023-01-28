@@ -2,7 +2,7 @@
 
 ## In testing
 
-- v0.05
+- v0.06
 
 ## In consideration
 
