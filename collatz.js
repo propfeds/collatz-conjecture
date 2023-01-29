@@ -79,7 +79,11 @@ const locStrings =
         alternating: ' (alternating)',
 
         achNegativeTitle: 'Shadow Realm',
-        achNegativeDesc: `Gone negative by publishing while c's level is odd.`,
+        achNegativeDesc: `Publish with an odd c level and go negative.`,
+        achMarathonTitle: 'Lothar-athon',
+        achMarathonDesc: 'Reach a c value of 1e60.',
+        achSixNineTitle: 'I\'m proud of you.',
+        achSixNineDesc: 'Reach a c value of 69.',
 
         btnClose: 'Close',
         btnNotationMode: ['Notation: Digits', 'Notation: Scientific'],
@@ -485,6 +489,11 @@ var init = () =>
 
     theory.createAchievement(0, undefined, getLoc('achNegativeTitle'),
     getLoc('achNegativeDesc'), () => cBigNum < 0);
+    theory.createAchievement(1, undefined, getLoc('achMarathonTitle'),
+    getLoc('achMarathonDesc'), () => cBigNum >= 1e60, () => c == 0n ? 0 :
+    cBigNum.log10().toNumber() / 60);
+    theory.createAchievement(2, undefined, getLoc('achSixNineTitle'),
+    getLoc('achSixNineDesc'), () => c == 69n);
 
     updateAvailability();
 
