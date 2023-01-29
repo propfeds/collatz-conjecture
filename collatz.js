@@ -69,13 +69,17 @@ const locStrings =
 
         c1Level: 'c_1\\text{{ level}}',
         cLevel: '1/{{{0}}}\\text{{{{ of }}}}c\\text{{{{\'s level}}}}',
-        cLevelth: '1/{{{0}}}^\\text{{{{th}}}}\\text{{{{ of }}}}c\\text{{{{\'s level}}}}',
+        cLevelth: `1/{{{0}}}^\\text{{{{th}}}}\\text{{{{ of }}}}c
+        \\text{{{{\'s level}}}}`,
         cLevelCap: 'c\\text{{ level cap}}',
         cooldown: '\\text{{interval}}',
         cooldownInfo: 'Interval',
         nTicks: '{{{0}}}\\text{{{{ ticks}}}}',
 
         alternating: ' (alternating)',
+
+        achNegativeTitle: 'Shadow Realm',
+        achNegativeDesc: `Gone negative by publishing while c's level is odd.`,
 
         btnClose: 'Close',
         btnNotationMode: ['Notation: Digits', 'Notation: Scientific'],
@@ -478,6 +482,9 @@ var init = () =>
         c1ExpMs.info = Localization.getUpgradeIncCustomExpInfo('c_1', c1ExpInc);
         c1ExpMs.boughtOrRefunded = (_) => theory.invalidateSecondaryEquation();
     }
+
+    theory.createAchievement(0, undefined, getLoc('achNegativeTitle'),
+    getLoc('achNegativeDesc'), () => cBigNum < 0);
 
     updateAvailability();
 
