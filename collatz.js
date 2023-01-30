@@ -44,12 +44,6 @@ what would you do?'`,
 var authors = 'propfeds#5988\n\nThanks to:\nCipher#9599, for the idea';
 var version = 0.06;
 
-const cDispColour = new Map();
-cDispColour.set(Theme.STANDARD, 'c0c0c0');
-cDispColour.set(Theme.DARK, 'b5b5b5');
-cDispColour.set(Theme.LIGHT, '434343');
-
-const menuLang = Localization.language;
 const locStrings =
 {
     en:
@@ -99,6 +93,7 @@ const locStrings =
     }
 };
 
+const menuLang = Localization.language;
 /**
  * Returns a localised string.
  * @param {string} name the internal name of the string.
@@ -114,6 +109,69 @@ let getLoc = (name, lang = menuLang) =>
     
     return `String missing: ${lang}.${name}`;
 }
+
+let time = 0;
+let c = 0n;
+let cBigNum = BigNumber.from(c);
+let totalIncLevel = 0;
+let history = {};
+let lastHistory;
+let lastHistoryLength = 0;
+let writeHistory = true;
+let historyNumMode = 0;
+let historyLvlMode = 1;
+
+const cDispColour = new Map();
+cDispColour.set(Theme.STANDARD, 'c0c0c0');
+cDispColour.set(Theme.DARK, 'b5b5b5');
+cDispColour.set(Theme.LIGHT, '434343');
+
+const cIterProgBar = ui.createProgressBar
+({
+    margin: new Thickness(6, 0)
+});
+const historyFrame = ui.createFrame
+({
+    isVisible: false,
+    row: 0,
+    column: 2,
+    cornerRadius: 1,
+    horizontalOptions: LayoutOptions.END,
+    verticalOptions: LayoutOptions.START,
+    margin: new Thickness(10),
+    hasShadow: true,
+    heightRequest: 24,
+    content: ui.createImage
+    ({
+        // margin: new Thickness(2),
+        source: ImageSource.BOOK,
+        aspect: Aspect.ASPECT_FIT,
+        useTint: false
+    }),
+    onTouched: (e) =>
+    {
+        if(e.type == TouchType.SHORTPRESS_RELEASED ||
+        e.type == TouchType.LONGPRESS_RELEASED)
+        {
+            Sound.playClick();
+            let menu = createHistoryMenu();
+            menu.show();
+        }
+    }
+});
+const historyLabel = ui.createLatexLabel
+({
+    isVisible: false,
+    row: 0,
+    column: 2,
+    horizontalOptions: LayoutOptions.END,
+    verticalOptions: LayoutOptions.START,
+    margin: new Thickness(3, 40),
+    text: () => Utils.getMath(Localization.format(getLoc('historyDesc'),
+    (incrementc ? incrementc.level : 0) - totalIncLevel, lastHistoryLength)),
+    fontSize: 9,
+    textColor: () => Color.fromHex(cDispColour.get(game.settings.theme))
+});
 
 let bigNumArray = (array) => array.map(x => BigNumber.from(x));
 
@@ -262,27 +320,23 @@ let getSequence = (sequence, numMode = 0, lvlMode = 0) =>
     return Utils.getMath(result);
 }
 
-const getc1 = (level) => Utils.getStepwisePowerSum(level + Math.floor(
-c1BorrowMs.level * incrementc.level / borrowFactor), 2, 5, 1);
+// All balance parameters are aggregated for ease of access
+
 const borrowFactor = 4;
 const c1Cost = new FirstFreeCost(new ExponentialCost(1, 3.01));
+const getc1 = (level) => Utils.getStepwisePowerSum(level + Math.floor(
+c1BorrowMs.level * incrementc.level / borrowFactor), 2, 5, 1);
+
 const c1ExpInc = 0.07;
 const c1ExpMaxLevel = 4;
 const getc1Exponent = (level) => 1 + c1ExpInc * level;
-const getc2 = (level) => BigNumber.TWO.pow(level);
-const c2Cost = new ExponentialCost(1e6, 11);
 
-const pubExp = 5.12;
-const pubMult = 31;
-var getPublicationMultiplier = (tau) => tau.pow(pubExp) /
-BigNumber.from(pubMult);
+const c2Cost = new ExponentialCost(1e6, 11);
+const getc2 = (level) => BigNumber.TWO.pow(level);
+
 const tauRate = 0.1;
-var getTau = () => currency.value.pow(BigNumber.from(tauRate));
-var getCurrencyFromTau = (tau) =>
-[
-    tau.max(BigNumber.ONE).pow(BigNumber.ONE / tauRate),
-    currency.symbol
-];
+const pubExp = 5.12;
+const pubDiv = 31;
 
 const permaCosts = bigNumArray(['1e12', '1e22', '1e31', '1e54']);
 const milestoneCost = new CompositeCost(2, new LinearCost(4.4, 4.4),
@@ -291,70 +345,12 @@ new CompositeCost(2, new LinearCost(13.2, 8.8), new LinearCost(30.8, 13.2)));
 const cLevelCap = [24, 36, 52, 72];
 const cooldown = [42, 30, 20, 12];
 
-let time = 0;
-let c = 0n;
-let cBigNum = BigNumber.from(c);
-let totalIncLevel = 0;
-let history = {};
-let lastHistory;
-let lastHistoryLength = 0;
-let writeHistory = true;
-let historyNumMode = 0;
-let historyLvlMode = 1;
-
 var pausec;
 var incrementc, c1, c2;
 var pausePerma;
 var cooldownMs, c1BorrowMs, c1ExpMs;
 
 var currency;
-
-const cIterProgBar = ui.createProgressBar
-({
-    margin: new Thickness(6, 0)
-});
-const historyFrame = ui.createFrame
-({
-    isVisible: false,
-    row: 0,
-    column: 2,
-    cornerRadius: 1,
-    horizontalOptions: LayoutOptions.END,
-    verticalOptions: LayoutOptions.START,
-    margin: new Thickness(10),
-    hasShadow: true,
-    heightRequest: 24,
-    content: ui.createImage
-    ({
-        // margin: new Thickness(2),
-        source: ImageSource.BOOK,
-        aspect: Aspect.ASPECT_FIT,
-        useTint: false
-    }),
-    onTouched: (e) =>
-    {
-        if(e.type == TouchType.SHORTPRESS_RELEASED ||
-        e.type == TouchType.LONGPRESS_RELEASED)
-        {
-            Sound.playClick();
-            let menu = createHistoryMenu();
-            menu.show();
-        }
-    }
-});
-const historyLabel = ui.createLatexLabel
-({
-    isVisible: false,
-    row: 0,
-    column: 2,
-    horizontalOptions: LayoutOptions.END,
-    verticalOptions: LayoutOptions.START,
-    margin: new Thickness(3, 40),
-    text: () => Utils.getMath(Localization.format(getLoc('historyDesc'),
-    (incrementc ? incrementc.level : 0) - totalIncLevel, lastHistoryLength)),
-    fontSize: 9,
-    textColor: () => Color.fromHex(cDispColour.get(game.settings.theme))
-});
 
 var init = () =>
 {
@@ -634,9 +630,6 @@ var getTertiaryEquation = () =>
     return result;
 }
 
-var getPublicationMultiplierFormula = (symbol) =>
-`\\frac{{${symbol}}^{${pubExp}}}{${pubMult}}`;
-
 let createHistoryMenu = () =>
 {
     let toggleBaseMode = () =>
@@ -778,6 +771,19 @@ var get2DGraphValue = () =>
     
     return (cBigNum.abs().log2() * cBigNum.sign).toNumber();
 }
+
+var getTau = () => currency.value.pow(tauRate);
+
+var getCurrencyFromTau = (tau) =>
+[
+    tau.max(BigNumber.ONE).pow(BigNumber.ONE / tauRate),
+    currency.symbol
+];
+
+var getPublicationMultiplier = (tau) => tau.pow(pubExp) / pubDiv;
+
+var getPublicationMultiplierFormula = (symbol) =>
+`\\frac{{${symbol}}^{${pubExp}}}{${pubDiv}}`;
 
 // Will not trigger if you press reset.
 var prePublish = () =>
