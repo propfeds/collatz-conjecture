@@ -144,10 +144,25 @@ let getSciBinString = (n) =>
         return s;
 
     let exponent = s.length - offset;
+    // Negative
     if(s[0] == '-')
     {
         if(exponent >= 1000000)
-            return getLoc('errorBinExpLimit');
+        {
+            let expofExp = Math.log10(exponent);
+            if(expofExp >= 100000)  // -eee5.00     I'm lazy.
+                return getLoc('errorBinExpLimit');
+            if(expofExp >= 10000)   // -ee10000
+                return `${s[0]}ee${expofExp.toFixed(0)}`;
+            if(expofExp >= 1000)    // -ee1000.
+                return `${s[0]}ee${expofExp.toFixed(0)}.`;
+            if(expofExp >= 100)     // -ee100.0
+                return `${s[0]}ee${expofExp.toFixed(1)}`;
+            if(expofExp >= 10)      // -ee10.00
+                return `${s[0]}ee${expofExp.toFixed(2)}`;
+                                    // -ee6.000
+            return `${s[0]}ee${expofExp.toFixed(3)}`;
+        }
         if(exponent >= 100000)  // -e100000
             return `${s[0]}e${exponent}`;
         if(exponent >= 10000)   // -1e10000
@@ -161,10 +176,25 @@ let getSciBinString = (n) =>
                                 // -1.000e9
         return `${s.slice(0, 2)}.${s.slice(2, 5)}e${exponent}`;
     }
-    if(exponent >= 10000000)
-        return getLoc('errorBinExpLimit');
-    if(exponent >= 1000000) // e1000000
-        return `e${exponent}`;
+    // Positive
+    if(exponent >= 1000000)
+    {
+        let expofExp = Math.log10(exponent);
+        if(expofExp >= 1000000) // eee6.000     I'm lazy.
+            return getLoc('errorBinExpLimit');
+        if(expofExp >= 100000)  // ee100000
+            return `ee${expofExp.toFixed(0)}`;
+        if(expofExp >= 10000)   // ee10000.
+            return `ee${expofExp.toFixed(0)}.`;
+        if(expofExp >= 1000)    // ee1000.0
+            return `ee${expofExp.toFixed(1)}`;
+        if(expofExp >= 100)     // ee100.00
+            return `ee${expofExp.toFixed(2)}`;
+        if(expofExp >= 10)      // ee10.000
+            return `ee${expofExp.toFixed(3)}`;
+                                // ee6.0000
+        return `ee${expofExp.toFixed(4)}`;
+    }
     if(exponent >= 100000)  // 1e100000
         return `${s[0]}e${exponent}`;
     if(exponent >= 10000)   // 1.e10000
