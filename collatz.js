@@ -284,7 +284,7 @@ var getCurrencyFromTau = (tau) =>
     currency.symbol
 ];
 
-const permaCosts = bigNumArray(['1e12', '1e22', '1e31', '1e66']);
+const permaCosts = bigNumArray(['1e12', '1e22', '1e31', '1e54']);
 const milestoneCost = new CompositeCost(2, new LinearCost(4.4, 4.4),
 new CompositeCost(2, new LinearCost(13.2, 8.8), new LinearCost(30.8, 13.2)));
 
