@@ -98,12 +98,12 @@ const locStrings =
         versionName: 'v0.06',
         workInProgress: ', WIP',//', Work in\\\\Progress',
         changeLog: `\\text{Change log!}\\\\ \\begin{array}{l}
-\\bullet \\text{ Pub:}\\\\ \\frac{{\\tau}^{5.22}}{31} \\rightarrow
+\\bullet \\text{ Pub formula~}\\\\ \\frac{{\\tau}^{5.22}}{31} \\rightarrow
 {\\tau}^{4.72}\\\\
-\\bullet \\text{ } c_1 \\text{ level ms:}\\\\
+\\bullet \\text{ } c_1 \\text{ level ms~}\\\\
 1/2 \\rightarrow 1/4,\\\\
 \\text{rounded down}\\\\
-\\bullet \\text{ Freeze cost:}\\\\ 1e66 \\rightarrow 1e54\\\\
+\\bullet \\text{ Freeze cost~}\\\\ 1e66 \\rightarrow 1e54\\\\
 \\bullet \\text{ Spaced out}\\\\ \\text{ms costs}\\\\
 \\end{array}`,
 
