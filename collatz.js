@@ -232,7 +232,7 @@ let getSciBinString = (n) =>
     if(s[0] == '-')
         offset = 2;
 
-    if(s.length < 9)
+    if(s.length < 8)
         return s;
 
     let exponent = s.length - offset;
