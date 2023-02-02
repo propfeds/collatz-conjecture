@@ -43,6 +43,54 @@ what would you do?'`,
 var authors = 'propfeds#5988\n\nThanks to:\nCipher#9599, for the idea';
 var version = 0.06;
 
+let time = 0;
+let c = 0n;
+let cBigNum = BigNumber.from(c);
+let totalIncLevel = 0;
+let history = {};
+let lastHistory;
+let lastHistoryLength = 0;
+let writeHistory = true;
+let historyNumMode = 0;
+let historyLvlMode = 1;
+
+let bigNumArray = (array) => array.map(x => BigNumber.from(x));
+
+// All balance parameters are aggregated for ease of access
+
+const borrowFactor = 4;
+const c1Cost = new FirstFreeCost(new ExponentialCost(1, 3.01));
+const getc1 = (level) => Utils.getStepwisePowerSum(level + Math.floor(
+c1BorrowMs.level * incrementc.level / borrowFactor), 2, 5, 1);
+
+const c1ExpInc = 0.03;
+const c1ExpMaxLevel = 4;
+const getc1Exponent = (level) => 1 + c1ExpInc * level;
+
+const c2Cost = new ExponentialCost(1e6, 11);
+const getc2 = (level) => BigNumber.TWO.pow(level);
+
+const permaCosts = bigNumArray(['1e12', '1e22', '1e31', '1e54']);
+const milestoneCost = new CompositeCost(2, new LinearCost(4.4, 4.4),
+new CompositeCost(2, new LinearCost(13.2, 8.8), new LinearCost(30.8, 13.2)));
+
+const cLevelCap = [24, 36, 52, 72];
+const cooldown = [42, 30, 20, 12];
+
+const tauRate = 0.1;
+const pubExp = 4.72;
+
+var getPublicationMultiplier = (tau) => tau.pow(pubExp);
+
+var getPublicationMultiplierFormula = (symbol) => `{${symbol}}^{${pubExp}}`;
+
+var pausec;
+var incrementc, c1, c2;
+var pausePerma;
+var cooldownMs, c1BorrowMs, c1ExpMs;
+
+var currency;
+
 const locStrings =
 {
     en:
@@ -51,7 +99,7 @@ const locStrings =
         workInProgress: ', Work in\\\\Progress',
 
         historyDesc: `\\begin{{array}}{{c}}\\text{{History}}\\\\{{{0}}}/{{{1}}}
-\\end{{array}}`,
+        \\end{{array}}`,
         historyInfo: 'Shows the last and current runs\' sequences',
         pausecDesc: ['\\text{Freeze }c', '\\text{Unfreeze }c'],
         pausecInfo: '\\text{Freezes }c\\text{\'s value}',
@@ -109,17 +157,6 @@ let getLoc = (name, lang = menuLang) =>
     return `String missing: ${lang}.${name}`;
 }
 
-let time = 0;
-let c = 0n;
-let cBigNum = BigNumber.from(c);
-let totalIncLevel = 0;
-let history = {};
-let lastHistory;
-let lastHistoryLength = 0;
-let writeHistory = true;
-let historyNumMode = 0;
-let historyLvlMode = 1;
-
 const cDispColour = new Map();
 cDispColour.set(Theme.STANDARD, 'c0c0c0');
 cDispColour.set(Theme.DARK, 'b5b5b5');
@@ -171,8 +208,6 @@ const historyLabel = ui.createLatexLabel
     fontSize: 9,
     textColor: () => Color.fromHex(cDispColour.get(game.settings.theme))
 });
-
-let bigNumArray = (array) => array.map(x => BigNumber.from(x));
 
 let getShortString = (n) =>
 {
@@ -318,38 +353,6 @@ let getSequence = (sequence, numMode = 0, lvlMode = 0) =>
 
     return Utils.getMath(result);
 }
-
-// All balance parameters are aggregated for ease of access
-
-const borrowFactor = 4;
-const c1Cost = new FirstFreeCost(new ExponentialCost(1, 3.01));
-const getc1 = (level) => Utils.getStepwisePowerSum(level + Math.floor(
-c1BorrowMs.level * incrementc.level / borrowFactor), 2, 5, 1);
-
-const c1ExpInc = 0.03;
-const c1ExpMaxLevel = 4;
-const getc1Exponent = (level) => 1 + c1ExpInc * level;
-
-const c2Cost = new ExponentialCost(1e6, 11);
-const getc2 = (level) => BigNumber.TWO.pow(level);
-
-const tauRate = 0.1;
-const pubExp = 5.12;
-const pubDiv = 31;
-
-const permaCosts = bigNumArray(['1e12', '1e22', '1e31', '1e54']);
-const milestoneCost = new CompositeCost(2, new LinearCost(4.4, 4.4),
-new CompositeCost(2, new LinearCost(13.2, 8.8), new LinearCost(30.8, 13.2)));
-
-const cLevelCap = [24, 36, 52, 72];
-const cooldown = [42, 30, 20, 12];
-
-var pausec;
-var incrementc, c1, c2;
-var pausePerma;
-var cooldownMs, c1BorrowMs, c1ExpMs;
-
-var currency;
 
 var init = () =>
 {
@@ -558,6 +561,7 @@ var tick = (elapsedTime, multiplier) =>
     }
 
     let dt = BigNumber.from(elapsedTime * multiplier);
+    if(dt > 0.2)log(dt)
     let vc1 = getc1(c1.level).pow(getc1Exponent(c1ExpMs.level));
     let vc2 = getc2(c2.level);
     let bonus = theory.publicationMultiplier;
@@ -778,11 +782,6 @@ var getCurrencyFromTau = (tau) =>
     tau.max(BigNumber.ONE).pow(BigNumber.ONE / tauRate),
     currency.symbol
 ];
-
-var getPublicationMultiplier = (tau) => tau.pow(pubExp) / pubDiv;
-
-var getPublicationMultiplierFormula = (symbol) =>
-`\\frac{{${symbol}}^{${pubExp}}}{${pubDiv}}`;
 
 // Will not trigger if you press reset.
 var prePublish = () =>
