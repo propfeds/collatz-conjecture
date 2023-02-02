@@ -1,6 +1,5 @@
 import { BigNumber } from '../api/BigNumber';
-import { CompositeCost, ExponentialCost, FirstFreeCost, FreeCost, LinearCost } from
-'../api/Costs';
+import { CompositeCost, ExponentialCost, FirstFreeCost, FreeCost, LinearCost } from '../api/Costs';
 import { Localization } from '../api/Localization';
 import { Theme } from '../api/Settings';
 import { theory } from '../api/Theory';
@@ -327,7 +326,7 @@ const c1Cost = new FirstFreeCost(new ExponentialCost(1, 3.01));
 const getc1 = (level) => Utils.getStepwisePowerSum(level + Math.floor(
 c1BorrowMs.level * incrementc.level / borrowFactor), 2, 5, 1);
 
-const c1ExpInc = 0.07;
+const c1ExpInc = 0.03;
 const c1ExpMaxLevel = 4;
 const getc1Exponent = (level) => 1 + c1ExpInc * level;
 
