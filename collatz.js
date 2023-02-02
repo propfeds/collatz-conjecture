@@ -96,7 +96,16 @@ const locStrings =
     en:
     {
         versionName: 'v0.06',
-        workInProgress: ', Work in\\\\Progress',
+        workInProgress: ', WIP',//', Work in\\\\Progress',
+        changeLog: `\\text{Change log!}\\\\ \\begin{array}{l}
+\\bullet \\text{ Pub:}\\\\ \\frac{{\\tau}^{5.22}}{31} \\rightarrow
+{\\tau}^{4.72}\\\\
+\\bullet \\text{ } c_1 \\text{ level ms:}\\\\
+1/2 \\rightarrow 1/4,\\\\
+\\text{rounded down}\\\\
+\\bullet \\text{ Freeze cost:}\\\\ 1e66 \\rightarrow 1e54\\\\
+\\bullet \\text{ Spaced out}\\\\ \\text{ms costs}\\\\
+\\end{array}`,
 
         historyDesc: `\\begin{{array}}{{c}}\\text{{History}}\\\\{{{0}}}/{{{1}}}
         \\end{{array}}`,
@@ -583,7 +592,8 @@ var getEquationOverlay = () =>
                 column: 0,
                 verticalOptions: LayoutOptions.START,
                 margin: new Thickness(6, 3),
-                text: getLoc('versionName') + getLoc('workInProgress'),
+                text: getLoc('versionName') + getLoc('workInProgress') +
+                Utils.getMath(getLoc('changeLog')),
                 fontSize: 9,
                 textColor: Color.TEXT_MEDIUM
             }),
