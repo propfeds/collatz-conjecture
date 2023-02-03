@@ -580,6 +580,9 @@ var updateAvailability = () =>
 
 var tick = (elapsedTime, multiplier) =>
 {
+    if(elapsedTime > 0.1)
+        log(`Long tick: ${elapsedTime.toFixed(3)}s`);
+
     if(pausec.level % 2 == 0)
     {
         ++time;
@@ -602,7 +605,6 @@ var tick = (elapsedTime, multiplier) =>
     }
 
     let dt = BigNumber.from(elapsedTime * multiplier);
-    if(dt > 0.2)log(dt)
     let vc1 = getc1(c1.level).pow(getc1Exponent(c1ExpMs.level));
     let vc2 = getc2(c2.level);
     let bonus = theory.publicationMultiplier;
