@@ -32,6 +32,8 @@ var getDescription = (language) =>
 `A puzzle revolving around nudging a number's value in order to counteract ` +
 `the even clause of the Collatz conjecture.
 
+Note: for spoiler purposes, sharing sequences to new players is ill-advised.
+
 'If it's odd, triple it plus one,
 If it's even, divide it in two.
 

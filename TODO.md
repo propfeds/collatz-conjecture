@@ -6,6 +6,7 @@
 
 ## In consideration
 
+- [ ] History shows number of turns between nudges
 - [x] Emergency upgrade that opens after c hits cap
   - Only increments, no decrements (does it benefit negative runs?)
   - [ ] Deducts 2 levels of c every time it's bought
