@@ -12,6 +12,7 @@ import { Aspect } from '../api/ui/properties/Aspect';
 import { TouchType } from '../api/ui/properties/TouchType';
 import { Thickness } from '../api/ui/properties/Thickness';
 import { Easing } from '../api/ui/properties/Easing';
+import { ScrollOrientation } from '../api/ui/properties/ScrollOrientation';
 
 var id = 'collatz_conjecture';
 var getName = (language) =>
@@ -61,7 +62,7 @@ let bigNumArray = (array) => array.map(x => BigNumber.from(x));
 const borrowFactor = 4;
 const c1Cost = new FirstFreeCost(new ExponentialCost(1, 3.01));
 const getc1 = (level) => Utils.getStepwisePowerSum(level + Math.floor(
-c1BorrowMs.level * incrementc.level / borrowFactor), 2, 5, 1);
+c1BorrowMs.level * nudgec.level / borrowFactor), 2, 5, 1);
 
 const c1ExpInc = 0.03;
 const c1ExpMaxLevel = 4;
@@ -85,7 +86,7 @@ var getPublicationMultiplier = (tau) => tau.pow(pubExp);
 var getPublicationMultiplierFormula = (symbol) => `{${symbol}}^{${pubExp}}`;
 
 var pausec;
-var incrementc, c1, c2;
+var nudgec, c1, c2, incrementc;
 var pausePerma;
 var cooldownMs, c1BorrowMs, c1ExpMs;
 
@@ -98,6 +99,8 @@ const locStrings =
         versionName: 'v0.06',
         workInProgress: ', WIP',//', Work in\\\\Progress',
         changeLog: `\\text{Change log!}\\\\ \\begin{array}{l}
+\\bullet \\text{ Now grants}\\\\ \\text{increments at}\\\\
+\\text{72 nudge levels}\\\\
 \\bullet \\text{ Pub formula~}\\\\ \\frac{{\\tau}^{5.22}}{31} \\rightarrow
 {\\tau}^{4.72}\\\\
 \\bullet \\text{ } c_1 \\text{ level ms~}\\\\
@@ -127,9 +130,11 @@ const locStrings =
         nTicks: '{{{0}}}\\text{{{{ ticks}}}}',
 
         alternating: ' (alternating)',
+        notAlternating: ' (does not alternate)',
+        deductFromc: '\\text{{ (deducts from }}c\\text{{\'s level)}}',
 
         achNegativeTitle: 'Shadow Realm',
-        achNegativeDesc: `Publish with an odd c level and go negative.`,
+        achNegativeDesc: `Publish with an odd level of c and go negative.`,
         achMarathonTitle: 'Lothar-athon',
         achMarathonDesc: 'Reach a c value of 1e60.',
         achSixNineTitle: 'I\'m proud of you.',
@@ -213,7 +218,7 @@ const historyLabel = ui.createLatexLabel
     verticalOptions: LayoutOptions.START,
     margin: new Thickness(3, 40),
     text: () => Utils.getMath(Localization.format(getLoc('historyDesc'),
-    (incrementc ? incrementc.level : 0) - totalIncLevel, lastHistoryLength)),
+    (nudgec ? nudgec.level : 0) - totalIncLevel, lastHistoryLength)),
     fontSize: 9,
     textColor: () => Color.fromHex(cDispColour.get(game.settings.theme))
 });
@@ -376,7 +381,7 @@ var init = () =>
         'pausecDesc')[pausec.level & 1]);
         pausec.info = Utils.getMath(getLoc('pausecInfo'));
     }
-    /* c
+    /* Nudge c
     The theory's core mechanic revolves around nudging c around. This upgrade
     alternates between incrementing and decrementing by 1. If an increment nudge
     is used on a number divisible by 4, the next number will become divisible by
@@ -385,28 +390,30 @@ var init = () =>
     {
         let getDesc = (level) => `c \\leftarrow c${level & 1 ? '-' : '+'}1
         \\text{${getLoc('alternating')}}`;
-        incrementc = theory.createUpgrade(0, currency, new FreeCost);
-        incrementc.getDescription = (_) => Utils.getMath(
-        getDesc(incrementc.level));
-        incrementc.getInfo = (_) => `${incrementc.level & 1 ?
+        nudgec = theory.createUpgrade(0, currency, new FreeCost);
+        nudgec.getDescription = (_) => Utils.getMath(
+        getDesc(nudgec.level));
+        nudgec.getInfo = (_) => `${nudgec.level & 1 ?
         Localization.getUpgradeDecCustomInfo('c', 1) :
         Localization.getUpgradeIncCustomInfo('c', 1)}${getLoc('alternating')}`;
-        incrementc.bought = (_) =>
+        nudgec.bought = (_) =>
         {
             if(writeHistory)
-                history[incrementc.level] = c.toString();
+                history[nudgec.level] = c.toString();
             // even level: -1, odd level: +1, because this is post-processing
-            if(incrementc.level & 1)
+            if(nudgec.level & 1)
                 c += 1n;
             else
                 c -= 1n;
 
             cBigNum = BigNumber.from(c);
+            if(nudgec.level == nudgec.maxLevel)
+                updateAvailability();
             theory.invalidatePrimaryEquation();
             theory.invalidateTertiaryEquation();
         }
-        incrementc.isAutoBuyable = false;
-        incrementc.maxLevel = cLevelCap[0];
+        nudgec.isAutoBuyable = false;
+        nudgec.maxLevel = cLevelCap[0];
     }
     /* c1
     Most theories use a (2, 10) stepwise power, which I criticise to be too weak
@@ -440,6 +447,29 @@ var init = () =>
         c2.getDescription = (_) => Utils.getMath(getDesc(c2.level));
         c2.getInfo = (amount) => Utils.getMathTo(getInfo(c2.level),
         getInfo(c2.level + amount));
+    }
+    /* Increment c
+    Unlike nudge, this upgrade only increments c, which means it will perform 
+    better in negative runs.
+    */
+    {
+        let getDesc = (level) => `c \\leftarrow c+1${getLoc('deductFromc')}`;
+        incrementc = theory.createUpgrade(3, currency, new FreeCost);
+        incrementc.description = Utils.getMath(getDesc(incrementc.level));
+        incrementc.info = `${Localization.getUpgradeIncCustomInfo('c', 1)}` +
+        `${getLoc('notAlternating')}`;
+        incrementc.bought = (_) =>
+        {
+            if(writeHistory)
+                history[nudgec.level + incrementc.level] = c.toString();
+            c += 1n;
+
+            cBigNum = BigNumber.from(c);
+            theory.invalidatePrimaryEquation();
+            theory.invalidateTertiaryEquation();
+        }
+        incrementc.isAutoBuyable = false;
+        incrementc.isAvailable = false;
     }
 
     theory.createPublicationUpgrade(0, currency, permaCosts[0]);
@@ -497,9 +527,9 @@ var init = () =>
         }
         cooldownMs.boughtOrRefunded = (_) =>
         {
-            incrementc.maxLevel = totalIncLevel + cLevelCap[cooldownMs.level];
+            nudgec.maxLevel = totalIncLevel + cLevelCap[cooldownMs.level];
         };
-        cooldownMs.canBeRefunded = (amount) => incrementc.level <=
+        cooldownMs.canBeRefunded = (amount) => nudgec.level <=
         totalIncLevel + cLevelCap[cooldownMs.level - amount];
     }
     /* Level borrowing
@@ -544,6 +574,8 @@ var updateAvailability = () =>
     pausec.isAvailable = pausePerma.level > 0;
     historyFrame.isVisible = theory.permanentUpgrades[0].level > 0;
     historyLabel.isVisible = theory.permanentUpgrades[0].level > 0;
+    incrementc.isAvailable = nudgec.level == nudgec.maxLevel &&
+    cooldownMs.level == cooldownMs.maxLevel;
 }
 
 var tick = (elapsedTime, multiplier) =>
@@ -754,7 +786,8 @@ let createHistoryMenu = () =>
                 ui.createScrollView
                 ({
                     // heightRequest: ui.screenHeight * 0.32,
-                    content: historyGrid
+                    content: historyGrid,
+                    orientation: ScrollOrientation.BOTH
                 }),
                 ui.createBox
                 ({
@@ -796,7 +829,7 @@ var getCurrencyFromTau = (tau) =>
 // Will not trigger if you press reset.
 var prePublish = () =>
 {
-    totalIncLevel = incrementc.level;
+    totalIncLevel = nudgec.level - incrementc.level;
     lastHistory = history;
     lastHistoryLength = Object.keys(lastHistory).length;
 }
@@ -806,25 +839,30 @@ var postPublish = () =>
     time = 0;
     // Disabling history write circumvents the extra levelling
     writeHistory = false;
-    incrementc.maxLevel = totalIncLevel + cLevelCap[cooldownMs.level];
-    incrementc.level = totalIncLevel;
+    nudgec.maxLevel = totalIncLevel + cLevelCap[cooldownMs.level];
+    nudgec.level = totalIncLevel;
     writeHistory = true;
     history = {};
     // c is reset to 0 afterwards
+
     c = 0n;
     cBigNum = BigNumber.from(c);
     cIterProgBar.progressTo(0, 220, Easing.CUBIC_INOUT);
 
     theory.invalidatePrimaryEquation();
     theory.invalidateTertiaryEquation();
+    updateAvailability();
 }
 
-var canResetStage = () => true;
+var canResetStage = () => !theory.canPublish || incrementc.level == 0;
 
 var getResetStageMessage = () => getLoc('reset');
 
 var resetStage = () =>
 {
+    if(theory.canPublish && incrementc.level)
+        return;
+
     for (let i = 0; i < theory.upgrades.length; ++i)
         theory.upgrades[i].level = 0;
 
@@ -868,7 +906,7 @@ var setInternalState = (stateStr) =>
         totalIncLevel = state.totalIncLevel;
         tmpIML += totalIncLevel;
     }
-    incrementc.maxLevel = tmpIML;
+    nudgec.maxLevel = tmpIML;
 
     if('history' in state)
         history = state.history;

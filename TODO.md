@@ -6,11 +6,12 @@
 
 ## In consideration
 
-- [ ] Emergency upgrade that opens after c hits cap
-  - Only increments, no decrements
-  - Deducts 2 levels of c every time it's bought
-  - But, makes players more impatient
-- [ ] Nerf exp to 4.72 or 4.92? Also remove division
+- [x] Emergency upgrade that opens after c hits cap
+  - Only increments, no decrements (does it benefit negative runs?)
+  - [ ] Deducts 2 levels of c every time it's bought
+    - Currently only deducts 1 for leniency
+  - Can make players more impatient
+- [x] Nerf exp to 4.72 or 4.92? Also remove division
 - From d4N:
   - Make a Collatz Conjurator/Conjoiner that makes decision trees or sequences
 - [ ] Buff c2 base to 3.01? Compensate by nerfing pub exp
