@@ -140,7 +140,7 @@ const locStrings =
         achNegativeTitle: 'Shadow Realm',
         achNegativeDesc: `Publish with an odd level of c and go negative.`,
         achMarathonTitle: 'Lothar-athon',
-        achMarathonDesc: 'Reach a c value of 1e60.',
+        achMarathonDesc: 'Reach a c value of ±1e60.',
         achSixNineTitle: 'I\'m proud of you.',
         achSixNineDesc: 'Reach a c value of 69.',
 
@@ -565,8 +565,8 @@ var init = () =>
     theory.createAchievement(0, undefined, getLoc('achNegativeTitle'),
     getLoc('achNegativeDesc'), () => cBigNum < 0);
     theory.createAchievement(1, undefined, getLoc('achMarathonTitle'),
-    getLoc('achMarathonDesc'), () => cBigNum >= 1e60, () => c == 0n ? 0 :
-    cBigNum.log10().toNumber() / 60);
+    getLoc('achMarathonDesc'), () => cBigNum.abs() >= 1e60, () => c == 0n ? 0 :
+    cBigNum.abs().log10().toNumber() / 60);
     theory.createAchievement(2, undefined, getLoc('achSixNineTitle'),
     getLoc('achSixNineDesc'), () => c == 69n);
 
