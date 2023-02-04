@@ -63,8 +63,12 @@ let bigNumArray = (array) => array.map(x => BigNumber.from(x));
 
 const borrowFactor = 4;
 const c1Cost = new FirstFreeCost(new ExponentialCost(1, 3.01));
-const getc1 = (level) => Utils.getStepwisePowerSum(level + Math.floor(
-c1BorrowMs.level * nudgec.level / borrowFactor), 2, 5, 1);
+const getIncrementPenalty = (level) => 2 * Utils.getStepwisePowerSum(level,
+2, 4, 0);
+const getc1BonusLevels = (bl, pl) => Math.max(Math.floor(bl * nudgec.level - 
+getIncrementPenalty(pl)) / borrowFactor, 0);
+const getc1 = (level) => Utils.getStepwisePowerSum(level + getc1BonusLevels(
+c1BorrowMs.level, incrementc.level), 2, 5, 1);
 
 const c1ExpInc = 0.03;
 const c1ExpMaxLevel = 4;
@@ -82,9 +86,7 @@ const cooldown = [42, 30, 20, 12];
 
 const tauRate = 0.1;
 const pubExp = 4.72;
-
 var getPublicationMultiplier = (tau) => tau.pow(pubExp);
-
 var getPublicationMultiplierFormula = (symbol) => `{${symbol}}^{${pubExp}}`;
 
 var pausec;
@@ -133,7 +135,7 @@ const locStrings =
 
         alternating: ' (alternating)',
         notAlternating: ' (does not alternate)',
-        deductFromc: '\\text{{ (deducts from }}c\\text{{\'s level)}}',
+        deductFromc: '\\text{{ (-}} {{{0}}} \\text{{ levels from }}c)',
 
         achNegativeTitle: 'Shadow Realm',
         achNegativeDesc: `Publish with an odd level of c and go negative.`,
@@ -152,7 +154,9 @@ const locStrings =
         labelCurrentRun: 'Current publication:',
         labelLastRun: 'Last publication:',
 
-        reset: 'You are about to reset the current publication.'
+        reset: `You are about to reset the current publication.
+Note: resetting is disabled if publishing is open and extra c levels (past ` +
+`{0}) are bought.`
     }
 };
 
@@ -451,13 +455,15 @@ var init = () =>
         getInfo(c2.level + amount));
     }
     /* Increment c
-    Unlike nudge, this upgrade only increments c, which means it will perform 
-    better in negative runs.
+    Unlike nudge, this upgrade only increments c. It is both weaker in positive
+    and negative.
     */
     {
-        let getDesc = (level) => `c \\leftarrow c+1${getLoc('deductFromc')}`;
+        let getDesc = (level) => `c \\leftarrow c+1${Localization.format(
+        getLoc('deductFromc'), getIncrementPenalty(level).toString(0))}`;
         incrementc = theory.createUpgrade(3, currency, new FreeCost);
-        incrementc.description = Utils.getMath(getDesc(incrementc.level));
+        incrementc.getDescription = () => Utils.getMath(getDesc(
+        incrementc.level));
         incrementc.info = `${Localization.getUpgradeIncCustomInfo('c', 1)}` +
         `${getLoc('notAlternating')}`;
         incrementc.bought = (_) =>
@@ -833,7 +839,7 @@ var getCurrencyFromTau = (tau) =>
 // Will not trigger if you press reset.
 var prePublish = () =>
 {
-    totalIncLevel = nudgec.level - incrementc.level;
+    totalIncLevel = nudgec.level - getIncrementPenalty(incrementc.level);
     lastHistory = history;
     lastHistoryLength = Object.keys(lastHistory).length;
 }
@@ -860,7 +866,8 @@ var postPublish = () =>
 
 var canResetStage = () => !theory.canPublish || incrementc.level == 0;
 
-var getResetStageMessage = () => getLoc('reset');
+var getResetStageMessage = () => Localization.format(getLoc('reset'),
+cLevelCap[cLevelCap.length - 1]);
 
 var resetStage = () =>
 {
