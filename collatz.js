@@ -65,8 +65,8 @@ const borrowFactor = 4;
 const c1Cost = new FirstFreeCost(new ExponentialCost(1, 3.01));
 const getIncrementPenalty = (level) => 2 * Utils.getStepwisePowerSum(level,
 2, 4, 0);
-const getc1BonusLevels = (bl, pl) => Math.max(Math.floor(bl * nudgec.level - 
-getIncrementPenalty(pl)) / borrowFactor, 0);
+const getc1BonusLevels = (bl, pl) => Math.max(Math.floor((bl * nudgec.level - 
+getIncrementPenalty(pl)) / borrowFactor), 0);
 const getc1 = (level) => Utils.getStepwisePowerSum(level + getc1BonusLevels(
 c1BorrowMs.level, incrementc.level), 2, 5, 1);
 
@@ -132,10 +132,11 @@ const locStrings =
         cooldown: '\\text{{interval}}',
         cooldownInfo: 'Interval',
         nTicks: '{{{0}}}\\text{{{{ ticks}}}}',
+        condition: `\\text{{if }}{{{0}}}`,
 
         alternating: ' (alternating)',
-        notAlternating: ' (does not alternate)',
-        deductFromc: '\\text{{ (-}} {{{0}}} \\text{{ levels from }}c)',
+        notAlternating: 'Does not alternate; penalty = ',
+        deductFromc: '\\text{{ (-}} {{{0}}} \\text{{ levels of }}c)',
 
         achNegativeTitle: 'Shadow Realm',
         achNegativeDesc: `Publish with an odd level of c and go negative.`,
@@ -224,7 +225,8 @@ const historyLabel = ui.createLatexLabel
     verticalOptions: LayoutOptions.START,
     margin: new Thickness(3, 40),
     text: () => Utils.getMath(Localization.format(getLoc('historyDesc'),
-    (nudgec ? nudgec.level : 0) - totalIncLevel, lastHistoryLength)),
+    (nudgec ? nudgec.level : 0) + (incrementc ? incrementc.level : 0) -
+    totalIncLevel, lastHistoryLength)),
     fontSize: 9,
     textColor: () => Color.fromHex(cDispColour.get(game.settings.theme))
 });
@@ -464,12 +466,13 @@ var init = () =>
         incrementc = theory.createUpgrade(3, currency, new FreeCost);
         incrementc.getDescription = () => Utils.getMath(getDesc(
         incrementc.level));
-        incrementc.info = `${Localization.getUpgradeIncCustomInfo('c', 1)}` +
-        `${getLoc('notAlternating')}`;
+        incrementc.getInfo = (amount) => `${getLoc('notAlternating')}
+        ${Utils.getMathTo(getIncrementPenalty(incrementc.level).toString(0),
+        getIncrementPenalty(incrementc.level + amount).toString(0))}`;
         incrementc.bought = (_) =>
         {
-            if(writeHistory)
-                history[nudgec.level + incrementc.level] = c.toString();
+            // if(writeHistory)
+            //     history[nudgec.level + incrementc.level] = c.toString();
             c += 1n;
 
             cBigNum = BigNumber.from(c);
@@ -659,9 +662,13 @@ var getPrimaryEquation = () =>
 {
     let cStr = historyNumMode & 2 ? getShortBinaryString(c) :
     getShortString(c);
-    let result = `\\begin{matrix}c\\leftarrow\\begin{cases}c/2&\\text{if }c
-    \\equiv0\\text{ (mod 2)}\\\\3c+1&\\text{if }c\\equiv1\\text{ (mod 2)}
-    \\end{cases}\\\\\\\\\\color{#${cDispColour.get(game.settings.theme)}}
+    let evenClause = Localization.format(getLoc('condition'),
+    `c\\equiv0\\text{ (mod 2)}`);
+    let oddClause = Localization.format(getLoc('condition'),
+    `c\\equiv1\\text{ (mod 2)}`);
+    let result = `\\begin{matrix}c\\leftarrow\\begin{cases}c/2&${evenClause}\\\\
+    3c+1&${oddClause}\\end{cases}\\\\\\\\
+    \\color{#${cDispColour.get(game.settings.theme)}}
     {=${cStr}${historyNumMode & 2 ? '_2' : ''}}\\end{matrix}`;
 
     return result;
