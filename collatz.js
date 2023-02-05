@@ -57,7 +57,7 @@ let lastHistory;
 let lastHistoryLength = 0;
 let writeHistory = true;
 let historyNumMode = 0;
-let historyLvlMode = 1;
+let historyIdxMode = 0;
 let reachedFirstPub = false;
 
 let bigNumArray = (array) => array.map(x => BigNumber.from(x));
@@ -163,6 +163,7 @@ It's thesis time.`,
         achSixNineDesc: 'Reach a c value of 69.',
 
         btnClose: 'Close',
+        btnIndexingMode: ['Indexing: Moves', 'Indexing: Levels'],
         btnNotationMode: ['Notation: Digits', 'Notation: Scientific'],
         btnBaseMode: ['Base: 10', 'Base: 2'],
         errorInvalidNumMode: 'Invalid number mode',
@@ -373,19 +374,30 @@ let getStringForm = (n, numMode = 0) =>
     }
 }
 
-let getSequence = (sequence, numMode = 0, lvlMode = 0) =>
+let getSequence = (sequence, numMode = 0, idxMode = 0) =>
 {
     let result = '\\begin{array}{rrr}';
     let i = 0;
     let start;
+    let oldFormat = false;
     for(key in sequence)
     {
         if(i)
             result += '\\\\';
         else
+        {
             start = Number(key) - 1;
-        result += `${lvlMode ? Number(key) - start : key}:&
-        ${getStringForm(sequence[key], numMode)}&(${key & 1 ? '+1' : '-1'})`;
+            if(typeof sequence[key] === 'string')
+                oldFormat = true;
+        }
+        if(oldFormat)
+            result += `${idxMode ? Number(key) - start : '?'}:&
+            ${getStringForm(sequence[key], numMode)}&
+            (${key & 1 ? '+1' : '-1'})`;
+        else
+            result += `${idxMode ? Number(key) - start : sequence[key][0]}:&
+            ${getStringForm(sequence[key][1], numMode)}&
+            (${key & 1 ? '+1' : '-1'})`;
         ++i;
     }
     result += '&\\end{array}';
@@ -429,7 +441,7 @@ var init = () =>
                 return;
             }
             if(writeHistory)
-                history[nudgec.level] = c.toString();
+                history[nudgec.level] = [moves, c.toString()];
             // even level: -1, odd level: +1, because this is post-processing
             if(nudgec.level & 1)
                 c += 1n;
@@ -499,8 +511,6 @@ var init = () =>
                 incrementc.refund(1);
                 return;
             }
-            // if(writeHistory)
-            //     history[nudgec.level + incrementc.level] = c.toString();
             if(c < 0n)
                 c -= 1n;
             else
@@ -751,13 +761,32 @@ var getTertiaryEquation = () =>
 
 let createHistoryMenu = () =>
 {
+    let toggleIdxMode = () =>
+    {
+        historyIdxMode ^= 1;
+        currentPubHistory.text = getSequence(history, historyNumMode,
+        historyIdxMode);
+        lastPubHistory.text = getSequence(lastHistory, historyNumMode,
+        historyIdxMode);
+        toggleIdxButton.text = getLoc('btnIndexingMode')[historyIdxMode & 1];
+    }
+    let toggleIdxButton = ui.createButton
+    ({
+        column: 0,
+        text: getLoc('btnIndexingMode')[historyIdxMode & 1],
+        onClicked: () =>
+        {
+            Sound.playClick();
+            toggleIdxMode();
+        }
+    });
     let toggleBaseMode = () =>
     {
         historyNumMode = historyNumMode ^ 2;
         currentPubHistory.text = getSequence(history, historyNumMode,
-        historyLvlMode);
+        historyIdxMode);
         lastPubHistory.text = getSequence(lastHistory, historyNumMode,
-        historyLvlMode);
+        historyIdxMode);
         toggleLvlButton.text = getLoc('btnBaseMode')[(historyNumMode & 2) >>
         1];
         theory.invalidatePrimaryEquation();
@@ -765,8 +794,7 @@ let createHistoryMenu = () =>
     };
     let toggleLvlButton = ui.createButton
     ({
-        row: 0,
-        column: 0,
+        column: 1,
         text: getLoc('btnBaseMode')[(historyNumMode & 2) >> 1],
         onClicked: () =>
         {
@@ -778,15 +806,14 @@ let createHistoryMenu = () =>
     {
         historyNumMode = historyNumMode ^ 1;
         currentPubHistory.text = getSequence(history, historyNumMode,
-        historyLvlMode);
+        historyIdxMode);
         lastPubHistory.text = getSequence(lastHistory, historyNumMode,
-        historyLvlMode);
+        historyIdxMode);
         toggleNumButton.text = getLoc('btnNotationMode')[historyNumMode & 1];
     };
     let toggleNumButton = ui.createButton
     ({
-        row: 0,
-        column: 1,
+        column: 2,
         text: getLoc('btnNotationMode')[historyNumMode & 1],
         onClicked: () =>
         {
@@ -796,22 +823,53 @@ let createHistoryMenu = () =>
     });
     let currentPubHistory = ui.createLatexLabel
     ({
+        row: 2,
         column: 0,
         horizontalOptions: LayoutOptions.CENTER,
-        text: getSequence(history, historyNumMode, historyLvlMode)
+        text: getSequence(history, historyNumMode, historyIdxMode)
     });
     let lastPubHistory = ui.createLatexLabel
     ({
+        row: 2,
         column: 1,
         horizontalOptions: LayoutOptions.CENTER,
-        text: getSequence(lastHistory, historyNumMode, historyLvlMode)
+        text: getSequence(lastHistory, historyNumMode, historyIdxMode)
     });
     let historyGrid = ui.createGrid
     ({
+        rowDefinitions: ['24', '13', 'auto'],
         columnDefinitions: ['1*', '1*'],
         // columnSpacing: 8,
         children:
         [
+            ui.createLatexLabel
+            ({
+                row: 0,
+                column: 0,
+                text: getLoc('labelCurrentRun'),
+                horizontalOptions: LayoutOptions.CENTER,
+                verticalOptions: LayoutOptions.END
+            }),
+            ui.createLatexLabel
+            ({
+                row: 0,
+                column: 1,
+                text: getLoc('labelLastRun'),
+                horizontalOptions: LayoutOptions.CENTER,
+                verticalOptions: LayoutOptions.END
+            }),
+            ui.createBox
+            ({
+                row: 1,
+                column: 0,
+                margin: new Thickness(0, 6)
+            }),
+            ui.createBox
+            ({
+                row: 1,
+                column: 1,
+                margin: new Thickness(0, 6)
+            }),
             currentPubHistory,
             lastPubHistory
         ]
@@ -827,35 +885,15 @@ let createHistoryMenu = () =>
             [
                 ui.createGrid
                 ({
-                    rowDefinitions: ['44', '24'],
-                    columnDefinitions: ['1*', '1*'],
-                    columnSpacing: 12,
+                    rowDefinitions: [44],
+                    columnDefinitions: ['3*', '2*', '3*'],
+                    columnSpacing: 8,
                     children:
                     [
+                        toggleIdxButton,
                         toggleNumButton,
-                        toggleLvlButton,
-                        ui.createLatexLabel
-                        ({
-                            row: 1,
-                            column: 0,
-                            text: getLoc('labelCurrentRun'),
-                            horizontalOptions: LayoutOptions.CENTER,
-                            verticalOptions: LayoutOptions.END
-                        }),
-                        ui.createLatexLabel
-                        ({
-                            row: 1,
-                            column: 1,
-                            text: getLoc('labelLastRun'),
-                            horizontalOptions: LayoutOptions.CENTER,
-                            verticalOptions: LayoutOptions.END
-                        })
+                        toggleLvlButton
                     ]
-                }),
-                ui.createBox
-                ({
-                    heightRequest: 1,
-                    margin: new Thickness(0, 6)
                 }),
                 ui.createScrollView
                 ({
@@ -954,7 +992,8 @@ var getInternalState = () => JSON.stringify
     totalIncLevel: totalIncLevel,
     history: history,
     lastHistory: lastHistory,
-    historyNumMode: historyNumMode
+    historyNumMode: historyNumMode,
+    historyIdxMode: historyIdxMode
 })
 
 var setInternalState = (stateStr) =>
@@ -994,6 +1033,8 @@ var setInternalState = (stateStr) =>
     }
     if('historyNumMode' in state)
         historyNumMode = state.historyNumMode;
+    if('historyIdxMode' in state)
+        historyIdxMode = state.historyIdxMode;
 
     theory.invalidatePrimaryEquation();
     theory.invalidateTertiaryEquation();
