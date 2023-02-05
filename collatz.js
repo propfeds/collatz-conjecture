@@ -32,7 +32,8 @@ var getDescription = (language) =>
 `A puzzle revolving around nudging a number's value in order to counteract ` +
 `the even clause of the Collatz conjecture.
 
-Note: for spoiler purposes, sharing sequences to new players is ill-advised.
+Warning: for spoiler purposes, it is ill-advised to
+share your sequences to new players.
 
 'If it's odd, triple it plus one,
 If it's even, divide it in two.
@@ -64,7 +65,7 @@ let bigNumArray = (array) => array.map(x => BigNumber.from(x));
 const borrowFactor = 4;
 const c1Cost = new FirstFreeCost(new ExponentialCost(1, 3.01));
 const getIncrementPenalty = (level) => 2 * Utils.getStepwisePowerSum(level,
-2, 4, 0);
+2, 4, 0).toNumber();
 const getc1BonusLevels = (bl, pl) => Math.max(Math.floor((bl * nudgec.level - 
 getIncrementPenalty(pl)) / borrowFactor), 0);
 const getc1 = (level) => Utils.getStepwisePowerSum(level + getc1BonusLevels(
@@ -149,9 +150,9 @@ behind their backs.
 
 It's thesis time.`,
 
-        achNegativeTitle: 'Shadow Realm',
+        achNegativeTitle: 'Shrouded by Fog',
         achNegativeDesc: `Publish with an odd level of c and go negative.`,
-        achMarathonTitle: 'Lothar-athon',
+        achMarathonTitle: 'The Annual Lothar-athon',
         achMarathonDesc: 'Reach a c value of ±1e60.',
         achSixNineTitle: 'I\'m proud of you.',
         achSixNineDesc: 'Reach a c value of 69.',
@@ -473,13 +474,13 @@ var init = () =>
     */
     {
         let getDesc = (level) => `c \\leftarrow c+1${Localization.format(
-        getLoc('deductFromc'), getIncrementPenalty(level).toString(0))}`;
+        getLoc('deductFromc'), getIncrementPenalty(level))}`;
         incrementc = theory.createUpgrade(3, currency, new FreeCost);
         incrementc.getDescription = () => Utils.getMath(getDesc(
         incrementc.level));
         incrementc.getInfo = (amount) => `${getLoc('notAlternating')}
-        ${Utils.getMathTo(getIncrementPenalty(incrementc.level).toString(0),
-        getIncrementPenalty(incrementc.level + amount).toString(0))}`;
+        ${Utils.getMathTo(getIncrementPenalty(incrementc.level),
+        getIncrementPenalty(incrementc.level + amount))}`;
         incrementc.bought = (_) =>
         {
             // if(writeHistory)
@@ -863,8 +864,8 @@ var prePublish = () =>
     totalIncLevel = nudgec.level - getIncrementPenalty(incrementc.level);
     lastHistory = history;
     lastHistoryLength = Object.keys(lastHistory).length;
+    
 }
-
 var postPublish = () =>
 {
     time = 0;
