@@ -9,9 +9,9 @@
 - [ ] History shows number of turns between nudges
 - [x] Emergency upgrade that opens after c hits cap
   - Only increments, no decrements (does it benefit negative runs?)
-  - [ ] Deducts 2 levels of c every time it's bought
-    - Currently only deducts 1 for leniency
+  - [x] Deducts 2+ levels of c every time it's bought
   - Can make players more impatient
+  - [ ] Make it a perma upgrade
 - [x] Nerf exp to 4.72 or 4.92? Also remove division
 - From d4N:
   - Make a Collatz Conjurator/Conjoiner that makes decision trees or sequences

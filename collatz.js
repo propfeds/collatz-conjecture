@@ -74,10 +74,10 @@ const c1ExpInc = 0.03;
 const c1ExpMaxLevel = 4;
 const getc1Exponent = (level) => 1 + c1ExpInc * level;
 
-const c2Cost = new ExponentialCost(1e6, 11);
-const getc2 = (level) => BigNumber.TWO.pow(level);
+const c2Cost = new ExponentialCost(2.2e7, 11);
+const getc2 = (level) => BigNumber.THREE.pow(level);
 
-const permaCosts = bigNumArray(['1e12', '1e22', '1e31', '1e54']);
+const permaCosts = bigNumArray(['1e12', '1e22', '1e31', '1e54', '1e160']);
 const milestoneCost = new CompositeCost(2, new LinearCost(4.4, 4.4),
 new CompositeCost(2, new LinearCost(13.2, 8.8), new LinearCost(30.8, 13.2)));
 
@@ -85,7 +85,7 @@ const cLevelCap = [24, 36, 52, 72];
 const cooldown = [42, 30, 20, 12];
 
 const tauRate = 0.1;
-const pubExp = 4.72;
+const pubExp = 4.2;
 var getPublicationMultiplier = (tau) => tau.pow(pubExp);
 var getPublicationMultiplierFormula = (symbol) => `{${symbol}}^{${pubExp}}`;
 
@@ -101,7 +101,7 @@ const locStrings =
     en:
     {
         versionName: 'v0.06',
-        workInProgress: ', WIP',//', Work in\\\\Progress',
+        workInProgress: /*', WIP',*/', Work in\\\\Progress',
         changeLog: `\\text{Change log!}\\\\ \\begin{array}{l}
 \\bullet \\text{ Now grants}\\\\ \\text{increments at}\\\\
 \\text{72 nudge levels}\\\\
@@ -136,7 +136,18 @@ const locStrings =
 
         alternating: ' (alternating)',
         notAlternating: 'Does not alternate; penalty = ',
-        deductFromc: '\\text{{ (-}} {{{0}}} \\text{{ levels of }}c)',
+        deductFromc: '\\text{{ (- }} {{{0}}} \\text{{ levels from }}c)',
+
+        ch1Title: 'Preface',
+        ch1Desc: `You are a talented undergraduate student.
+Your professors see a bright future ahead of you.
+One you respect hands you a formula,
+then asks you if it converges into a finite cycle.
+It is a modular recursive equation.
+Not knowing how to solve it, you nudge the value
+behind their backs.
+
+It's thesis time.`,
 
         achNegativeTitle: 'Shadow Realm',
         achNegativeDesc: `Publish with an odd level of c and go negative.`,
@@ -449,7 +460,7 @@ var init = () =>
     Standard doubling upgrade.
     */
     {
-        let getDesc = (level) => `c_2=2^{${level}}`;
+        let getDesc = (level) => `c_2=3^{${level}}`;
         let getInfo = (level) => `c_2=${getc2(level).toString(0)}`;
         c2 = theory.createUpgrade(2, currency, c2Cost);
         c2.getDescription = (_) => Utils.getMath(getDesc(c2.level));
@@ -565,6 +576,9 @@ var init = () =>
         c1ExpMs.boughtOrRefunded = (_) => theory.invalidateSecondaryEquation();
     }
 
+    theory.createStoryChapter(0, getLoc('ch1Title'), getLoc('ch1Desc'),
+    () => true);
+
     theory.createAchievement(0, undefined, getLoc('achNegativeTitle'),
     getLoc('achNegativeDesc'), () => cBigNum < 0);
     theory.createAchievement(1, undefined, getLoc('achMarathonTitle'),
@@ -637,8 +651,8 @@ var getEquationOverlay = () =>
                 column: 0,
                 verticalOptions: LayoutOptions.START,
                 margin: new Thickness(6, 3),
-                text: getLoc('versionName') + getLoc('workInProgress') +
-                Utils.getMath(getLoc('changeLog')),
+                text: getLoc('versionName') + getLoc('workInProgress')/* +
+                Utils.getMath(getLoc('changeLog'))*/,
                 fontSize: 9,
                 textColor: Color.TEXT_MEDIUM
             }),
