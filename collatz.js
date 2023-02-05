@@ -122,7 +122,7 @@ const locStrings =
         pausecInfo: '\\text{Freezes }c\\text{\'s value}',
 
         permaPause: '\\text{{the ability to freeze }}c',
-        permaIncrement: `\\text{{extra in/decrements of }}c`,
+        permaIncrement: `\\text{{extra in/decrements for }}c`,
         permaIncrementInfo: `\\text{{Dependent on }}c
         \\text{{'s sign, and incurs penalty on its level}}`,
         permaPreserveDesc: '\\text{Preserve }c\\text{ after publishing}',
