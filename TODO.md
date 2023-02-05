@@ -6,6 +6,7 @@
 
 ## In consideration
 
+- [ ] Rename c1c2 to q1q2 for distinction from c
 - [ ] History shows number of turns between nudges
 - [x] Emergency upgrade that opens after c hits cap
   - Only increments, no decrements (does it benefit negative runs?)

@@ -421,6 +421,11 @@ var init = () =>
         Localization.getUpgradeIncCustomInfo('c', 1)}${getLoc('alternating')}`;
         nudgec.bought = (_) =>
         {
+            if(nudgec.isAutoBuyable)
+            {
+                nudgec.refund(1);
+                return;
+            }
             if(writeHistory)
                 history[nudgec.level] = c.toString();
             // even level: -1, odd level: +1, because this is post-processing
@@ -487,6 +492,11 @@ var init = () =>
         getIncrementPenalty(incrementc.level + amount))}`;
         incrementc.bought = (_) =>
         {
+            if(incrementc.isAutoBuyable)
+            {
+                incrementc.refund(1);
+                return;
+            }
             // if(writeHistory)
             //     history[nudgec.level + incrementc.level] = c.toString();
             if(c < 0n)
