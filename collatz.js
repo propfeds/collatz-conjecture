@@ -47,6 +47,7 @@ what would you do?'`,
 var authors = 'propfeds#5988\n\nThanks to:\nCipher#9599, for the idea';
 var version = 0.06;
 
+let moves = 0;
 let time = 0;
 let c = 0n;
 let cBigNum = BigNumber.from(c);
@@ -57,6 +58,7 @@ let lastHistoryLength = 0;
 let writeHistory = true;
 let historyNumMode = 0;
 let historyLvlMode = 1;
+let reachedFirstPub = false;
 
 let bigNumArray = (array) => array.map(x => BigNumber.from(x));
 
@@ -145,7 +147,7 @@ const locStrings =
         ch1Title: 'Preface',
         ch1Desc: `You are a talented undergraduate student.
 Your professors see a bright future ahead of you.
-One you respect hands you a formula,
+One professor you respect hands you a formula,
 then asks you if it converges into a finite cycle.
 It is a modular recursive equation.
 Not knowing how to solve it, you nudge the value
@@ -513,7 +515,7 @@ var init = () =>
     }
 
     theory.createPublicationUpgrade(0, currency, permaCosts[0]);
-    theory.permanentUpgrades[0].bought = (_) => updateAvailability();
+    // theory.permanentUpgrades[0].bought = (_) => updateAvailability();
     theory.createBuyAllUpgrade(1, currency, permaCosts[1]);
     theory.createAutoBuyerUpgrade(2, currency, permaCosts[2]);
     /* Unlocks freeze
@@ -626,8 +628,12 @@ var init = () =>
 var updateAvailability = () =>
 {
     pausec.isAvailable = pausePerma.level > 0;
-    historyFrame.isVisible = theory.permanentUpgrades[0].level > 0;
-    historyLabel.isVisible = theory.permanentUpgrades[0].level > 0;
+    if(theory.permanentUpgrades[0].level)
+    {
+        historyFrame.isVisible = true;
+        historyLabel.isVisible = true;
+        reachedFirstPub = true;
+    }
     incrementc.isAvailable = extraIncPerma.level > 0 &&
     nudgec.level == nudgec.maxLevel;
 }
@@ -652,6 +658,8 @@ var tick = (elapsedTime, multiplier) =>
                 c /= 2n;
 
             cBigNum = BigNumber.from(c);
+            if(nudgec.level > totalIncLevel)
+                ++moves;
             theory.invalidatePrimaryEquation();
             theory.invalidateTertiaryEquation();
             time -= cooldown[cooldownMs.level];
@@ -730,12 +738,15 @@ var getSecondaryEquation = () =>
 
 var getTertiaryEquation = () =>
 {
-    let result;
+    let mStr = '';
+    let cStr = '';
+    if(reachedFirstPub)
+        mStr = `t=${moves}`;
     if(historyNumMode & 2 || c > 1e6 || c < -1e6)
-        result = `c=${cBigNum.toString(0)}`;
-    else
-        result = '';
-    return result;
+        cStr = `c=${cBigNum.toString(0)}`;
+
+    return `\\begin{matrix}${mStr}${mStr && cStr ? ',&' : ''}${cStr}
+    \\end{matrix}`;
 }
 
 let createHistoryMenu = () =>
@@ -898,6 +909,7 @@ var prePublish = () =>
 }
 var postPublish = () =>
 {
+    moves = 0;
     time = 0;
     // Disabling history write circumvents the extra levelling
     writeHistory = false;
@@ -936,6 +948,7 @@ var resetStage = () =>
 var getInternalState = () => JSON.stringify
 ({
     version: version,
+    moves: moves,
     time: time,
     c: c.toString(),
     totalIncLevel: totalIncLevel,
@@ -950,6 +963,8 @@ var setInternalState = (stateStr) =>
         return;
 
     let state = JSON.parse(stateStr);
+    if('moves' in state)
+        moves = state.moves;
     if('time' in state)
     {
         time = state.time;
