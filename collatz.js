@@ -123,7 +123,7 @@ const locStrings =
 
         permaPause: '\\text{{the ability to freeze }}c',
         permaIncrement: '\\text{{extra increments of }}c',
-        permaIncrementInfo: `\\text{{Does not alternate; incurs penalty on}}c
+        permaIncrementInfo: `\\text{{Does not alternate; incurs penalty on }}c
         \\text{{\'s level}}`,
         permaPreserveDesc: '\\text{Preserve }c\\text{ after publishing}',
         permaPreserveInfo: '\\text{Preserves }c\\text{ after publishing}',
@@ -524,7 +524,7 @@ var init = () =>
         new ConstantCost(permaCosts[4]));
         extraIncPerma.description = Localization.getUpgradeUnlockDesc(getLoc(
         'permaIncrement'));
-        extraIncPerma.info = Utils.getMath('permaIncrementInfo');
+        extraIncPerma.info = Utils.getMath(getLoc('permaIncrementInfo'));
         extraIncPerma.bought = (_) => updateAvailability();
         extraIncPerma.maxLevel = 1;
     }
