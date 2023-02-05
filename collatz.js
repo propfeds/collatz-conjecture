@@ -47,7 +47,7 @@ what would you do?'`,
 var authors = 'propfeds#5988\n\nThanks to:\nCipher#9599, for the idea';
 var version = 0.06;
 
-let moves = 0;
+let turns = 0;
 let time = 0;
 let c = 0n;
 let cBigNum = BigNumber.from(c);
@@ -163,8 +163,8 @@ It's thesis time.`,
         achSixNineDesc: 'Reach a c value of 69.',
 
         btnClose: 'Close',
-        btnIndexingMode: ['Indexing: Moves', 'Indexing: Levels'],
-        btnNotationMode: ['Notation: Digits', 'Notation: Scientific'],
+        btnIndexingMode: ['Indexing: Turns (t)', 'Indexing: Levels'],
+        btnNotationMode: ['Disp.: Digits', 'Disp.: Scientific'],
         btnBaseMode: ['Base: 10', 'Base: 2'],
         errorInvalidNumMode: 'Invalid number mode',
         errorBinExpLimit: 'Too big',
@@ -441,7 +441,7 @@ var init = () =>
                 return;
             }
             if(writeHistory)
-                history[nudgec.level] = [moves, c.toString()];
+                history[nudgec.level] = [turns, c.toString()];
             // even level: -1, odd level: +1, because this is post-processing
             if(nudgec.level & 1)
                 c += 1n;
@@ -669,7 +669,7 @@ var tick = (elapsedTime, multiplier) =>
 
             cBigNum = BigNumber.from(c);
             if(nudgec.level > totalIncLevel)
-                ++moves;
+                ++turns;
             theory.invalidatePrimaryEquation();
             theory.invalidateTertiaryEquation();
             time -= cooldown[cooldownMs.level];
@@ -751,7 +751,7 @@ var getTertiaryEquation = () =>
     let mStr = '';
     let cStr = '';
     if(reachedFirstPub)
-        mStr = `t=${moves}`;
+        mStr = `t=${turns}`;
     if(historyNumMode & 2 || c > 1e6 || c < -1e6)
         cStr = `c=${cBigNum.toString(0)}`;
 
@@ -947,7 +947,7 @@ var prePublish = () =>
 }
 var postPublish = () =>
 {
-    moves = 0;
+    turns = 0;
     time = 0;
     // Disabling history write circumvents the extra levelling
     writeHistory = false;
@@ -986,7 +986,7 @@ var resetStage = () =>
 var getInternalState = () => JSON.stringify
 ({
     version: version,
-    moves: moves,
+    turns: turns,
     time: time,
     c: c.toString(),
     totalIncLevel: totalIncLevel,
@@ -1002,8 +1002,8 @@ var setInternalState = (stateStr) =>
         return;
 
     let state = JSON.parse(stateStr);
-    if('moves' in state)
-        moves = state.moves;
+    if('turns' in state)
+        turns = state.turns;
     if('time' in state)
     {
         time = state.time;
