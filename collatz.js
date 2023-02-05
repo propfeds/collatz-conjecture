@@ -122,9 +122,9 @@ const locStrings =
         pausecInfo: '\\text{Freezes }c\\text{\'s value}',
 
         permaPause: '\\text{{the ability to freeze }}c',
-        permaIncrement: '\\text{{extra increments of }}c',
-        permaIncrementInfo: `\\text{{Does not alternate; incurs penalty on }}c
-        \\text{{\'s level}}`,
+        permaIncrement: `\\text{{extra in/decrements of }}c`,
+        permaIncrementInfo: `\\text{{Dependent on }}c
+        \\text{{'s sign, and incurs penalty on its level}}`,
         permaPreserveDesc: '\\text{Preserve }c\\text{ after publishing}',
         permaPreserveInfo: '\\text{Preserves }c\\text{ after publishing}',
 
@@ -139,7 +139,7 @@ const locStrings =
         condition: `\\text{{if }}{{{0}}}`,
 
         alternating: ' (alternating)',
-        notAlternating: 'c \\text{ level penalty} = ',
+        penalty: 'c \\text{ level penalty} = ',
         deductFromc: '\\text{{ (- }} {{{0}}} \\text{{ levels from }}c)',
 
         ch1Title: 'Preface',
@@ -155,7 +155,7 @@ It's thesis time.`,
 
         achNegativeTitle: 'Shrouded by Fog',
         achNegativeDesc: `Publish with an odd level of c and go negative.`,
-        achMarathonTitle: 'The Annual Lothar-athon',
+        achMarathonTitle: 'Annual Lothar-athon',
         achMarathonDesc: 'Reach a c value of ±1e60.',
         achSixNineTitle: 'I\'m proud of you.',
         achSixNineDesc: 'Reach a c value of 69.',
@@ -476,20 +476,23 @@ var init = () =>
     and negative.
     */
     {
-        let getDesc = (level) => `c \\leftarrow c+1${Localization.format(
-        getLoc('deductFromc'), getIncrementPenalty(level))}`;
+        let getDesc = (level) => `c \\leftarrow c${c < 0n ? '-' : '+'}1
+        ${Localization.format(getLoc('deductFromc'),
+        getIncrementPenalty(level))}`;
         incrementc = theory.createUpgrade(3, currency, new FreeCost);
         incrementc.getDescription = () => Utils.getMath(getDesc(
         incrementc.level));
-        incrementc.getInfo = (amount) =>
-        `${Utils.getMath(getLoc('notAlternating'))}
+        incrementc.getInfo = (amount) => `${Utils.getMath(getLoc('penalty'))}
         ${Utils.getMathTo(getIncrementPenalty(incrementc.level),
         getIncrementPenalty(incrementc.level + amount))}`;
         incrementc.bought = (_) =>
         {
             // if(writeHistory)
             //     history[nudgec.level + incrementc.level] = c.toString();
-            c += 1n;
+            if(c < 0n)
+                c -= 1n;
+            else
+                c += 1n;
 
             cBigNum = BigNumber.from(c);
             theory.invalidatePrimaryEquation();
