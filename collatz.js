@@ -92,7 +92,7 @@ var getPublicationMultiplierFormula = (symbol) => `{${symbol}}^{${pubExp}}`;
 
 var pausec;
 var nudgec, c1, c2, incrementc;
-var pausePerma;
+var pausePerma, extraIncPerma;
 var cooldownMs, c1BorrowMs, c1ExpMs;
 
 var currency;
@@ -122,6 +122,9 @@ const locStrings =
         pausecInfo: '\\text{Freezes }c\\text{\'s value}',
 
         permaPause: '\\text{{the ability to freeze }}c',
+        permaIncrement: '\\text{{extra increments of }}c',
+        permaIncrementInfo: `\\text{{Does not alternate; incurs penalty on}}c
+        \\text{{\'s level}}`,
         permaPreserveDesc: '\\text{Preserve }c\\text{ after publishing}',
         permaPreserveInfo: '\\text{Preserves }c\\text{ after publishing}',
 
@@ -136,7 +139,7 @@ const locStrings =
         condition: `\\text{{if }}{{{0}}}`,
 
         alternating: ' (alternating)',
-        notAlternating: 'Does not alternate; penalty = ',
+        notAlternating: 'c \\text{ level penalty} = ',
         deductFromc: '\\text{{ (- }} {{{0}}} \\text{{ levels from }}c)',
 
         ch1Title: 'Preface',
@@ -168,8 +171,8 @@ It's thesis time.`,
         labelLastRun: 'Last publication:',
 
         reset: `You are about to reset the current publication.
-Note: resetting is disabled if publishing is open and extra c levels (past ` +
-`{0}) are bought.`
+Note: resetting is disabled if publishing is open and extra c levels are ` +
+`bought.`
     }
 };
 
@@ -478,7 +481,8 @@ var init = () =>
         incrementc = theory.createUpgrade(3, currency, new FreeCost);
         incrementc.getDescription = () => Utils.getMath(getDesc(
         incrementc.level));
-        incrementc.getInfo = (amount) => `${getLoc('notAlternating')}
+        incrementc.getInfo = (amount) =>
+        `${Utils.getMath(getLoc('notAlternating'))}
         ${Utils.getMathTo(getIncrementPenalty(incrementc.level),
         getIncrementPenalty(incrementc.level + amount))}`;
         incrementc.bought = (_) =>
@@ -511,6 +515,18 @@ var init = () =>
         'permaPause'));
         pausePerma.bought = (_) => updateAvailability();
         pausePerma.maxLevel = 1;
+    }
+    /* Extra increments
+    Generally used to aid with catching up. Not sure if it's actually effective.
+    */
+    {
+        extraIncPerma = theory.createPermanentUpgrade(4, currency,
+        new ConstantCost(permaCosts[4]));
+        extraIncPerma.description = Localization.getUpgradeUnlockDesc(getLoc(
+        'permaIncrement'));
+        extraIncPerma.info = Utils.getMath('permaIncrementInfo');
+        extraIncPerma.bought = (_) => updateAvailability();
+        extraIncPerma.maxLevel = 1;
     }
     /* Preserve c
     We had the chance to test out this one. It breaks progression, and poses a
@@ -592,7 +608,6 @@ var init = () =>
 
     theory.primaryEquationHeight = 66;
     theory.primaryEquationScale = 0.9;
-
 }
 
 var updateAvailability = () =>
@@ -600,8 +615,8 @@ var updateAvailability = () =>
     pausec.isAvailable = pausePerma.level > 0;
     historyFrame.isVisible = theory.permanentUpgrades[0].level > 0;
     historyLabel.isVisible = theory.permanentUpgrades[0].level > 0;
-    incrementc.isAvailable = nudgec.level == nudgec.maxLevel &&
-    cooldownMs.level == cooldownMs.maxLevel;
+    incrementc.isAvailable = extraIncPerma.level > 0 &&
+    nudgec.level == nudgec.maxLevel;
 }
 
 var tick = (elapsedTime, multiplier) =>
@@ -864,7 +879,6 @@ var prePublish = () =>
     totalIncLevel = nudgec.level - getIncrementPenalty(incrementc.level);
     lastHistory = history;
     lastHistoryLength = Object.keys(lastHistory).length;
-    
 }
 var postPublish = () =>
 {
@@ -888,8 +902,7 @@ var postPublish = () =>
 
 var canResetStage = () => !theory.canPublish || incrementc.level == 0;
 
-var getResetStageMessage = () => Localization.format(getLoc('reset'),
-cLevelCap[cLevelCap.length - 1]);
+var getResetStageMessage = () => getLoc('reset');
 
 var resetStage = () =>
 {

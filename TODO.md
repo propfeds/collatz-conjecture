@@ -11,7 +11,7 @@
   - Only increments, no decrements (does it benefit negative runs?)
   - [x] Deducts 2+ levels of c every time it's bought
   - Can make players more impatient
-  - [ ] Make it a perma upgrade
+  - [x] Make it a perma upgrade
 - [x] Nerf exp to 4.72 or 4.92? Also remove division
 - From d4N:
   - Make a Collatz Conjurator/Conjoiner that makes decision trees or sequences
