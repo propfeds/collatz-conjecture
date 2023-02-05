@@ -108,7 +108,7 @@ const locStrings =
 \\text{72 nudge levels}\\\\
 \\bullet \\text{ Pub formula~}\\\\ \\frac{{\\tau}^{5.22}}{31} \\rightarrow
 {\\tau}^{4.72}\\\\
-\\bullet \\text{ } c_1 \\text{ level ms~}\\\\
+\\bullet \\text{ } q_1 \\text{ level ms~}\\\\
 1/2 \\rightarrow 1/4,\\\\
 \\text{rounded down}\\\\
 \\bullet \\text{ Freeze cost~}\\\\ 1e66 \\rightarrow 1e54\\\\
@@ -119,7 +119,7 @@ const locStrings =
         \\end{{array}}`,
         historyInfo: 'Shows the last and current runs\' sequences',
         pausecDesc: ['\\text{Freeze }c', '\\text{Unfreeze }c'],
-        pausecInfo: '\\text{Freezes }c\\text{\'s value}',
+        pausecInfo: '\\text{Freezes }c\\text{ value}',
 
         permaPause: '\\text{{the ability to freeze }}c',
         permaIncrement: `\\text{{extra in/decrements for }}c`,
@@ -128,10 +128,10 @@ const locStrings =
         permaPreserveDesc: '\\text{Preserve }c\\text{ after publishing}',
         permaPreserveInfo: '\\text{Preserves }c\\text{ after publishing}',
 
-        c1Level: 'c_1\\text{{ level}}',
-        cLevel: '1/{{{0}}}\\text{{{{ of }}}}c\\text{{{{\'s level}}}}',
+        c1Level: 'q_1\\text{{ level}}',
+        cLevel: '1/{{{0}}}\\text{{{{ of }}}}c\\text{{{{ level}}}}',
         cLevelth: `1/{{{0}}}^\\text{{{{th}}}}\\text{{{{ of }}}}c
-        \\text{{{{\'s level}}}}`,
+        \\text{{{{ level}}}}`,
         cLevelCap: 'c\\text{{ level cap}}',
         cooldown: '\\text{{interval}}',
         cooldownInfo: 'Interval',
@@ -443,7 +443,7 @@ var init = () =>
         nudgec.isAutoBuyable = false;
         nudgec.maxLevel = cLevelCap[0];
     }
-    /* c1
+    /* q1 (c1 prior to 0.06)
     Most theories use a (2, 10) stepwise power, which I criticise to be too weak
     to be worth putting autobuy on. In Botched, a (3, 6) was used, and c1's cost
     there would align with c2 near perfectly at ~6 c1 upgrades per c2 upgrade.
@@ -451,11 +451,11 @@ var init = () =>
     more powerful.
     */
     {
-        let getDesc = (level) => `c_1=${getc1(level).toString(0)}`;
+        let getDesc = (level) => `q_1=${getc1(level).toString(0)}`;
         let getInfo = (level) =>
         {
             if(c1ExpMs.level > 0)
-                return `c_1^{${getc1Exponent(c1ExpMs.level)}}=
+                return `q_1^{${getc1Exponent(c1ExpMs.level)}}=
                 ${getc1(level).pow(getc1Exponent(c1ExpMs.level)).toString()}`;
 
             return getDesc(level);
@@ -465,12 +465,12 @@ var init = () =>
         c1.getInfo = (amount) => Utils.getMathTo(getInfo(c1.level),
         getInfo(c1.level + amount));
     }
-    /* c2
+    /* q2 (c2 prior to 0.06)
     Standard doubling upgrade.
     */
     {
-        let getDesc = (level) => `c_2=3^{${level}}`;
-        let getInfo = (level) => `c_2=${getc2(level).toString(0)}`;
+        let getDesc = (level) => `q_2=3^{${level}}`;
+        let getInfo = (level) => `q_2=${getc2(level).toString(0)}`;
         c2 = theory.createUpgrade(2, currency, c2Cost);
         c2.getDescription = (_) => Utils.getMath(getDesc(c2.level));
         c2.getInfo = (amount) => Utils.getMathTo(getInfo(c2.level),
@@ -600,9 +600,9 @@ var init = () =>
     */
     {
         c1ExpMs = theory.createMilestoneUpgrade(2, c1ExpMaxLevel);
-        c1ExpMs.description = Localization.getUpgradeIncCustomExpDesc('c_1',
+        c1ExpMs.description = Localization.getUpgradeIncCustomExpDesc('q_1',
         c1ExpInc);
-        c1ExpMs.info = Localization.getUpgradeIncCustomExpInfo('c_1', c1ExpInc);
+        c1ExpMs.info = Localization.getUpgradeIncCustomExpInfo('q_1', c1ExpInc);
         c1ExpMs.boughtOrRefunded = (_) => theory.invalidateSecondaryEquation();
     }
 
@@ -722,8 +722,8 @@ var getPrimaryEquation = () =>
 
 var getSecondaryEquation = () =>
 {
-    let result = `\\begin{matrix}\\dot{\\rho}=c_1${c1ExpMs.level > 0 ?
-    `^{${getc1Exponent(c1ExpMs.level)}}` : ''}c_2|c|,&${theory.latexSymbol}
+    let result = `\\begin{matrix}\\dot{\\rho}=|c|\\,q_1${c1ExpMs.level > 0 ?
+    `^{${getc1Exponent(c1ExpMs.level)}}` : ''}q_2,&${theory.latexSymbol}
     =\\max{\\rho}^{0.1}\\end{matrix}`;
     return result;
 }
