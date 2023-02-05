@@ -627,6 +627,9 @@ var tick = (elapsedTime, multiplier) =>
     if(elapsedTime > 0.1)
         log(`Long tick: ${elapsedTime.toFixed(3)}s`);
 
+    nudgec.isAutoBuyable = false;
+    incrementc.isAutoBuyable = false;
+
     if(pausec.level % 2 == 0)
     {
         ++time;

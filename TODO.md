@@ -16,7 +16,7 @@
 - From d4N:
   - Make a Collatz Conjurator/Conjoiner that makes decision trees or sequences
   - Make runs less monotonous
-- [ ] Buff c2 base to 3.01? Compensate by nerfing pub exp
+- [x] Buff c2 base to ~~3.01~~ 3? Compensate by nerfing pub exp
 - Make pub exponent go down gradually like `y=(10/log(x+1)+6.22)`?
   - This is to make early game more lenient
   - Disproven: early game is very normal at 5.22
