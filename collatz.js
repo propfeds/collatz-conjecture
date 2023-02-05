@@ -937,8 +937,8 @@ var setInternalState = (stateStr) =>
     if('time' in state)
     {
         time = state.time;
-        cIterProgBar.progressTo((time / (cooldown[cooldownMs.level] - 1)) **
-        1.5, 220, Easing.CUBIC_INOUT);
+        cIterProgBar.progress = (time / (cooldown[cooldownMs.level] - 1)) **
+        1.5;
     }
     if('c' in state)
     {
