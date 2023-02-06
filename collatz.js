@@ -67,8 +67,8 @@ let bigNumArray = (array) => array.map(x => BigNumber.from(x));
 
 const borrowFactor = 4;
 const q1Cost = new FirstFreeCost(new ExponentialCost(1, 3.01));
-const getIncrementPenalty = (level) => Utils.getStepwisePowerSum(level,
-2, 4, 0).toNumber();
+const getIncrementPenalty = (level) => Math.round(Utils.getStepwisePowerSum(
+level, 2, 4, 0).toNumber());
 const getq1BonusLevels = (bl, pl) => Math.max(Math.floor((bl * nudgec.level - 
 getIncrementPenalty(pl)) / borrowFactor), 0);
 const getq1 = (level) => Utils.getStepwisePowerSum(level + getq1BonusLevels(
