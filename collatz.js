@@ -65,20 +65,20 @@ let bigNumArray = (array) => array.map(x => BigNumber.from(x));
 // All balance parameters are aggregated for ease of access
 
 const borrowFactor = 4;
-const c1Cost = new FirstFreeCost(new ExponentialCost(1, 3.01));
+const q1Cost = new FirstFreeCost(new ExponentialCost(1, 3.01));
 const getIncrementPenalty = (level) => Utils.getStepwisePowerSum(level,
 2, 4, 0).toNumber();
-const getc1BonusLevels = (bl, pl) => Math.max(Math.floor((bl * nudgec.level - 
+const getq1BonusLevels = (bl, pl) => Math.max(Math.floor((bl * nudgec.level - 
 getIncrementPenalty(pl)) / borrowFactor), 0);
-const getc1 = (level) => Utils.getStepwisePowerSum(level + getc1BonusLevels(
-c1BorrowMs.level, incrementc.level), 2, 5, 1);
+const getq1 = (level) => Utils.getStepwisePowerSum(level + getq1BonusLevels(
+q1BorrowMs.level, incrementc.level), 2, 5, 1);
 
-const c1ExpInc = 0.03;
-const c1ExpMaxLevel = 4;
-const getc1Exponent = (level) => 1 + c1ExpInc * level;
+const q1ExpInc = 0.03;
+const q1ExpMaxLevel = 4;
+const getq1Exponent = (level) => 1 + q1ExpInc * level;
 
-const c2Cost = new ExponentialCost(2.2e7, 11);
-const getc2 = (level) => BigNumber.THREE.pow(level);
+const q2Cost = new ExponentialCost(2.2e7, 11);
+const getq2 = (level) => BigNumber.THREE.pow(level);
 
 const permaCosts = bigNumArray(['1e12', '1e22', '1e31', '1e54', '1e160']);
 const milestoneCost = new CompositeCost(2, new LinearCost(4.4, 4.4),
@@ -93,9 +93,9 @@ var getPublicationMultiplier = (tau) => tau.pow(pubExp);
 var getPublicationMultiplierFormula = (symbol) => `{${symbol}}^{${pubExp}}`;
 
 var pausec;
-var nudgec, c1, c2, incrementc;
+var nudgec, q1, q2, incrementc;
 var pausePerma, extraIncPerma;
-var cooldownMs, c1BorrowMs, c1ExpMs;
+var cooldownMs, q1BorrowMs, q1ExpMs;
 
 var currency;
 
@@ -130,7 +130,7 @@ const locStrings =
         permaPreserveDesc: '\\text{Preserve }c\\text{ after publishing}',
         permaPreserveInfo: '\\text{Preserves }c\\text{ after publishing}',
 
-        c1Level: 'q_1\\text{{ level}}',
+        q1Level: 'q_1\\text{{ level}}',
         cLevel: '1/{{{0}}}\\text{{{{ of }}}}c\\text{{{{ level}}}}',
         cLevelth: `1/{{{0}}}^\\text{{{{th}}}}\\text{{{{ of }}}}c
         \\text{{{{ level}}}}`,
@@ -465,30 +465,30 @@ var init = () =>
     more powerful.
     */
     {
-        let getDesc = (level) => `q_1=${getc1(level).toString(0)}`;
+        let getDesc = (level) => `q_1=${getq1(level).toString(0)}`;
         let getInfo = (level) =>
         {
-            if(c1ExpMs.level > 0)
-                return `q_1^{${getc1Exponent(c1ExpMs.level)}}=
-                ${getc1(level).pow(getc1Exponent(c1ExpMs.level)).toString()}`;
+            if(q1ExpMs.level > 0)
+                return `q_1^{${getq1Exponent(q1ExpMs.level)}}=
+                ${getq1(level).pow(getq1Exponent(q1ExpMs.level)).toString()}`;
 
             return getDesc(level);
         }
-        c1 = theory.createUpgrade(1, currency, c1Cost);
-        c1.getDescription = (_) => Utils.getMath(getDesc(c1.level));
-        c1.getInfo = (amount) => Utils.getMathTo(getInfo(c1.level),
-        getInfo(c1.level + amount));
+        q1 = theory.createUpgrade(1, currency, q1Cost);
+        q1.getDescription = (_) => Utils.getMath(getDesc(q1.level));
+        q1.getInfo = (amount) => Utils.getMathTo(getInfo(q1.level),
+        getInfo(q1.level + amount));
     }
     /* q2 (c2 prior to 0.06)
     Standard doubling upgrade.
     */
     {
         let getDesc = (level) => `q_2=3^{${level}}`;
-        let getInfo = (level) => `q_2=${getc2(level).toString(0)}`;
-        c2 = theory.createUpgrade(2, currency, c2Cost);
-        c2.getDescription = (_) => Utils.getMath(getDesc(c2.level));
-        c2.getInfo = (amount) => Utils.getMathTo(getInfo(c2.level),
-        getInfo(c2.level + amount));
+        let getInfo = (level) => `q_2=${getq2(level).toString(0)}`;
+        q2 = theory.createUpgrade(2, currency, q2Cost);
+        q2.getDescription = (_) => Utils.getMath(getDesc(q2.level));
+        q2.getInfo = (amount) => Utils.getMathTo(getInfo(q2.level),
+        getInfo(q2.level + amount));
     }
     /* Increment c
     Unlike nudge, this upgrade only increments c. It is both weaker in positive
@@ -601,21 +601,21 @@ var init = () =>
     be farmed simply by doing a bunch of empty publishes at 1.00 multiplier.
     */
     {
-        c1BorrowMs = theory.createMilestoneUpgrade(1, 1);
-        c1BorrowMs.description = Localization.getUpgradeIncCustomDesc(getLoc(
-        'c1Level'), Localization.format(getLoc('cLevelth'), borrowFactor));
-        c1BorrowMs.info = Localization.getUpgradeIncCustomInfo(getLoc(
-        'c1Level'), Localization.format(getLoc('cLevelth'), borrowFactor));
+        q1BorrowMs = theory.createMilestoneUpgrade(1, 1);
+        q1BorrowMs.description = Localization.getUpgradeIncCustomDesc(getLoc(
+        'q1Level'), Localization.format(getLoc('cLevelth'), borrowFactor));
+        q1BorrowMs.info = Localization.getUpgradeIncCustomInfo(getLoc(
+        'q1Level'), Localization.format(getLoc('cLevelth'), borrowFactor));
     }
-    /* c1 exponent
+    /* q1 exponent
     Standard exponent upgrade.
     */
     {
-        c1ExpMs = theory.createMilestoneUpgrade(2, c1ExpMaxLevel);
-        c1ExpMs.description = Localization.getUpgradeIncCustomExpDesc('q_1',
-        c1ExpInc);
-        c1ExpMs.info = Localization.getUpgradeIncCustomExpInfo('q_1', c1ExpInc);
-        c1ExpMs.boughtOrRefunded = (_) => theory.invalidateSecondaryEquation();
+        q1ExpMs = theory.createMilestoneUpgrade(2, q1ExpMaxLevel);
+        q1ExpMs.description = Localization.getUpgradeIncCustomExpDesc('q_1',
+        q1ExpInc);
+        q1ExpMs.info = Localization.getUpgradeIncCustomExpInfo('q_1', q1ExpInc);
+        q1ExpMs.boughtOrRefunded = (_) => theory.invalidateSecondaryEquation();
     }
 
     theory.createStoryChapter(0, getLoc('ch1Title'), getLoc('ch1Desc'),
@@ -680,11 +680,11 @@ var tick = (elapsedTime, multiplier) =>
     }
 
     let dt = BigNumber.from(elapsedTime * multiplier);
-    let vc1 = getc1(c1.level).pow(getc1Exponent(c1ExpMs.level));
-    let vc2 = getc2(c2.level);
+    let q1Term = getq1(q1.level).pow(getq1Exponent(q1ExpMs.level));
+    let q2Term = getq2(q2.level);
     let bonus = theory.publicationMultiplier;
 
-    currency.value += dt * cBigNum.abs() * vc1 * vc2 * bonus;
+    currency.value += dt * cBigNum.abs() * q1Term * q2Term * bonus;
 }
 
 var getEquationOverlay = () =>
@@ -740,8 +740,8 @@ var getPrimaryEquation = () =>
 
 var getSecondaryEquation = () =>
 {
-    let result = `\\begin{matrix}\\dot{\\rho}=|c|\\,q_1${c1ExpMs.level > 0 ?
-    `^{${getc1Exponent(c1ExpMs.level)}}` : ''}q_2,&${theory.latexSymbol}
+    let result = `\\begin{matrix}\\dot{\\rho}=|c|\\,q_1${q1ExpMs.level > 0 ?
+    `^{${getq1Exponent(q1ExpMs.level)}}` : ''}q_2,&${theory.latexSymbol}
     =\\max{\\rho}^{0.1}\\end{matrix}`;
     return result;
 }
