@@ -386,7 +386,7 @@ var init = () =>
         Localization.getUpgradeIncCustomInfo('c', 1)}${getLoc('alternating')}`;
         nudgec.bought = (_) =>
         {
-            if(nudgec.isAutoBuyable || choices.length < 2)
+            if(nudgec.isAutoBuyable)
             {
                 nudgec.refund(1);
                 return;
@@ -402,7 +402,7 @@ var init = () =>
 
             cBigNum = BigNumber.from(c);
             choices = [c.toString()];
-            choiceNav.level = 1;
+            choiceNav.level = 0;
             if(nudgec.level >= 24)
             {
                 currency.value += 1;
@@ -412,8 +412,27 @@ var init = () =>
             theory.invalidateSecondaryEquation();
             theory.invalidateTertiaryEquation();
         }
+        nudgec.refunded = (_) =>
+        {
+            if(nudgec.isAutoBuyable)
+            {
+                nudgec.refund(1);
+                return;
+            }
+            turns = history[nudgec.level + 1][0];
+            c = BigInt(history[nudgec.level + 1][1]);
+            // if(nudgec.level & 1)
+            //     c = BigInt(target) + 1n;
+            // else
+            //     c = BigInt(target) - 1n;
+            cBigNum = BigNumber.from(c);
+            choices = [c.toString()];
+            choiceNav.level = 0;
+            theory.invalidatePrimaryEquation();
+            theory.invalidateSecondaryEquation();
+            theory.invalidateTertiaryEquation();
+        }
         nudgec.isAutoBuyable = false;
-        nudgec.canBeRefunded = () => false;
     }
     {
         choiceNav = theory.createUpgrade(1, currency, new FreeCost);
@@ -459,6 +478,7 @@ var init = () =>
         }
         incrementc.isAutoBuyable = false;
         incrementc.isAvailable = false;
+        incrementc.canBeRefunded = () => false;
     }
 
     theory.createPublicationUpgrade(0, currency, 0);
@@ -511,7 +531,6 @@ var tick = (elapsedTime, multiplier) =>
     for(let i = 0; i < 100; ++i)
     {
         let tmpc = BigInt(choices[choices.length - 1]);
-
         if((tmpc == 0n || tmpc == 1n || tmpc == -1n || tmpc == -5n ||
         tmpc == -17n) && choices.length > 20)
             break;
