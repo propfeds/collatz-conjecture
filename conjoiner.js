@@ -14,12 +14,12 @@ import { Thickness } from '../api/ui/properties/Thickness';
 import { Easing } from '../api/ui/properties/Easing';
 import { ScrollOrientation } from '../api/ui/properties/ScrollOrientation';
 
-var id = 'collatz_conjecture';
+var id = 'collatz_conjoiner';
 var getName = (language) =>
 {
     let names =
     {
-        en: 'Collatz Conjecture',
+        en: 'Collatz Conjoiner',
     };
 
     return names[language] || names.en;
@@ -29,8 +29,8 @@ var getDescription = (language) =>
     let descs =
     {
         en:
-`A puzzle revolving around nudging a number's value in order to counteract ` +
-`the even clause of the Collatz conjecture.
+`A companion theory to Collatz Conjecture that allows you to create your own ` +
+`sequences.
 
 Warning: for spoiler purposes, it is ill-advised to
 share your sequences to new players.
@@ -38,65 +38,36 @@ share your sequences to new players.
 'If it's odd, triple it plus one,
 If it's even, divide it in two.
 
-If you woke up today and ate bread,
+If this second was your life,
 what would you do?'`,
     };
 
     return descs[language] || descs.en;
 }
-var authors = 'propfeds#5988\n\nThanks to:\nCipher#9599, for the idea';
-var version = 0.06;
+var authors = 'propfeds#5988\n\nThanks to:\nd4Nf6Bg51-0#2276, for the idea';
+var version = 0.01;
 
 let turns = 0;
-let time = 0;
 let c = 0n;
 let cBigNum = BigNumber.from(c);
-let totalIncLevel = 0;
+let choices = ['0'];
+let tmpRho = 0;
 let history = {};
 let lastHistory;
 let lastHistoryLength = 0;
-let writeHistory = true;
 let historyNumMode = 0;
 let historyIdxMode = 0;
-let reachedFirstPub = false;
-let marathonBadge = false;
+let reachedFirstPub = true;
 
-let bigNumArray = (array) => array.map(x => BigNumber.from(x));
-
-// All balance parameters are aggregated for ease of access
-
-const borrowFactor = 4;
-const q1Cost = new FirstFreeCost(new ExponentialCost(1, 3.01));
 const getIncrementPenalty = (level) => Utils.getStepwisePowerSum(level,
 2, 4, 0).toNumber();
-const getq1BonusLevels = (bl, pl) => Math.max(Math.floor((bl * nudgec.level - 
-getIncrementPenalty(pl)) / borrowFactor), 0);
-const getq1 = (level) => Utils.getStepwisePowerSum(level + getq1BonusLevels(
-q1BorrowMs.level, incrementc.level), 2, 5, 1);
 
-const q1ExpInc = 0.03;
-const q1ExpMaxLevel = 4;
-const getq1Exponent = (level) => 1 + q1ExpInc * level;
-
-const q2Cost = new ExponentialCost(2.2e7, 11);
-const getq2 = (level) => BigNumber.THREE.pow(level) + (marathonBadge ? 1 : 0);
-
-const permaCosts = bigNumArray(['1e12', '1e22', '1e31', '1e54', '1e160']);
-const milestoneCost = new CompositeCost(2, new LinearCost(4.4, 4.4),
-new CompositeCost(2, new LinearCost(13.2, 8.8), new LinearCost(30.8, 13.2)));
-
-const cLevelCap = [24, 36, 52, 72];
-const cooldown = [42, 30, 20, 12];
-
-const tauRate = 0.1;
-const pubExp = 4.2;
-var getPublicationMultiplier = (tau) => tau.pow(pubExp);
-var getPublicationMultiplierFormula = (symbol) => `{${symbol}}^{${pubExp}}`;
+var getPublicationMultiplier = (tau) => tau;
+var getPublicationMultiplierFormula = (symbol) => `${symbol}`;
 
 var pausec;
-var nudgec, q1, q2, incrementc;
-var pausePerma, extraIncPerma;
-var cooldownMs, q1BorrowMs, q1ExpMs;
+var nudgec, choiceNav, incrementc;
+var extraIncPerma;
 
 var currency;
 
@@ -104,7 +75,7 @@ const locStrings =
 {
     en:
     {
-        versionName: 'v0.06',
+        versionName: 'v0.01',
         workInProgress: /*', WIP',*/', Work in\\\\Progress',
         changeLog: `\\text{Change log!}\\\\ \\begin{array}{l}
 \\bullet \\text{ Now grants}\\\\ \\text{increments at}\\\\
@@ -148,20 +119,11 @@ const locStrings =
         alternating: ' (alternating)',
         penalty: '{0} level penalty = ',
         deductFromc: '\\text{{ (- }} {{{0}}} \\text{{ levels from }}c)',
+        choiceNav: 'Navigate choices',
+        choiceNavInfo: 'Buy to move forward, refund to move backwards',
+        choice: `\\begin{{array}}{{c}}\\text{{Choose next number: }}{{{0}}}
+        \\\\({{{1}}})\\end{{array}}`,
 
-        ch1Title: 'Preface',
-        ch1Desc: `You are a talented undergraduate student.
-Your professors see a bright future ahead of you.
-One professor you respect hands you a formula,
-then asks you if it converges into a finite cycle.
-It is a modular recursive equation.
-Not knowing how to solve it, you nudge the value
-behind their backs.
-
-It's thesis time.`,
-
-        achNegativeTitle: 'Shrouded by Fog',
-        achNegativeDesc: `Publish with an odd level of c and go negative.`,
         achMarathonTitle: 'Annual Lothar-athon',
         achMarathonDesc: 'Reach a c value of ±1e60. Reward: +1 to q2.',
         achSixNineTitle: 'I\'m proud of you.',
@@ -178,9 +140,7 @@ It's thesis time.`,
         labelCurrentRun: 'Current publication:',
         labelLastRun: 'Last publication:',
 
-        reset: `You are about to reset the current publication.
-Note: resetting is disabled if publishing is open and extra c levels are ` +
-`bought.`
+        reset: `You are about to reset the current publication.`
     }
 };
 
@@ -206,10 +166,6 @@ cDispColour.set(Theme.STANDARD, 'c0c0c0');
 cDispColour.set(Theme.DARK, 'b5b5b5');
 cDispColour.set(Theme.LIGHT, '434343');
 
-const cIterProgBar = ui.createProgressBar
-({
-    margin: new Thickness(6, 0)
-});
 const historyFrame = ui.createFrame
 ({
     isVisible: false,
@@ -248,8 +204,8 @@ const historyLabel = ui.createLatexLabel
     verticalOptions: LayoutOptions.START,
     margin: new Thickness(3, 40),
     text: () => Utils.getMath(Localization.format(getLoc('historyDesc'),
-    (nudgec ? nudgec.level : 0) + (incrementc ? incrementc.level : 0) -
-    totalIncLevel, lastHistoryLength)),
+    (nudgec ? nudgec.level : 0) + (incrementc ? incrementc.level : 0),
+    lastHistoryLength)),
     fontSize: 9,
     textColor: () => Color.fromHex(cDispColour.get(game.settings.theme))
 });
@@ -413,16 +369,6 @@ let getSequence = (sequence, numMode = 0, idxMode = 0) =>
 var init = () =>
 {
     currency = theory.createCurrency();
-    /* Freeze
-    Freeze c's value and the timer in place, which allows for idling. This will
-    become more important later on, and also helps with farming c levels.
-    */
-    {
-        pausec = theory.createSingularUpgrade(3, currency, new FreeCost);
-        pausec.getDescription = () => Localization.format(getLoc(
-        'pausecDesc')[pausec.level & 1], Utils.getMath('c'));
-        pausec.getInfo = () => getLoc('pausecInfo')[pausec.level & 1];
-    }
     /* Nudge c
     The theory's core mechanic revolves around nudging c around. This upgrade
     alternates between incrementing and decrementing by 1. If an increment nudge
@@ -445,55 +391,40 @@ var init = () =>
                 nudgec.refund(1);
                 return;
             }
-            if(writeHistory)
-                history[nudgec.level] = [turns, c.toString()];
             // even level: -1, odd level: +1, because this is post-processing
+            let target = choices[choiceNav.level];
+            history[nudgec.level] = [turns, target];
             if(nudgec.level & 1)
-                c += 1n;
+                c = BigInt(target) + 1n;
             else
-                c -= 1n;
+                c = BigInt(target) - 1n;
 
             cBigNum = BigNumber.from(c);
-            if(nudgec.level == nudgec.maxLevel)
+            turns += choiceNav.level;
+            choices = [c.toString()];
+            choiceNav.level = 1;
+            if(nudgec.level >= 24)
+            {
+                currency.value += 1;
                 updateAvailability();
+            }
             theory.invalidatePrimaryEquation();
+            theory.invalidateSecondaryEquation();
             theory.invalidateTertiaryEquation();
         }
         nudgec.isAutoBuyable = false;
-        nudgec.maxLevel = cLevelCap[0];
+        nudgec.canBeRefunded = () => false;
     }
-    /* q1 (c1 prior to 0.06)
-    Most theories use a (2, 10) stepwise power, which I criticise to be too weak
-    to be worth putting autobuy on. In Botched, a (3, 6) was used, and c1's cost
-    there would align with c2 near perfectly at ~6 c1 upgrades per c2 upgrade.
-    Collatz uses a (2, 5), which aligns more with tradition, while being twice
-    more powerful.
-    */
     {
-        let getDesc = (level) => `q_1=${getq1(level).toString(0)}`;
-        let getInfo = (level) =>
+        choiceNav = theory.createUpgrade(1, currency, new FreeCost);
+        choiceNav.description = getLoc('choiceNav');
+        choiceNav.info = getLoc('choiceNavInfo');
+        choiceNav.boughtOrRefunded = (_) =>
         {
-            if(q1ExpMs.level > 0)
-                return `q_1^{${getq1Exponent(q1ExpMs.level)}}=
-                ${getq1(level).pow(getq1Exponent(q1ExpMs.level)).toString()}`;
-
-            return getDesc(level);
+            theory.invalidateSecondaryEquation();
+            theory.invalidateTertiaryEquation();
         }
-        q1 = theory.createUpgrade(1, currency, q1Cost);
-        q1.getDescription = (_) => Utils.getMath(getDesc(q1.level));
-        q1.getInfo = (amount) => Utils.getMathTo(getInfo(q1.level),
-        getInfo(q1.level + amount));
-    }
-    /* q2 (c2 prior to 0.06)
-    Standard doubling upgrade.
-    */
-    {
-        let getDesc = (level) => `q_2=3^{${level}}${marathonBadge ? '+1' : ''}`;
-        let getInfo = (level) => `q_2=${getq2(level).toString(0)}`;
-        q2 = theory.createUpgrade(2, currency, q2Cost);
-        q2.getDescription = (_) => Utils.getMath(getDesc(q2.level));
-        q2.getInfo = (amount) => Utils.getMathTo(getInfo(q2.level),
-        getInfo(q2.level + amount));
+        choiceNav.maxLevel = 0;
     }
     /* Increment c
     Unlike nudge, this upgrade only increments c. It is both weaker in positive
@@ -530,29 +461,13 @@ var init = () =>
         incrementc.isAvailable = false;
     }
 
-    theory.createPublicationUpgrade(0, currency, permaCosts[0]);
-    // theory.permanentUpgrades[0].bought = (_) => updateAvailability();
-    theory.createBuyAllUpgrade(1, currency, permaCosts[1]);
-    theory.createAutoBuyerUpgrade(2, currency, permaCosts[2]);
-    /* Unlocks freeze
-    Shame that you unlock such a useful tool really late.
-    */
-    {
-        pausePerma = theory.createPermanentUpgrade(3, currency,
-        new ConstantCost(permaCosts[3]));
-        pausePerma.description = Localization.getUpgradeUnlockDesc(getLoc(
-        'permaPause'));
-        pausePerma.info = Localization.getUpgradeUnlockInfo(getLoc(
-        'permaPause'));
-        pausePerma.bought = (_) => updateAvailability();
-        pausePerma.maxLevel = 1;
-    }
+    theory.createPublicationUpgrade(0, currency, 0);
     /* Extra increments
     Generally used to aid with catching up. Not sure if it's actually effective.
     */
     {
         extraIncPerma = theory.createPermanentUpgrade(4, currency,
-        new ConstantCost(permaCosts[4]));
+        new FreeCost);
         extraIncPerma.description = Localization.getUpgradeUnlockDesc(getLoc(
         'permaIncrement'));
         extraIncPerma.info = Localization.format(getLoc('permaIncrementInfo'),
@@ -560,76 +475,7 @@ var init = () =>
         extraIncPerma.bought = (_) => updateAvailability();
         extraIncPerma.maxLevel = 1;
     }
-    /* Preserve c
-    We had the chance to test out this one. It breaks progression, and poses a
-    threat to the theory's performance.
-    */
 
-    theory.setMilestoneCost(milestoneCost);
-    /* Interval speed-up
-    Technically, this is a c level cap milestone coupled with a drawback. This
-    allows you to farm for the borrow milestone faster.
-    */
-    {
-        let getInfo = (level, amount = 1) => `${getLoc('cooldownInfo')}=
-        ${cooldown[level] || cooldown[level - amount]}`;
-        cooldownMs = theory.createMilestoneUpgrade(0, cooldown.length - 1);
-        cooldownMs.getDescription = (amount) =>
-        {
-            let cd = Localization.getUpgradeDecCustomDesc(getLoc(
-            'cooldown'), Localization.format(getLoc('nTicks'),
-            cooldown[cooldownMs.level] - cooldown[cooldownMs.level + amount] ||
-            0));
-            let cap = Localization.getUpgradeIncCustomDesc(getLoc(
-            'cLevelCap'), cLevelCap[cooldownMs.level + amount] -
-            cLevelCap[cooldownMs.level] || 0);
-            return `${cd}; ${cap}`;
-        };
-        cooldownMs.getInfo = (amount) =>
-        {
-            let cd = `${getLoc('cooldownInfo')} = ${Utils.getMathTo(
-            cooldown[cooldownMs.level], cooldown[cooldownMs.level + amount] ||
-            cooldown[cooldownMs.level])}`;
-            let cap = `${Utils.getMath(getLoc('cLevelCap'))} = 
-            ${Utils.getMathTo(cLevelCap[cooldownMs.level],
-            cLevelCap[cooldownMs.level + amount] ||
-            cLevelCap[cooldownMs.level])}`;
-            return `${cd}; ${cap}`;
-        }
-        cooldownMs.boughtOrRefunded = (_) =>
-        {
-            nudgec.maxLevel = totalIncLevel + cLevelCap[cooldownMs.level];
-        };
-        cooldownMs.canBeRefunded = (amount) => nudgec.level <=
-        totalIncLevel + cLevelCap[cooldownMs.level - amount];
-    }
-    /* Level borrowing
-    It'll be useless for a while at first when you unlock it at e44. But, it can
-    be farmed simply by doing a bunch of empty publishes at 1.00 multiplier.
-    */
-    {
-        q1BorrowMs = theory.createMilestoneUpgrade(1, 1);
-        q1BorrowMs.description = Localization.getUpgradeIncCustomDesc(getLoc(
-        'q1Level'), Localization.format(getLoc('cLevelth'), borrowFactor));
-        q1BorrowMs.info = Localization.getUpgradeIncCustomInfo(getLoc(
-        'q1Level'), Localization.format(getLoc('cLevelth'), borrowFactor));
-    }
-    /* q1 exponent
-    Standard exponent upgrade.
-    */
-    {
-        q1ExpMs = theory.createMilestoneUpgrade(2, q1ExpMaxLevel);
-        q1ExpMs.description = Localization.getUpgradeIncCustomExpDesc('q_1',
-        q1ExpInc);
-        q1ExpMs.info = Localization.getUpgradeIncCustomExpInfo('q_1', q1ExpInc);
-        q1ExpMs.boughtOrRefunded = (_) => theory.invalidateSecondaryEquation();
-    }
-
-    theory.createStoryChapter(0, getLoc('ch1Title'), getLoc('ch1Desc'),
-    () => true);
-
-    theory.createAchievement(0, undefined, getLoc('achNegativeTitle'),
-    getLoc('achNegativeDesc'), () => cBigNum < 0);
     theory.createAchievement(1, undefined, getLoc('achMarathonTitle'),
     getLoc('achMarathonDesc'), () => cBigNum.abs() >= 1e60, () => c == 0n ? 0 :
     cBigNum.abs().log10().toNumber() / 60);
@@ -644,16 +490,14 @@ var init = () =>
 
 var updateAvailability = () =>
 {
-    pausec.isAvailable = pausePerma.level > 0;
-    if(theory.permanentUpgrades[0].level)
+    if(reachedFirstPub)
     {
         historyFrame.isVisible = true;
         historyLabel.isVisible = true;
-        reachedFirstPub = true;
     }
     marathonBadge = theory.achievements[1].isUnlocked;
     incrementc.isAvailable = extraIncPerma.level > 0 &&
-    nudgec.level == nudgec.maxLevel;
+    nudgec.level >= 24;
 }
 
 var tick = (elapsedTime, multiplier) =>
@@ -664,35 +508,18 @@ var tick = (elapsedTime, multiplier) =>
     nudgec.isAutoBuyable = false;
     incrementc.isAutoBuyable = false;
 
-    if(pausec.level % 2 == 0)
+    for(let i = 0; i < 100; ++i)
     {
-        ++time;
-        if(time >= cooldown[cooldownMs.level])
-        {
-            cIterProgBar.progressTo(0, 33, Easing.CUBIC_IN);
-            if(c % 2n != 0)
-                c = 3n * c + 1n;
-            else
-                c /= 2n;
+        let tmpc = BigInt(choices[choices.length - 1]);
+        if(tmpc in [1n, -1n, -5n, -17n] && choices.length > 20)
+            break;
 
-            cBigNum = BigNumber.from(c);
-            if(nudgec.level > totalIncLevel)
-                ++turns;
-            theory.invalidatePrimaryEquation();
-            theory.invalidateTertiaryEquation();
-            time -= cooldown[cooldownMs.level];
-        }
+        if(tmpc % 2n != 0)
+            choices.push((3n * tmpc + 1n).toString());
         else
-            cIterProgBar.progressTo((time / (cooldown[cooldownMs.level] - 1)) **
-            1.5, 110, Easing.LINEAR);
+            choices.push((tmpc / 2n).toString());
     }
-
-    let dt = BigNumber.from(elapsedTime * multiplier);
-    let q1Term = getq1(q1.level).pow(getq1Exponent(q1ExpMs.level));
-    let q2Term = getq2(q2.level);
-    let bonus = theory.publicationMultiplier;
-
-    currency.value += dt * cBigNum.abs() * q1Term * q2Term * bonus;
+    choiceNav.maxLevel = choices.length - 1;
 }
 
 var getEquationOverlay = () =>
@@ -713,15 +540,6 @@ var getEquationOverlay = () =>
                 Utils.getMath(getLoc('changeLog'))*/,
                 fontSize: 9,
                 textColor: Color.TEXT_MEDIUM
-            }),
-            ui.createFrame
-            ({
-                row: 0,
-                column: 1,
-                hasShadow: true,
-                verticalOptions: LayoutOptions.START,
-                cornerRadius: 1,
-                content: cIterProgBar
             }),
             historyFrame,
             historyLabel
@@ -748,18 +566,19 @@ var getPrimaryEquation = () =>
 
 var getSecondaryEquation = () =>
 {
-    let result = `\\begin{matrix}\\dot{\\rho}=|c|\\,q_1${q1ExpMs.level > 0 ?
-    `^{${getq1Exponent(q1ExpMs.level)}}` : ''}q_2,&${theory.latexSymbol}
-    =\\max{\\rho}^{0.1}\\end{matrix}`;
-    return result;
-}
+    let nStr = historyNumMode & 2 ? getShortBinaryString(
+    choices[choiceNav.level]) : getShortString(choices[choiceNav.level]);
+    let sStr = BigNumber.from(choices[choiceNav.level]).toString(0);
+
+    return Localization.format(getLoc('choice'), nStr, sStr);
+};
 
 var getTertiaryEquation = () =>
 {
     let mStr = '';
     let cStr = '';
     if(reachedFirstPub)
-        mStr = `t=${turns}`;
+        mStr = `t=${turns}${choiceNav.level ? `+${choiceNav.level}` : ''}`;
     if(historyNumMode & 2 || c > 1e6 || c < -1e6)
         cStr = `c=${cBigNum.toString(0)}`;
 
@@ -798,6 +617,7 @@ let createHistoryMenu = () =>
         toggleLvlButton.text = getLoc('btnBaseMode')[(historyNumMode & 2) >>
         1];
         theory.invalidatePrimaryEquation();
+        theory.invalidateSecondaryEquation();
         theory.invalidateTertiaryEquation();
     };
     let toggleLvlButton = ui.createButton
@@ -940,55 +760,51 @@ var get2DGraphValue = () =>
     return (cBigNum.abs().log2() * cBigNum.sign).toNumber();
 }
 
-var getTau = () => currency.value.pow(tauRate);
+var getTau = () => currency.value;
 
 var getCurrencyFromTau = (tau) =>
 [
-    tau.max(BigNumber.ONE).pow(BigNumber.ONE / tauRate),
+    tau.max(BigNumber.ONE),
     currency.symbol
 ];
 
 // Will not trigger if you press reset.
 var prePublish = () =>
 {
+    tmpRho = currency.value;
     totalIncLevel = nudgec.level - getIncrementPenalty(incrementc.level);
     lastHistory = history;
     lastHistoryLength = Object.keys(lastHistory).length;
 }
 var postPublish = () =>
 {
+    currency.value = tmpRho;
     turns = 0;
     time = 0;
-    // Disabling history write circumvents the extra levelling
-    writeHistory = false;
-    nudgec.maxLevel = totalIncLevel + cLevelCap[cooldownMs.level];
-    nudgec.level = totalIncLevel;
-    writeHistory = true;
     history = {};
-    // c is reset to 0 afterwards
+    choices = ['0'];
 
     c = 0n;
     cBigNum = BigNumber.from(c);
-    cIterProgBar.progressTo(0, 220, Easing.CUBIC_INOUT);
 
     theory.invalidatePrimaryEquation();
+    theory.invalidateSecondaryEquation();
     theory.invalidateTertiaryEquation();
     updateAvailability();
 }
 
-var canResetStage = () => !theory.canPublish || incrementc.level == 0;
+var alwaysShowRefundButtons = () => true;
+
+var canResetStage = () => true;
 
 var getResetStageMessage = () => getLoc('reset');
 
 var resetStage = () =>
 {
-    if(theory.canPublish && incrementc.level)
-        return;
-
     for(let i = 0; i < theory.upgrades.length; ++i)
         theory.upgrades[i].level = 0;
 
-    currency.value = 0;
+    tmpRho = currency.value;
     theory.clearGraph();
     postPublish();
 }
@@ -997,9 +813,8 @@ var getInternalState = () => JSON.stringify
 ({
     version: version,
     turns: turns,
-    time: time,
     c: c.toString(),
-    totalIncLevel: totalIncLevel,
+    choices: choices,
     history: history,
     lastHistory: lastHistory,
     historyNumMode: historyNumMode,
@@ -1014,25 +829,18 @@ var setInternalState = (stateStr) =>
     let state = JSON.parse(stateStr);
     if('turns' in state)
         turns = state.turns;
-    if('time' in state)
-    {
-        time = state.time;
-        cIterProgBar.progress = (time / (cooldown[cooldownMs.level] - 1)) **
-        1.5;
-    }
     if('c' in state)
     {
         c = BigInt(state.c);
         cBigNum = BigNumber.from(c);
     }
-
-    let tmpIML = cLevelCap[cooldownMs.level];
-    if('totalIncLevel' in state)
+    if('choices' in state)
     {
-        totalIncLevel = state.totalIncLevel;
-        tmpIML += totalIncLevel;
+        choices = state.choices;
+        choiceNav.maxLevel = choices.length - 1;
     }
-    nudgec.maxLevel = tmpIML;
+    else
+        choices = [c.toString()];
 
     if('history' in state)
         history = state.history;
