@@ -121,15 +121,19 @@ const locStrings =
         historyDesc: `\\begin{{array}}{{c}}\\text{{History}}\\\\{{{0}}}/{{{1}}}
         \\end{{array}}`,
         historyInfo: 'Shows the last and current runs\' sequences',
-        pausecDesc: ['\\text{Freeze }c', '\\text{Unfreeze }c'],
-        pausecInfo: '\\text{Freezes }c\\text{ value}',
+        pausecDesc: ['Freeze {0}', 'Unfreeze {0}'],
+        pausecInfo:
+        [
+            'Freezes the iteration timer in place',
+            'Resumes the iteration timer'
+        ],
 
         permaPause: '\\text{{the ability to freeze }}c',
         permaIncrement: `\\text{{extra in/decrements for }}c`,
-        permaIncrementInfo: `\\text{{Dependent on }}c
-        \\text{{'s sign, and incurs penalty on its level}}`,
-        permaPreserveDesc: '\\text{Preserve }c\\text{ after publishing}',
-        permaPreserveInfo: '\\text{Preserves }c\\text{ after publishing}',
+        permaIncrementInfo: `Dependent on {0}'s sign, and incurs a penalty ` +
+`on its level`,
+        // permaPreserveDesc: '\\text{Preserve }c\\text{ after publishing}',
+        // permaPreserveInfo: '\\text{Preserves }c\\text{ after publishing}',
 
         q1Level: 'q_1\\text{{ level}}',
         cLevel: '1/{{{0}}}\\text{{{{ of }}}}c\\text{{{{ level}}}}',
@@ -142,7 +146,7 @@ const locStrings =
         condition: `\\text{{if }}{{{0}}}`,
 
         alternating: ' (alternating)',
-        penalty: 'c \\text{ level penalty} = ',
+        penalty: '{0} level penalty = ',
         deductFromc: '\\text{{ (- }} {{{0}}} \\text{{ levels from }}c)',
 
         ch1Title: 'Preface',
@@ -159,7 +163,7 @@ It's thesis time.`,
         achNegativeTitle: 'Shrouded by Fog',
         achNegativeDesc: `Publish with an odd level of c and go negative.`,
         achMarathonTitle: 'Annual Lothar-athon',
-        achMarathonDesc: 'Reach a c value of ±1e60.\n\nReward: +1 to q2.',
+        achMarathonDesc: 'Reach a c value of ±1e60. Reward: +1 to q2.',
         achSixNineTitle: 'I\'m proud of you.',
         achSixNineDesc: 'Reach a c value of 69.',
 
@@ -415,9 +419,9 @@ var init = () =>
     */
     {
         pausec = theory.createSingularUpgrade(3, currency, new FreeCost);
-        pausec.getDescription = () => Utils.getMath(getLoc(
-        'pausecDesc')[pausec.level & 1]);
-        pausec.info = Utils.getMath(getLoc('pausecInfo'));
+        pausec.getDescription = () => Localization.format(getLoc(
+        'pausecDesc')[pausec.level & 1], Utils.getMath('c'));
+        pausec.getInfo = () => getLoc('pausecInfo')[pausec.level & 1];
     }
     /* Nudge c
     The theory's core mechanic revolves around nudging c around. This upgrade
@@ -502,7 +506,8 @@ var init = () =>
         incrementc = theory.createUpgrade(3, currency, new FreeCost);
         incrementc.getDescription = () => Utils.getMath(getDesc(
         incrementc.level));
-        incrementc.getInfo = (amount) => `${Utils.getMath(getLoc('penalty'))}
+        incrementc.getInfo = (amount) => `${Localization.format(
+        getLoc('penalty'), Utils.getMath('c'))}
         ${Utils.getMathTo(getIncrementPenalty(incrementc.level),
         getIncrementPenalty(incrementc.level + amount))}`;
         incrementc.bought = (_) =>
@@ -550,7 +555,8 @@ var init = () =>
         new ConstantCost(permaCosts[4]));
         extraIncPerma.description = Localization.getUpgradeUnlockDesc(getLoc(
         'permaIncrement'));
-        extraIncPerma.info = Utils.getMath(getLoc('permaIncrementInfo'));
+        extraIncPerma.info = Localization.format(getLoc('permaIncrementInfo'),
+        Utils.getMath('c'));
         extraIncPerma.bought = (_) => updateAvailability();
         extraIncPerma.maxLevel = 1;
     }

@@ -6,8 +6,9 @@
 
 ## In consideration
 
-- [ ] Nerf initial pub mult
-  - Better to defer this to when XLII comes online to sim
+- Better to defer these to when XLII comes online to sim
+  - [ ] Nerf initial pub mult
+  - [ ] Nerf final level cap to 64
 - [x] History shows number of turns between nudges
 - [x] Rename c1c2 to q1q2 for distinction from c
 - [x] Emergency upgrade that opens after c hits cap
