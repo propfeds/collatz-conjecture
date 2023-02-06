@@ -163,8 +163,8 @@ It's thesis time.`,
         achSixNineDesc: 'Reach a c value of 69.',
 
         btnClose: 'Close',
-        btnIndexingMode: ['Indexing: Turns (t)', 'Indexing: Levels'],
-        btnNotationMode: ['Disp.: Digits', 'Disp.: Scientific'],
+        btnIndexingMode: ['Indexing: Turns', 'Indexing: Levels'],
+        btnNotationMode: ['Notation: Digits', 'Notation: Scientific'],
         btnBaseMode: ['Base: 10', 'Base: 2'],
         errorInvalidNumMode: 'Invalid number mode',
         errorBinExpLimit: 'Too big',
@@ -825,21 +825,23 @@ let createHistoryMenu = () =>
     ({
         row: 2,
         column: 0,
+        text: getSequence(history, historyNumMode, historyIdxMode),
+        margin: new Thickness(0, 0, 3, 0),
         horizontalOptions: LayoutOptions.CENTER,
-        text: getSequence(history, historyNumMode, historyIdxMode)
     });
     let lastPubHistory = ui.createLatexLabel
     ({
         row: 2,
         column: 1,
+        text: getSequence(lastHistory, historyNumMode, historyIdxMode),
+        margin: new Thickness(3, 0, 0, 0),
         horizontalOptions: LayoutOptions.CENTER,
-        text: getSequence(lastHistory, historyNumMode, historyIdxMode)
     });
     let historyGrid = ui.createGrid
     ({
         rowDefinitions: ['24', '13', 'auto'],
         columnDefinitions: ['1*', '1*'],
-        // columnSpacing: 8,
+        columnSpacing: 0,
         children:
         [
             ui.createLatexLabel
@@ -886,7 +888,7 @@ let createHistoryMenu = () =>
                 ui.createGrid
                 ({
                     rowDefinitions: [44],
-                    columnDefinitions: ['3*', '2*', '3*'],
+                    columnDefinitions: ['8*', '5*', '9*'],
                     columnSpacing: 8,
                     children:
                     [
