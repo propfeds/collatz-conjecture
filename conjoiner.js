@@ -121,8 +121,8 @@ const locStrings =
         deductFromc: '\\text{{ (- }} {{{0}}} \\text{{ levels from }}c)',
         choiceNav: 'Navigate choices',
         choiceNavInfo: 'Buy to move forward, refund to move backwards',
-        choice: `\\begin{{array}}{{c}}\\text{{Choose next number: }}{{{0}}}
-        \\\\({{{1}}})\\end{{array}}`,
+        choice: `\\begin{{array}}{{rcl}}&\\text{{Choose next number:}}\\\\
+        &{{{0}}}\\\\_{{{1}}}&({{{2}}})&_{{{3}}}\\end{{array}}`,
 
         achMarathonTitle: 'Annual Lothar-athon',
         achMarathonDesc: 'Reach a c value of ±1e60. Reward: +1 to q2.',
@@ -506,6 +506,7 @@ var init = () =>
 
     theory.primaryEquationHeight = 66;
     theory.primaryEquationScale = 0.9;
+    theory.secondaryEquationHeight = 66;
 }
 
 var updateAvailability = () =>
@@ -588,9 +589,13 @@ var getSecondaryEquation = () =>
 {
     let nStr = historyNumMode & 2 ? getShortBinaryString(
     choices[choiceNav.level]) : getShortString(choices[choiceNav.level]);
-    let sStr = BigNumber.from(choices[choiceNav.level]).toString(0);
+    let snStr = BigNumber.from(choices[choiceNav.level]).toString(0);
+    let pStr = choiceNav.level > 0 ?
+    BigNumber.from(choices[choiceNav.level - 1]).toString(0) : '\\O';
+    let sStr = choiceNav.level < choices.length - 1 ?
+    BigNumber.from(choices[choiceNav.level + 1]).toString(0) : '\\O';
 
-    return Localization.format(getLoc('choice'), nStr, sStr);
+    return Localization.format(getLoc('choice'), nStr, pStr, snStr, sStr);
 };
 
 var getTertiaryEquation = () =>
