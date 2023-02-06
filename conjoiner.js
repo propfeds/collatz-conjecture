@@ -386,7 +386,7 @@ var init = () =>
         Localization.getUpgradeIncCustomInfo('c', 1)}${getLoc('alternating')}`;
         nudgec.bought = (_) =>
         {
-            if(nudgec.isAutoBuyable)
+            if(nudgec.isAutoBuyable || choices.length < 2)
             {
                 nudgec.refund(1);
                 return;
