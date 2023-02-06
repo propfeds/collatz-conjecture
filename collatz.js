@@ -59,6 +59,7 @@ let writeHistory = true;
 let historyNumMode = 0;
 let historyIdxMode = 0;
 let reachedFirstPub = false;
+let marathonBadge = false;
 
 let bigNumArray = (array) => array.map(x => BigNumber.from(x));
 
@@ -78,7 +79,7 @@ const q1ExpMaxLevel = 4;
 const getq1Exponent = (level) => 1 + q1ExpInc * level;
 
 const q2Cost = new ExponentialCost(2.2e7, 11);
-const getq2 = (level) => BigNumber.THREE.pow(level);
+const getq2 = (level) => BigNumber.THREE.pow(level) + (marathonBadge ? 1 : 0);
 
 const permaCosts = bigNumArray(['1e12', '1e22', '1e31', '1e54', '1e160']);
 const milestoneCost = new CompositeCost(2, new LinearCost(4.4, 4.4),
@@ -158,7 +159,7 @@ It's thesis time.`,
         achNegativeTitle: 'Shrouded by Fog',
         achNegativeDesc: `Publish with an odd level of c and go negative.`,
         achMarathonTitle: 'Annual Lothar-athon',
-        achMarathonDesc: 'Reach a c value of ±1e60.',
+        achMarathonDesc: 'Reach a c value of ±1e60.\n\nReward: +1 to q2.',
         achSixNineTitle: 'I\'m proud of you.',
         achSixNineDesc: 'Reach a c value of 69.',
 
@@ -483,7 +484,7 @@ var init = () =>
     Standard doubling upgrade.
     */
     {
-        let getDesc = (level) => `q_2=3^{${level}}`;
+        let getDesc = (level) => `q_2=3^{${level}}${marathonBadge ? '+1' : ''}`;
         let getInfo = (level) => `q_2=${getq2(level).toString(0)}`;
         q2 = theory.createUpgrade(2, currency, q2Cost);
         q2.getDescription = (_) => Utils.getMath(getDesc(q2.level));
@@ -644,6 +645,7 @@ var updateAvailability = () =>
         historyLabel.isVisible = true;
         reachedFirstPub = true;
     }
+    marathonBadge = theory.achievements[1].isUnlocked;
     incrementc.isAvailable = extraIncPerma.level > 0 &&
     nudgec.level == nudgec.maxLevel;
 }
