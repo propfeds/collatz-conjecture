@@ -393,6 +393,7 @@ var init = () =>
             }
             // even level: -1, odd level: +1, because this is post-processing
             let target = choices[choiceNav.level];
+            turns += choiceNav.level;
             history[nudgec.level] = [turns, target];
             if(nudgec.level & 1)
                 c = BigInt(target) + 1n;
@@ -400,7 +401,6 @@ var init = () =>
                 c = BigInt(target) - 1n;
 
             cBigNum = BigNumber.from(c);
-            turns += choiceNav.level;
             choices = [c.toString()];
             choiceNav.level = 1;
             if(nudgec.level >= 24)
@@ -511,9 +511,10 @@ var tick = (elapsedTime, multiplier) =>
     for(let i = 0; i < 100; ++i)
     {
         let tmpc = BigInt(choices[choices.length - 1]);
-        if(tmpc in [1n, -1n, -5n, -17n] && choices.length > 20)
-            break;
 
+        if((tmpc == 0n || tmpc == 1n || tmpc == -1n || tmpc == -5n ||
+        tmpc == -17n) && choices.length > 20)
+            break;
         if(tmpc % 2n != 0)
             choices.push((3n * tmpc + 1n).toString());
         else
@@ -536,7 +537,7 @@ var getEquationOverlay = () =>
                 column: 0,
                 verticalOptions: LayoutOptions.START,
                 margin: new Thickness(6, 3),
-                text: getLoc('versionName') + getLoc('workInProgress')/* +
+                text: getLoc('versionName')/* + getLoc('workInProgress')/* +
                 Utils.getMath(getLoc('changeLog'))*/,
                 fontSize: 9,
                 textColor: Color.TEXT_MEDIUM
