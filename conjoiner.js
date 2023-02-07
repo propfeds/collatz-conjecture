@@ -75,7 +75,7 @@ const locStrings =
 {
     en:
     {
-        versionName: 'v0.01',
+        versionName: 'v0.01b',
         workInProgress: /*', WIP',*/', Work in\\\\Progress',
         changeLog: `\\text{Change log!}\\\\ \\begin{array}{l}
 \\bullet \\text{ Now grants}\\\\ \\text{increments at}\\\\
@@ -403,7 +403,7 @@ var init = () =>
             cBigNum = BigNumber.from(c);
             choices = [c.toString()];
             choiceNav.level = 0;
-            if(nudgec.level >= 24)
+            if(nudgec.level == 24)
             {
                 currency.value += 1;
                 updateAvailability();

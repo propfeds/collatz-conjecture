@@ -6,9 +6,12 @@
 
 ## In consideration
 
+- Ask Gilles:
+  - [ ] Make a bonus levels function like perma levels from stars
 - Better to defer these to when XLII comes online to sim
   - [ ] Nerf initial pub mult
   - [ ] Nerf final level cap to 64
+  - [ ] Move 3rd ms to 176 but move extra increments forward
 - [x] History shows number of turns between nudges
 - [x] Rename c1c2 to q1q2 for distinction from c
 - [x] Emergency upgrade that opens after c hits cap
