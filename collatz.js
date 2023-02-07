@@ -210,6 +210,33 @@ const cIterProgBar = ui.createProgressBar
 ({
     margin: new Thickness(6, 0)
 });
+/* Image size reference
+Size 20:
+270x480
+
+Size 24:
+360x640
+450x800
+540x960
+
+Size 36:
+720x1280
+
+Size 48:
+1080x1920
+*/
+let getImageSize = (width) =>
+{
+    if(width >= 1080)
+        return 48;
+    if(width >= 720)
+        return 36;
+    if(width >= 360)
+        return 24;
+    
+    return 20;
+}
+
 const historyFrame = ui.createFrame
 ({
     isVisible: false,
@@ -218,9 +245,9 @@ const historyFrame = ui.createFrame
     cornerRadius: 1,
     horizontalOptions: LayoutOptions.END,
     verticalOptions: LayoutOptions.START,
-    margin: new Thickness(10),
+    margin: new Thickness(9.5),
     hasShadow: true,
-    heightRequest: 24,
+    heightRequest: getImageSize(ui.screenWidth),
     content: ui.createImage
     ({
         // margin: new Thickness(2),
@@ -246,7 +273,7 @@ const historyLabel = ui.createLatexLabel
     column: 2,
     horizontalOptions: LayoutOptions.END,
     verticalOptions: LayoutOptions.START,
-    margin: new Thickness(3, 40),
+    margin: new Thickness(2.5, 40),
     text: () => Utils.getMath(Localization.format(getLoc('historyDesc'),
     (nudgec ? nudgec.level : 0) + (incrementc ? incrementc.level : 0) -
     totalIncLevel, lastHistoryLength)),
@@ -468,6 +495,7 @@ var init = () =>
     there would align with c2 near perfectly at ~6 c1 upgrades per c2 upgrade.
     Collatz uses a (2, 5), which aligns more with tradition, while being twice
     more powerful.
+    Optimal cost ratios (mod 5): 2/6, 2/7, 2/8, 2/9, 2/10
     */
     {
         let getDesc = (level) => `q_1=${getq1(level).toString(0)}`;
