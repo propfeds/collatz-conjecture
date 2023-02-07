@@ -124,8 +124,8 @@ const locStrings =
         pausecDesc: ['Freeze {0}', 'Unfreeze {0}'],
         pausecInfo:
         [
-            'Freezes the iteration timer in place',
-            'Resumes the iteration timer'
+            'Freezes the turn timer in place',
+            'Resumes the turn timer'
         ],
 
         permaPause: '\\text{{the ability to freeze }}c',

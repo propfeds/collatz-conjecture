@@ -10,7 +10,8 @@
   - [ ] Make a bonus levels function like perma levels from stars
 - Better to defer these to when XLII comes online to sim
   - [ ] Nerf initial pub mult
-  - [ ] Nerf final level cap to 64
+  - [ ] Nerf level caps to 24/36/48/64 if the game's still too easy
+    - Rescale marathon achievement
   - [ ] Move 3rd ms to 176 but move extra increments forward
 - [x] History shows number of turns between nudges
 - [x] Rename c1c2 to q1q2 for distinction from c
