@@ -765,7 +765,7 @@ var getEquationOverlay = () =>
                 column: 0,
                 verticalOptions: LayoutOptions.START,
                 margin: new Thickness(6, 3),
-                text: getLoc('versionName') + getLoc('workInProgress')/* +
+                text: getLoc('versionName') /*+ getLoc('workInProgress')/* +
                 Utils.getMath(getLoc('changeLog'))*/,
                 fontSize: 9,
                 textColor: Color.TEXT_MEDIUM

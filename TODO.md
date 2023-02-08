@@ -1,9 +1,5 @@
 # Collatz Conjecture
 
-## In testing
-
-- v0.06
-
 ## In consideration
 
 - Ask Gilles:
@@ -16,19 +12,6 @@
     - Rescale marathon achievement
   - [ ] Move 3rd ms to 176 but move extra increments forward
   - [ ] Change step length of penalty to 6
-  - [x] History shows number of turns between nudges
-- [x] Determine metrics for:
-  - [x] History book icon (24)
-  - [x] History menu buttons (44)
-  - [x] History pub labels (24)
-- [x] Rename c1c2 to q1q2 for distinction from c
-- [x] Emergency upgrade that opens after c hits cap
-  - Only increments, no decrements (does it benefit negative runs?)
-  - [x] Deducts 2+ levels of c every time it's bought
-  - Can make players more impatient
-  - [x] Make it a perma upgrade
-- [x] Nerf exp to 4.72 or 4.92? Also remove division
-- [x] Buff c2 base to ~~3.01~~ 3? Compensate by nerfing pub exp
 - From d4N:
   - Make a Collatz Conjurator/Conjoiner that makes decision trees or sequences
   -  Make runs less monotonous
@@ -42,6 +25,22 @@
     - Solves the problem of players being confused by c level
     - But also trivialises the game by allowing you to farm massive amounts of
     levels
+
+## 0.06
+
+- [x] History shows number of turns between nudges
+- [x] Determine metrics for:
+  - [x] History book icon (24)
+  - [x] History menu buttons (44)
+  - [x] History pub labels (24)
+- [x] Rename c1c2 to q1q2 for distinction from c
+- [x] Emergency upgrade that opens after c hits cap
+  - Only increments, no decrements (does it benefit negative runs?)
+  - [x] Deducts 2+ levels of c every time it's bought
+  - Can make players more impatient
+  - [x] Make it a perma upgrade
+- [x] Nerf exp to 4.72 or 4.92? Also remove division
+- [x] Buff c2 base to ~~3.01~~ 3? Compensate by nerfing pub exp
 
 ## 0.05
 
