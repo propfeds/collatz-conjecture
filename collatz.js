@@ -526,7 +526,9 @@ var init = () =>
       4,  4.667, 5,333,   6,   6,667
     */
     {
-        let getDesc = (level) => `q_1=${getq1(level).toString(0)}`;
+        let getDesc = (level) => `_{(+
+        ${getq1BonusLevels(q1BorrowMs.level, incrementc.level)})}\\,q_1=
+        ${getq1(level).toString(0)}`;
         let getInfo = (level) =>
         {
             if(q1ExpMs.level > 0)
