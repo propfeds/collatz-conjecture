@@ -9,11 +9,18 @@
 - Ask Gilles:
   - [ ] Make a bonus levels function like perma levels from stars
 - Better to defer these to when XLII comes online to sim
-  - [ ] Nerf initial pub mult
-  - [ ] Nerf level caps to 24/36/48/64 if the game's still too easy
+  - [ ] Nerf initial pub mult?
+  - [ ] From 0 to e44 is the tutorial. The players must both learn about running
+  - quickly (early) and running deep (before e44).
+  - [ ] Nerf level caps to 24/36/48/64
     - Rescale marathon achievement
   - [ ] Move 3rd ms to 176 but move extra increments forward
-- [x] History shows number of turns between nudges
+  - [ ] Change step length of penalty to 6
+  - [x] History shows number of turns between nudges
+- [x] Determine metrics for:
+  - [x] History book icon (24)
+  - [x] History menu buttons (44)
+  - [x] History pub labels (24)
 - [x] Rename c1c2 to q1q2 for distinction from c
 - [x] Emergency upgrade that opens after c hits cap
   - Only increments, no decrements (does it benefit negative runs?)
@@ -21,10 +28,10 @@
   - Can make players more impatient
   - [x] Make it a perma upgrade
 - [x] Nerf exp to 4.72 or 4.92? Also remove division
+- [x] Buff c2 base to ~~3.01~~ 3? Compensate by nerfing pub exp
 - From d4N:
   - Make a Collatz Conjurator/Conjoiner that makes decision trees or sequences
-  - Make runs less monotonous
-- [x] Buff c2 base to ~~3.01~~ 3? Compensate by nerfing pub exp
+  -  Make runs less monotonous
 - Make pub exponent go down gradually like `y=(10/log(x+1)+6.22)`?
   - This is to make early game more lenient
   - Disproven: early game is very normal at 5.22

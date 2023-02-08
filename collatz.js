@@ -233,8 +233,32 @@ let getImageSize = (width) =>
         return 36;
     if(width >= 360)
         return 24;
-    
+
     return 20;
+}
+
+let getSmallBtnSize = (width) =>
+{
+    if(width >= 1080)
+        return 88;
+    if(width >= 720)
+        return 66;
+    if(width >= 360)
+        return 44;
+
+    return 36;
+}
+
+let getSeparatorSize = (width) =>
+{
+    if(width >= 1080)
+        return 25;
+    if(width >= 720)
+        return 19;
+    if(width >= 360)
+        return 13;
+
+    return 11;
 }
 
 const historyFrame = ui.createFrame
@@ -495,7 +519,11 @@ var init = () =>
     there would align with c2 near perfectly at ~6 c1 upgrades per c2 upgrade.
     Collatz uses a (2, 5), which aligns more with tradition, while being twice
     more powerful.
-    Optimal cost ratios (mod 5): 2/6, 2/7, 2/8, 2/9, 2/10
+    Optimal cost ratios (mod 5) against q2: 3/(10+2r) --> inverse: 4+0.667r
+    r=1,    2,     3,     4,     5
+    3/12,   14,    16,    18,    20
+    0.25, 0.214, 0.188, 0.167, 0.15
+      4,  4.667, 5,333,   6,   6,667
     */
     {
         let getDesc = (level) => `q_1=${getq1(level).toString(0)}`;
@@ -875,7 +903,12 @@ let createHistoryMenu = () =>
     });
     let historyGrid = ui.createGrid
     ({
-        rowDefinitions: ['24', '13', 'auto'],
+        rowDefinitions:
+        [
+            getImageSize(ui.screenWidth),
+            'auto',
+            'auto'
+        ],
         columnDefinitions: ['1*', '1*'],
         columnSpacing: 0,
         children:
@@ -900,12 +933,14 @@ let createHistoryMenu = () =>
             ({
                 row: 1,
                 column: 0,
+                heightRequest: 1,
                 margin: new Thickness(0, 6)
             }),
             ui.createBox
             ({
                 row: 1,
                 column: 1,
+                heightRequest: 1,
                 margin: new Thickness(0, 6)
             }),
             currentPubHistory,
@@ -923,7 +958,7 @@ let createHistoryMenu = () =>
             [
                 ui.createGrid
                 ({
-                    rowDefinitions: [44],
+                    rowDefinitions: [getSmallBtnSize(ui.screenWidth)],
                     columnDefinitions: ['8*', '5*', '9*'],
                     columnSpacing: 8,
                     children:
