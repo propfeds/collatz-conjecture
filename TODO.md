@@ -1,21 +1,46 @@
 # Collatz Conjecture
 
-## In testing
-
-- v0.05
-
 ## In consideration
 
+- Ask Gilles:
+  - [ ] Make a bonus levels function like perma levels from stars
+- Better to defer these to when XLII comes online to sim
+  - [ ] Nerf initial pub mult?
+  - [ ] From 0 to e44 is the tutorial. The players must both learn about running
+  - quickly (early) and running deep (before e44).
+  - [ ] Nerf level caps to 24/36/48/64
+    - Rescale marathon achievement
+  - [ ] Move 3rd ms to 176 but move extra increments forward
+  - [ ] Change step length of penalty to 6
+- From d4N:
+  - Make a Collatz Conjurator/Conjoiner that makes decision trees or sequences
+  -  Make runs less monotonous
 - Make pub exponent go down gradually like `y=(10/log(x+1)+6.22)`?
   - This is to make early game more lenient
   - Disproven: early game is very normal at 5.22
-- [ ] Counter: make pub exponent go up gradually to 5.22
-  - This is to make early game players not delusional about pub multipliers
+  - Counter: make pub exponent go up gradually to 5.22
+    - This is to make early game players not delusional about pub multipliers
 - From pietro:
   - Save some levels for the next pub if not used up in current one
     - Solves the problem of players being confused by c level
     - But also trivialises the game by allowing you to farm massive amounts of
     levels
+
+## 0.06
+
+- [x] History shows number of turns between nudges
+- [x] Determine metrics for:
+  - [x] History book icon (24)
+  - [x] History menu buttons (44)
+  - [x] History pub labels (24)
+- [x] Rename c1c2 to q1q2 for distinction from c
+- [x] Emergency upgrade that opens after c hits cap
+  - Only increments, no decrements (does it benefit negative runs?)
+  - [x] Deducts 2+ levels of c every time it's bought
+  - Can make players more impatient
+  - [x] Make it a perma upgrade
+- [x] Nerf exp to 4.72 or 4.92? Also remove division
+- [x] Buff c2 base to ~~3.01~~ 3? Compensate by nerfing pub exp
 
 ## 0.05
 
