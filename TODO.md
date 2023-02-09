@@ -11,6 +11,13 @@
   - [ ] Nerf level caps to 24/36/48/64
     - Rescale marathon achievement
   - [ ] Move 3rd ms to 176 but move extra increments forward
+    - Right now, extra increments seem useless
+    - The players must know about how strong the borrow milestone can be?
+    - But how are they gonna know if it's worth it if they've been running the
+    level cap upgrade all this time?
+    - Is blocking their progress enough? Unlocking extra increments would only
+    make borrowing worse
+    - By the way, extra increments can also be run with borrow instead of cap
   - [ ] Change step length of penalty to 6
 - From d4N:
   - Make a Collatz Conjurator/Conjoiner that makes decision trees or sequences

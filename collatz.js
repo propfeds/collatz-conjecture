@@ -57,7 +57,7 @@ let lastHistory;
 let lastHistoryLength = 0;
 let writeHistory = true;
 let historyNumMode = 0;
-let historyIdxMode = 0;
+let historyIdxMode = 1;
 let reachedFirstPub = false;
 let marathonBadge = false;
 
@@ -271,7 +271,7 @@ const historyFrame = ui.createFrame
     verticalOptions: LayoutOptions.START,
     margin: new Thickness(9.5),
     hasShadow: true,
-    heightRequest: getImageSize(ui.screenWidth),
+    widthRequest: getImageSize(ui.screenWidth),
     content: ui.createImage
     ({
         // margin: new Thickness(2),
