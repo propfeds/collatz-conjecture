@@ -705,7 +705,7 @@ var init = () =>
     theory.createStoryChapter(0, getLoc('ch1Title'), getLoc('ch1Desc'),
     () => true);
     theory.createStoryChapter(1, getLoc('ch2Title'), getLoc('ch2Desc'),
-    () => nudgec.level >= 1000);
+    () => totalIncLevel >= 1000);
 
     theory.createAchievement(0, undefined, getLoc('achNegativeTitle'),
     getLoc('achNegativeDesc'), () => cBigNum < 0);
