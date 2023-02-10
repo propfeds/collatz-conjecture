@@ -44,8 +44,8 @@ what would you do?'`,
 
     return descs[language] || descs.en;
 }
-var authors = 'propfeds#5988\n\nThanks to:\nCipher#9599, for the original ' +
-'suggestion\nXLII#0042, a computer pretending to be a normal player, acting ' +
+var authors = 'propfeds#5988\n\nThanks to:\nCipher#9599, the original ' +
+'suggester\nXLII#0042, a computer pretending to be a normal player, acting ' +
 'at the speed of light';
 var version = 0.06;
 
@@ -165,7 +165,7 @@ It's thesis time.`,
         ch2Title: 'Nudge Theory',
         ch2Desc: `In your graduation thesis, you have documented
 sequences that seemingly go from 0 to
-breaking integer limits.
+breaking the integer limits.
 It's certainly interesting: even though it's
 bound to fall, if you cheat by even just a little bit,
 the outcome can get a lot better.
@@ -173,7 +173,7 @@ the outcome can get a lot better.
 Impressed by your work, a professor offers you
 an internship in his research lab.
 Occasionally, your lab mates can hear you giggling
-with your online chat friends, whom call you:
+with your online chat friends, who call you:
 The CEO of Nudge.`,
 
         achNegativeTitle: 'Shrouded by Fog',
