@@ -5,9 +5,9 @@
 - Ask Gilles:
   - [ ] Make a bonus levels function like perma levels from stars
 - Better to defer these to when XLII comes online to sim
-  - [ ] Nerf initial pub mult?
-  - [ ] From 0 to e44 is the tutorial. The players must both learn about running
+  - From 0 to e44 is the tutorial. The players must both learn about running
   - quickly (early) and running deep (before e44).
+    - [ ] Nerf initial pub mult to make mod 4 strat impossible near e44
   - [ ] Nerf level caps to 24/36/48/64, as current runs are too long
     - Rescale marathon achievement?
   - [ ] Move 3rd ms to 176 but move extra increments forward
@@ -19,6 +19,10 @@
     make borrowing worse
     - By the way, extra increments can also be run with borrow instead of cap
   - [ ] Change step length of penalty to 6
+  - [ ] Perma upgrade that automatically copies last history (Weyl Group style)
+    - Does not auto-freeze!
+    - Reduces activeness and input error
+    - Probably set it at e220~240 or sth, else it will inhibit experimentation
 - From d4N:
   - Make a Collatz Conjurator/Conjoiner that makes decision trees or sequences
   -  Make runs less monotonous

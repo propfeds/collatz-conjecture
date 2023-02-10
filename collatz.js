@@ -47,7 +47,7 @@ what would you do?'`,
 var authors = 'propfeds#5988\n\nThanks to:\nCipher#9599, the original ' +
 'suggester\nXLII#0042, a computer pretending to be a normal player, acting ' +
 'at the speed of light';
-var version = 0.06;
+var version = 0.07;
 
 let turns = 0;
 let time = 0;
@@ -106,8 +106,7 @@ const locStrings =
 {
     en:
     {
-        versionName: 'v0.06',
-        workInProgress: /*', WIP',*/', Work in\\\\Progress',
+        versionName: 'v0.07, Work in\\\\Progress',
         changeLog: `\\text{Change log!}\\\\ \\begin{array}{l}
 \\bullet \\text{ Now grants}\\\\ \\text{increments at}\\\\
 \\text{72 nudge levels}\\\\
@@ -748,7 +747,7 @@ var tick = (elapsedTime, multiplier) =>
         ++time;
         if(time >= cooldown[cooldownMs.level])
         {
-            cIterProgBar.progressTo(0, 33, Easing.CUBIC_IN);
+            cIterProgBar.progressTo(0, 33, Easing.LINEAR);
             if(c % 2n != 0)
                 c = 3n * c + 1n;
             else
@@ -788,7 +787,7 @@ var getEquationOverlay = () =>
                 column: 0,
                 verticalOptions: LayoutOptions.START,
                 margin: new Thickness(6, 3),
-                text: getLoc('versionName') /*+ getLoc('workInProgress')/* +
+                text: getLoc('versionName')/* +
                 Utils.getMath(getLoc('changeLog'))*/,
                 fontSize: 9,
                 textColor: Color.TEXT_MEDIUM
