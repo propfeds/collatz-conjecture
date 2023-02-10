@@ -44,7 +44,9 @@ what would you do?'`,
 
     return descs[language] || descs.en;
 }
-var authors = 'propfeds#5988\n\nThanks to:\nCipher#9599, for the idea';
+var authors = 'propfeds#5988\n\nThanks to:\nCipher#9599, for the original ' +
+'suggestion\nXLII#0042, a computer pretending to be a normal player, acting ' +
+'at the speed of light';
 var version = 0.06;
 
 let turns = 0;
@@ -159,6 +161,20 @@ Not knowing how to solve it, you nudge the value
 behind their backs.
 
 It's thesis time.`,
+
+        ch2Title: 'Nudge Theory',
+        ch2Desc: `In your graduation thesis, you have documented
+sequences that seemingly go from 0 to
+breaking integer limits.
+It's certainly interesting: even though it's
+bound to fall, if you cheat by even just a little bit,
+the outcome can get a lot better.
+
+Impressed by your work, a professor offers you
+an internship in his research lab.
+Occasionally, your lab mates can hear you giggling
+with your online chat friends, whom call you:
+The CEO of Nudge.`,
 
         achNegativeTitle: 'Shrouded by Fog',
         achNegativeDesc: `Publish with an odd level of c and go negative.`,
@@ -688,6 +704,8 @@ var init = () =>
 
     theory.createStoryChapter(0, getLoc('ch1Title'), getLoc('ch1Desc'),
     () => true);
+    theory.createStoryChapter(1, getLoc('ch2Title'), getLoc('ch2Desc'),
+    () => nudgec.level >= 1000);
 
     theory.createAchievement(0, undefined, getLoc('achNegativeTitle'),
     getLoc('achNegativeDesc'), () => cBigNum < 0);

@@ -8,8 +8,8 @@
   - [ ] Nerf initial pub mult?
   - [ ] From 0 to e44 is the tutorial. The players must both learn about running
   - quickly (early) and running deep (before e44).
-  - [ ] Nerf level caps to 24/36/48/64
-    - Rescale marathon achievement
+  - [ ] Nerf level caps to 24/36/48/64, as current runs are too long
+    - Rescale marathon achievement?
   - [ ] Move 3rd ms to 176 but move extra increments forward
     - Right now, extra increments seem useless
     - The players must know about how strong the borrow milestone can be?
