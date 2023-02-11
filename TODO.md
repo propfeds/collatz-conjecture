@@ -8,6 +8,7 @@
   - From 0 to e44 is the tutorial. The players must both learn about running
   - quickly (early) and running deep (before e44).
     - [ ] Nerf initial pub mult to make mod 4 strat impossible near e44
+  - [ ] Move freeze up to 58? as e44 milestone is enough to run for a while
   - [ ] Nerf level caps to 24/36/48/64, as current runs are too long
     - Rescale marathon achievement?
   - [ ] Move 3rd ms to 176 but move extra increments forward
@@ -22,7 +23,8 @@
   - [ ] Perma upgrade that automatically copies last history (Weyl Group style)
     - Does not auto-freeze!
     - Reduces activeness and input error
-    - Probably set it at e220~240 or sth, else it will inhibit experimentation
+    - Probably set it at e301, else it will inhibit experimentation
+    - Tracks the next move's turn in internal state
 - From d4N:
   - Make a Collatz Conjurator/Conjoiner that makes decision trees or sequences
   -  Make runs less monotonous
