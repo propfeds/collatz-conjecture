@@ -151,7 +151,7 @@ const locStrings =
         deductFromc: '\\text{{ (- }} {{{0}}} \\text{{ levels from }}c)',
 
         ch1Title: 'Preface',
-        ch1Desc: `You are a talented undergraduate student.
+        ch1Text: `You are a talented undergraduate student.
 Your professors see a bright future ahead of you.
 One professor you respect hands you a formula,
 then asks you if it converges into a finite cycle.
@@ -162,7 +162,7 @@ behind their backs.
 It's thesis time.`,
 
         ch2Title: 'Nudge Theory',
-        ch2Desc: `In your graduation thesis, you have documented
+        ch2Text: `In your graduation thesis, you have documented
 sequences that seemingly go from 0 to
 breaking the integer limits.
 It's certainly interesting: even though it's
@@ -171,9 +171,40 @@ the outcome can get a lot better.
 
 Impressed by your work, a professor offers you
 an internship in his research lab.
-Occasionally, your lab mates can hear you giggling
-with your online chat friends, who call you:
-The CEO of Nudge.`,
+Occasionally, you can be heard in the lab,
+giggling with some of your online chat friends,
+who call you: the CEO of Nudge.`,
+
+        ch3Title: 'Escalations',
+        ch3Text: `Eventually, a colleague of yours has come to
+know about your nudging business...
+
+'I've always had these nightmares about climbing.
+Gracefully weaving through the cityscapes, but
+the purpose had never been for recreation...
+It was always some accident, and suddenly
+I was caught under the scrying eyes
+of a headmaster.
+I had to just keep scaling and scaling.
+I wanted it to stop, I wished I could jump
+through one of those windows, and
+beg the ones inside to let me stay!'`,
+
+        ch3bTitle: '...Escalations.',
+        ch3bText:`'...But I got caught again, and my punishments
+escalated. Then there was the constant chases,
+fruitless beggings, and then I was caught again.
+My punishments escalated.
+But I don't want to be a criminal...'
+
+You woke yourself up, looking frozen all over.
+A shiver shook you up, and suddenly, you
+chanced upon that colleague in the hallway.
+She is the only one who knows.`,
+
+        ch4Title: 'Something about the Auto-nudge',
+        ch4Text: `Something about the Auto-nudge being a mysterious tool gifted
+to you and you are suspicious of it and totally not super scared.`,
 
         achNegativeTitle: 'Shrouded by Fog',
         achNegativeDesc: `Publish with an odd level of c and go negative.`,
@@ -701,18 +732,22 @@ var init = () =>
         q1ExpMs.boughtOrRefunded = (_) => theory.invalidateSecondaryEquation();
     }
 
-    theory.createStoryChapter(0, getLoc('ch1Title'), getLoc('ch1Desc'),
+    theory.createStoryChapter(0, getLoc('ch1Title'), getLoc('ch1Text'),
     () => true);
-    theory.createStoryChapter(1, getLoc('ch2Title'), getLoc('ch2Desc'),
-    () => totalIncLevel >= 1000);
+    theory.createStoryChapter(1, getLoc('ch2Title'), getLoc('ch2Text'),
+    () => totalIncLevel >= 480);
+    theory.createStoryChapter(2, getLoc('ch3Title'), getLoc('ch3Text'),
+    () => totalIncLevel >= 1200);
+    theory.createStoryChapter(3, getLoc('ch3bTitle'), getLoc('ch3bText'),
+    () => theory.storyChapters[2].isUnlocked && (c === 1n || c === -1n));
 
     theory.createAchievement(0, undefined, getLoc('achNegativeTitle'),
     getLoc('achNegativeDesc'), () => cBigNum < 0);
     theory.createAchievement(1, undefined, getLoc('achMarathonTitle'),
-    getLoc('achMarathonDesc'), () => cBigNum.abs() >= 1e60, () => c == 0n ? 0 :
+    getLoc('achMarathonDesc'), () => cBigNum.abs() >= 1e60, () => c === 0n ? 0 :
     cBigNum.abs().log10().toNumber() / 60);
     theory.createAchievement(2, undefined, getLoc('achSixNineTitle'),
-    getLoc('achSixNineDesc'), () => c == 69n);
+    getLoc('achSixNineDesc'), () => c === 69n);
 
     updateAvailability();
 
