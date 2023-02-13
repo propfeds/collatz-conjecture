@@ -158,10 +158,8 @@ Your professors see a bright future ahead of you.
 One professor you respect hands you a formula,
 then asks you if it converges into a finite cycle.
 It is a modular recursive equation.
-Not knowing how to solve it, you nudge the value
-behind their backs.
-
-It's thesis time.`,
+Not knowing how to solve it, you start to
+nudge the value behind their backs.`,
 
         ch2Title: 'Nudge Theory',
         ch2Text: `In your graduation thesis, you have documented
@@ -175,7 +173,9 @@ Impressed by your work, a professor offers you
 an internship in his research lab.
 Occasionally, you can be heard in the lab,
 giggling with some of your online chat friends,
-who call you: the CEO of Nudge.`,
+who call you: the CEO of Nudge.
+
+But inside, you are afraid.`,
 
         ch3Title: 'Escalations',
         ch3Text: `Eventually, a colleague of yours has come to
@@ -184,9 +184,9 @@ know about your nudging business...
 'I've always had these nightmares about climbing.
 Gracefully weaving through the cityscapes, but
 the purpose had never been for recreation...
-It was always some accident, and suddenly
-I was caught under the scrying eyes
-of a headmaster.
+It was always some kind of accident.
+Then suddenly I was caught under the
+scrying eyes of a headmaster, and
 I had to keep scaling and scaling,
 I wanted it to stop, I wished I could jump
 into one of those windows, and
@@ -202,7 +202,7 @@ But I don't want to be a criminal...'
 You woke yourself up, looking frozen all over.
 A shiver shook you up, and suddenly, you
 chanced upon that colleague in the hallway.
-She is the only one who knows.`,
+She is the only one who knows this.`,
 
         ch4Title: 'Something about the Auto-nudge',
         ch4Text: `Something about the Auto-nudge being a mysterious tool gifted
