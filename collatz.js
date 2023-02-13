@@ -779,7 +779,7 @@ var tick = (elapsedTime, multiplier) =>
 
     if(pausec.level % 2 == 0)
     {
-        ++time;
+        time += elapsedTime * 10;
         if(time >= cooldown[cooldownMs.level])
         {
             cIterProgBar.progressTo(0, 33, Easing.LINEAR);
