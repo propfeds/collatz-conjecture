@@ -2,6 +2,7 @@
 
 ## In consideration
 
+- [ ] History menu option to enable/disable last pub preservation
 - Ask Gilles:
   - [ ] Make a bonus levels function like perma levels from stars
 - Better to defer these to when XLII comes online to sim

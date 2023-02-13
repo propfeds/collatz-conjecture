@@ -185,14 +185,14 @@ the purpose had never been for recreation...
 It was always some accident, and suddenly
 I was caught under the scrying eyes
 of a headmaster.
-I had to just keep scaling and scaling.
+I had to keep scaling and scaling,
 I wanted it to stop, I wished I could jump
-through one of those windows, and
-beg the ones inside to let me stay!'`,
+into one of those windows, and
+beg the family inside to let me stay!'`,
 
-        ch3bTitle: '...Escalations.',
+        ch3bTitle: '...Escalations',
         ch3bText:`'...But I got caught again, and my punishments
-escalated. Then there was the constant chases,
+escalated. Then there were the constant chases,
 fruitless beggings, and then I was caught again.
 My punishments escalated.
 But I don't want to be a criminal...'
@@ -739,15 +739,15 @@ var init = () =>
     theory.createStoryChapter(2, getLoc('ch3Title'), getLoc('ch3Text'),
     () => totalIncLevel >= 1200);
     theory.createStoryChapter(3, getLoc('ch3bTitle'), getLoc('ch3bText'),
-    () => theory.storyChapters[2].isUnlocked && (c === 1n || c === -1n));
+    () => theory.storyChapters[2].isUnlocked && (c == 1n || c == -1n));
 
     theory.createAchievement(0, undefined, getLoc('achNegativeTitle'),
     getLoc('achNegativeDesc'), () => cBigNum < 0);
     theory.createAchievement(1, undefined, getLoc('achMarathonTitle'),
-    getLoc('achMarathonDesc'), () => cBigNum.abs() >= 1e60, () => c === 0n ? 0 :
+    getLoc('achMarathonDesc'), () => cBigNum.abs() >= 1e60, () => c == 0n ? 0 :
     cBigNum.abs().log10().toNumber() / 60);
     theory.createAchievement(2, undefined, getLoc('achSixNineTitle'),
-    getLoc('achSixNineDesc'), () => c === 69n);
+    getLoc('achSixNineDesc'), () => c == 69n);
 
     updateAvailability();
 
