@@ -62,6 +62,7 @@ let historyNumMode = 0;
 let historyIdxMode = 1;
 let reachedFirstPub = false;
 let marathonBadge = false;
+let longTickMsg = '';
 
 let bigNumArray = (array) => array.map(x => BigNumber.from(x));
 
@@ -107,6 +108,7 @@ const locStrings =
     en:
     {
         versionName: 'v0.07, Work in\\\\Progress',
+        longTick: 'Tick: {0}s',
         changeLog: `\\text{Change log!}\\\\ \\begin{array}{l}
 \\bullet \\text{ Now grants}\\\\ \\text{increments at}\\\\
 \\text{72 nudge levels}\\\\
@@ -772,7 +774,8 @@ var updateAvailability = () =>
 var tick = (elapsedTime, multiplier) =>
 {
     if(elapsedTime > 0.1)
-        log(`Long tick: ${elapsedTime.toFixed(3)}s`);
+        longTickMsg = Localization.format(getLoc('longTick'),
+        elapsedTime.toFixed(3));
 
     nudgec.isAutoBuyable = false;
     incrementc.isAutoBuyable = false;
@@ -796,8 +799,9 @@ var tick = (elapsedTime, multiplier) =>
             time -= cooldown[cooldownMs.level];
         }
         else
-            cIterProgBar.progressTo((time / (cooldown[cooldownMs.level] - 1)) **
-            1.5, 110, Easing.LINEAR);
+            cIterProgBar.progressTo(Math.min(1,
+            (time / (cooldown[cooldownMs.level] - 1)) ** 1.5), 110,
+            Easing.LINEAR);
     }
 
     let dt = BigNumber.from(elapsedTime * multiplier);
@@ -812,7 +816,7 @@ var getEquationOverlay = () =>
 {
     let result = ui.createGrid
     ({
-        rowDefinitions: ['auto', '80*', 'auto'],
+        rowDefinitions: ['auto', '1*', '1*'],
         columnDefinitions: ['1*', '2*', '1*'],
         children:
         [
@@ -837,7 +841,18 @@ var getEquationOverlay = () =>
                 content: cIterProgBar
             }),
             historyFrame,
-            historyLabel
+            historyLabel,
+            ui.createLatexLabel
+            ({
+                row: 2,
+                column: 2,
+                horizontalOptions: LayoutOptions.END,
+                verticalOptions: LayoutOptions.END,
+                margin: new Thickness(6, 3),
+                text: () => longTickMsg,
+                fontSize: 9,
+                textColor: Color.TEXT_MEDIUM
+            })
         ]
     });
     return result;
@@ -1137,8 +1152,8 @@ var setInternalState = (stateStr) =>
     if('time' in state)
     {
         time = state.time;
-        cIterProgBar.progress = (time / (cooldown[cooldownMs.level] - 1)) **
-        1.5;
+        cIterProgBar.progress = Math.min(1,
+        (time / (cooldown[cooldownMs.level] - 1)) ** 1.5);
     }
     if('c' in state)
     {
