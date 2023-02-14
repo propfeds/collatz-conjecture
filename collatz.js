@@ -13,6 +13,7 @@ import { TouchType } from '../api/ui/properties/TouchType';
 import { Thickness } from '../api/ui/properties/Thickness';
 import { Easing } from '../api/ui/properties/Easing';
 import { ScrollOrientation } from '../api/ui/properties/ScrollOrientation';
+import { TextAlignment } from '../api/ui/properties/TextAlignment';
 
 var id = 'collatz_conjecture';
 var getName = (language) =>
@@ -89,6 +90,7 @@ const getq2 = (level) => BigNumber.THREE.pow(level) + (marathonBadge ? 1 : 0);
 
 const permaCosts = bigNumArray(['1e12', '1e22', '1e31', '1e58', '1e126',
 '1e301']);
+// 44, 88, 176, 264, 352, 480, 600, 720
 const milestoneCost = new CompositeCost(2, new LinearCost(4.4, 4.4),
 new CompositeCost(3, new LinearCost(17.6, 8.8), new LinearCost(48, 12)));
 
@@ -167,7 +169,8 @@ Occasionally, you can be heard in the lab,
 giggling with some of your online chat friends,
 who call you: the CEO of Nudge.
 
-But inside, you are afraid.`,
+But inside, you are afraid.
+It's bound to fall.`,
 
         ch3Title: 'Escalations',
         ch3Text: `Eventually, a colleague of yours has come to
@@ -351,8 +354,8 @@ const historyLabel = ui.createLatexLabel
     isVisible: false,
     row: 0,
     column: 2,
-    horizontalOptions: LayoutOptions.END,
-    verticalOptions: LayoutOptions.START,
+    horizontalTextAlignment: TextAlignment.END,
+    verticalTextAlignment: TextAlignment.START,
     margin: new Thickness(2.5, 40),
     text: () => Utils.getMath(Localization.format(getLoc('historyDesc'),
     (nudgec ? nudgec.level : 0) + (incrementc ? incrementc.level : 0) -
@@ -868,7 +871,7 @@ var getEquationOverlay = () =>
             ({
                 row: 0,
                 column: 0,
-                verticalOptions: LayoutOptions.START,
+                verticalTextAlignment: TextAlignment.START,
                 margin: new Thickness(6, 3),
                 text: getLoc('versionName')/* +
                 Utils.getMath(getLoc('changeLog'))*/,
@@ -890,8 +893,8 @@ var getEquationOverlay = () =>
             ({
                 row: 2,
                 column: 2,
-                horizontalOptions: LayoutOptions.END,
-                verticalOptions: LayoutOptions.END,
+                horizontalTextAlignment: TextAlignment.END,
+                verticalTextAlignment: TextAlignment.END,
                 margin: new Thickness(6, 3),
                 text: () => longTickMsg,
                 fontSize: 9,
@@ -1007,7 +1010,7 @@ let createHistoryMenu = () =>
         column: 0,
         text: getSequence(history, historyNumMode, historyIdxMode),
         margin: new Thickness(0, 0, 3, 0),
-        horizontalOptions: LayoutOptions.CENTER,
+        horizontalTextAlignment: TextAlignment.CENTER,
     });
     let lastPubHistory = ui.createLatexLabel
     ({
@@ -1015,7 +1018,7 @@ let createHistoryMenu = () =>
         column: 1,
         text: getSequence(lastHistory, historyNumMode, historyIdxMode),
         margin: new Thickness(3, 0, 0, 0),
-        horizontalOptions: LayoutOptions.CENTER,
+        horizontalTextAlignment: TextAlignment.CENTER,
     });
     let historyGrid = ui.createGrid
     ({
@@ -1035,8 +1038,8 @@ let createHistoryMenu = () =>
                 column: 0,
                 margin: new Thickness(0, 2, 0, 0),
                 text: getLoc('labelCurrentRun'),
-                horizontalOptions: LayoutOptions.CENTER,
-                verticalOptions: LayoutOptions.END
+                horizontalTextAlignment: TextAlignment.CENTER,
+                verticalTextAlignment: TextAlignment.END
             }),
             ui.createLatexLabel
             ({
@@ -1044,8 +1047,8 @@ let createHistoryMenu = () =>
                 column: 1,
                 margin: new Thickness(0, 2, 0, 0),
                 text: getLoc('labelLastRun'),
-                horizontalOptions: LayoutOptions.CENTER,
-                verticalOptions: LayoutOptions.END
+                horizontalTextAlignment: TextAlignment.CENTER,
+                verticalTextAlignment: TextAlignment.END
             }),
             ui.createBox
             ({
