@@ -74,7 +74,7 @@ let bigNumArray = (array) => array.map(x => BigNumber.from(x));
 const borrowFactor = 4;
 const q1Cost = new FirstFreeCost(new ExponentialCost(1, 3.01));
 const getIncrementPenalty = (level) => Math.round(Utils.getStepwisePowerSum(
-level, 2, 4, 0).toNumber());
+level, 2, 6, 0).toNumber());
 const getq1BonusLevels = (bl, pl) => Math.max(Math.floor((bl * nudgec.level - 
 getIncrementPenalty(pl)) / borrowFactor), 0);
 const getq1 = (level) => Utils.getStepwisePowerSum(level + getq1BonusLevels(
@@ -87,16 +87,16 @@ const getq1Exponent = (level) => 1 + q1ExpInc * level;
 const q2Cost = new ExponentialCost(2.2e7, 11);
 const getq2 = (level) => BigNumber.THREE.pow(level) + (marathonBadge ? 1 : 0);
 
-const permaCosts = bigNumArray(['1e12', '1e22', '1e31', '1e54', '1e160',
+const permaCosts = bigNumArray(['1e12', '1e22', '1e31', '1e58', '1e126',
 '1e301']);
 const milestoneCost = new CompositeCost(2, new LinearCost(4.4, 4.4),
-new CompositeCost(2, new LinearCost(13.2, 8.8), new LinearCost(30.8, 13.2)));
+new CompositeCost(3, new LinearCost(17.6, 8.8), new LinearCost(48, 12)));
 
-const cLevelCap = [24, 36, 52, 72];
+const cLevelCap = [24, 36, 48, 64];
 const cooldown = [42, 30, 20, 12];
 
 const tauRate = 0.1;
-const pubExp = 4.2;
+const pubExp = 4;
 var getPublicationMultiplier = (tau) => tau.pow(pubExp);
 var getPublicationMultiplierFormula = (symbol) => `{${symbol}}^{${pubExp}}`;
 

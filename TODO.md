@@ -2,17 +2,17 @@
 
 ## In consideration
 
-- [ ] History menu option to enable/disable last pub preservation
 - Ask Gilles:
   - [ ] Make a bonus levels function like perma levels from stars
 - Better to defer these to when XLII comes online to sim
+  - [x] Nerf pub exp again
   - From 0 to e44 is the tutorial. The players must both learn about running
   - quickly (early) and running deep (before e44).
     - [ ] Nerf initial pub mult to make mod 4 strat impossible near e44
-  - [ ] Move freeze up to 58? as e44 milestone is enough to run for a while
-  - [ ] Nerf level caps to 24/36/48/64, as current runs are too long
+  - [x] Move freeze up to 58? as e44 milestone is enough to run for a while
+  - [x] Nerf level caps to 24/36/48/64, as current runs are too long
     - Rescale marathon achievement?
-  - [ ] Move 3rd ms to 176 but move extra increments forward
+  - [x] Move 3rd ms to 176 but move extra increments forward
     - Right now, extra increments seem useless
     - The players must know about how strong the borrow milestone can be?
     - But how are they gonna know if it's worth it if they've been running the
@@ -20,25 +20,19 @@
     - Is blocking their progress enough? Unlocking extra increments would only
     make borrowing worse
     - By the way, extra increments can also be run with borrow instead of cap
-  - [ ] Change step length of penalty to 6
-  - [x] Perma upgrade that automatically copies last history (Weyl Group style)
-    - Does not auto-freeze!
-    - Reduces activeness and input error
-    - Probably set it at e301, else it will inhibit experimentation
-    - Tracks the next move's turn in internal state
+  - [x] Change step length of penalty to 6
+
+## 0.07
+
+- [x] History menu option to enable/disable last pub preservation
+- [x] Perma upgrade that automatically copies last history (Weyl Group style)
+  - Does not auto-freeze!
+  - Reduces activeness and input error
+  - Probably set it at e301, else it will inhibit experimentation
+  - Tracks the next move
 - From d4N:
-  - Make a Collatz Conjurator/Conjoiner that makes decision trees or sequences
-  -  Make runs less monotonous
-- Make pub exponent go down gradually like `y=(10/log(x+1)+6.22)`?
-  - This is to make early game more lenient
-  - Disproven: early game is very normal at 5.22
-  - Counter: make pub exponent go up gradually to 5.22
-    - This is to make early game players not delusional about pub multipliers
-- From pietro:
-  - Save some levels for the next pub if not used up in current one
-    - Solves the problem of players being confused by c level
-    - But also trivialises the game by allowing you to farm massive amounts of
-    levels
+  - [x] Make a Collatz Conjoiner that makes ~~decision trees~~ sequences
+  - [z] Make runs less monotonous
 
 ## 0.06
 
@@ -90,3 +84,16 @@
 
 - [x] Interval milestone also increases level cap
 - [x] Buff c2 by reduce 1/2 of cost growth
+
+## Scrapped
+
+- Make pub exponent go down gradually like `y=(10/log(x+1)+6.22)`?
+  - This is to make early game more lenient
+  - Disproven: early game is very normal at 5.22
+  - Counter: make pub exponent go up gradually to 5.22
+    - This is to make early game players not delusional about pub multipliers
+- (From pietro) Save some levels for the next pub if not used up
+  - Solves the problem of players being confused by c level
+  - But also trivialises the game by allowing you to farm massive amounts of
+  levels early on
+  - With the q1 milestone, this is useless anyway
