@@ -663,7 +663,6 @@ var init = () =>
     }
 
     theory.createPublicationUpgrade(0, currency, permaCosts[0]);
-    // theory.permanentUpgrades[0].bought = (_) => updateAvailability();
     theory.createBuyAllUpgrade(1, currency, permaCosts[1]);
     theory.createAutoBuyerUpgrade(2, currency, permaCosts[2]);
     /* Unlocks freeze
@@ -795,12 +794,14 @@ var init = () =>
 var updateAvailability = () =>
 {
     pausec.isAvailable = pausePerma.level > 0;
-    if(theory.permanentUpgrades[0].level)
+    if(theory.autoBuyerUpgrade.level)
     {
         historyFrame.isVisible = true;
         historyLabel.isVisible = true;
         reachedFirstPub = true;
     }
+    extraIncPerma.isAvailable = pausePerma.level > 0;
+    mimickPerma.isAvailable = extraIncPerma.level > 0;
     marathonBadge = theory.achievements[1].isUnlocked;
     incrementc.isAvailable = extraIncPerma.level > 0 &&
     nudgec.level == nudgec.maxLevel;
