@@ -21,7 +21,7 @@
     make borrowing worse
     - By the way, extra increments can also be run with borrow instead of cap
   - [ ] Change step length of penalty to 6
-  - [ ] Perma upgrade that automatically copies last history (Weyl Group style)
+  - [x] Perma upgrade that automatically copies last history (Weyl Group style)
     - Does not auto-freeze!
     - Reduces activeness and input error
     - Probably set it at e301, else it will inhibit experimentation

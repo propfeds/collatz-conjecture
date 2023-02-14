@@ -29,8 +29,8 @@ var getDescription = (language) =>
     let descs =
     {
         en:
-`A puzzle revolving around nudging a number's value in order to counteract ` +
-`the even clause of the Collatz conjecture.
+`A puzzle revolving around trying to counteract the even clause of the ` +
+`Collatz conjecture.
 
 Warning: for spoiler purposes, it is ill-advised to
 share your sequences to new players.
@@ -60,6 +60,9 @@ let lastHistoryLength = 0;
 let writeHistory = true;
 let historyNumMode = 0;
 let historyIdxMode = 1;
+let mimickLastHistory = false;
+let nextNudge = 0;
+let preserveLastHistory = false;
 let reachedFirstPub = false;
 let marathonBadge = false;
 let longTickMsg = '';
@@ -84,7 +87,8 @@ const getq1Exponent = (level) => 1 + q1ExpInc * level;
 const q2Cost = new ExponentialCost(2.2e7, 11);
 const getq2 = (level) => BigNumber.THREE.pow(level) + (marathonBadge ? 1 : 0);
 
-const permaCosts = bigNumArray(['1e12', '1e22', '1e31', '1e54', '1e160']);
+const permaCosts = bigNumArray(['1e12', '1e22', '1e31', '1e54', '1e160',
+'1e301']);
 const milestoneCost = new CompositeCost(2, new LinearCost(4.4, 4.4),
 new CompositeCost(2, new LinearCost(13.2, 8.8), new LinearCost(30.8, 13.2)));
 
@@ -98,7 +102,7 @@ var getPublicationMultiplierFormula = (symbol) => `{${symbol}}^{${pubExp}}`;
 
 var pausec;
 var nudgec, q1, q2, incrementc;
-var pausePerma, extraIncPerma;
+var pausePerma, extraIncPerma, mimickPerma;
 var cooldownMs, q1BorrowMs, q1ExpMs;
 
 var currency;
@@ -109,21 +113,10 @@ const locStrings =
     {
         versionName: 'v0.07, Work in\\\\Progress',
         longTick: 'Tick: {0}s',
-        changeLog: `\\text{Change log!}\\\\ \\begin{array}{l}
-\\bullet \\text{ Now grants}\\\\ \\text{increments at}\\\\
-\\text{72 nudge levels}\\\\
-\\bullet \\text{ Pub formula~}\\\\ \\frac{{\\tau}^{5.22}}{31} \\rightarrow
-{\\tau}^{4.72}\\\\
-\\bullet \\text{ } q_1 \\text{ level ms~}\\\\
-1/2 \\rightarrow 1/4,\\\\
-\\text{rounded down}\\\\
-\\bullet \\text{ Freeze cost~}\\\\ 1e66 \\rightarrow 1e54\\\\
-\\bullet \\text{ Spaced out}\\\\ \\text{ms costs}\\\\
-\\end{array}`,
 
         historyDesc: `\\begin{{array}}{{c}}\\text{{History}}\\\\{{{0}}}/{{{1}}}
         \\end{{array}}`,
-        historyInfo: 'Shows the last and current runs\' sequences',
+        historyInfo: 'Shows the last and current publications\' sequences',
         pausecDesc: ['Freeze {0}', 'Unfreeze {0}'],
         pausecInfo:
         [
@@ -135,8 +128,7 @@ const locStrings =
         permaIncrement: `\\text{{extra in/decrements for }}c`,
         permaIncrementInfo: `Dependent on {0}'s sign, and incurs a penalty ` +
 `on its level`,
-        // permaPreserveDesc: '\\text{Preserve }c\\text{ after publishing}',
-        // permaPreserveInfo: '\\text{Preserves }c\\text{ after publishing}',
+        permaMimick: '\\text{{auto-nudge for }}c',
 
         q1Level: 'q_1\\text{{ level}}',
         cLevel: '1/{{{0}}}\\text{{{{ of }}}}c\\text{{{{ level}}}}',
@@ -215,16 +207,20 @@ to you and you are suspicious of it and totally not super scared.`,
         achSixNineTitle: 'I\'m proud of you.',
         achSixNineDesc: 'Reach a c value of 69.',
 
-        btnClose: 'Close',
+        btnSave: 'Save',
         btnIndexingMode: ['Indexing: Turns', 'Indexing: Levels'],
         btnNotationMode: ['Notation: Digits', 'Notation: Scientific'],
         btnBaseMode: ['Base: 10', 'Base: 2'],
-        errorInvalidNumMode: 'Invalid number mode',
-        errorBinExpLimit: 'Too big',
 
         menuHistory: 'Sequence History',
         labelCurrentRun: 'Current publication:',
         labelLastRun: 'Last publication:',
+        labelMimick: 'Auto-nudge (follows last pub): ',
+        labelMimickLatex: `\\text{{Auto-nudge }}c
+        \\text{{ (mimicks last pub): }}`,
+        labelPreserve: 'Preserve last publication: ',
+        errorInvalidNumMode: 'Invalid number mode',
+        errorBinExpLimit: 'Too big',
 
         reset: `You are about to reset the current publication.
 Note: resetting is disabled if publishing is open and extra c levels are ` +
@@ -285,7 +281,7 @@ let getImageSize = (width) =>
     return 20;
 }
 
-let getSmallBtnSize = (width) =>
+let getMediumBtnSize = (width) =>
 {
     if(width >= 1080)
         return 88;
@@ -295,6 +291,18 @@ let getSmallBtnSize = (width) =>
         return 44;
 
     return 36;
+}
+
+let getSmallBtnSize = (width) =>
+{
+    if(width >= 1080)
+        return 80;
+    if(width >= 720)
+        return 60;
+    if(width >= 360)
+        return 40;
+
+    return 32;
 }
 
 let getSeparatorSize = (width) =>
@@ -509,6 +517,21 @@ let getSequence = (sequence, numMode = 0, idxMode = 0) =>
     return Utils.getMath(result);
 }
 
+let binarySearch = (arr, target) =>
+{
+    let l = Number(arr[0]);
+    let r = Number(arr[arr.length - 1]);
+    while(l < r)
+    {
+        let m = Math.floor((l + r) / 2);
+        if(lastHistory[m][0] < target)
+            l = m + 1;
+        else
+            r = m;
+    }
+    return l;
+}
+
 var init = () =>
 {
     currency = theory.createCurrency();
@@ -673,6 +696,18 @@ var init = () =>
     We had the chance to test out this one. It breaks progression, and poses a
     threat to the theory's performance.
     */
+    /* Mimick history
+    Now that's quality of life.
+    */
+    {
+        mimickPerma = theory.createPermanentUpgrade(5, currency,
+        new ConstantCost(permaCosts[5]));
+        mimickPerma.description = Localization.getUpgradeUnlockDesc(getLoc(
+        'permaMimick'));
+        mimickPerma.info = Localization.getUpgradeUnlockInfo(getLoc(
+        'permaMimick'));
+        mimickPerma.maxLevel = 1;
+    }
 
     theory.setMilestoneCost(milestoneCost);
     /* Interval speed-up
@@ -786,6 +821,14 @@ var tick = (elapsedTime, multiplier) =>
         if(time >= cooldown[cooldownMs.level])
         {
             cIterProgBar.progressTo(0, 33, Easing.LINEAR);
+
+            if(mimickLastHistory && nextNudge in lastHistory &&
+            turns == lastHistory[nextNudge][0])
+            {
+                nudgec.buy(1);
+                ++nextNudge;
+            }
+
             if(c % 2n != 0)
                 c = 3n * c + 1n;
             else
@@ -977,7 +1020,7 @@ let createHistoryMenu = () =>
     ({
         rowDefinitions:
         [
-            getImageSize(ui.screenWidth),
+            'auto',
             'auto',
             'auto'
         ],
@@ -989,6 +1032,7 @@ let createHistoryMenu = () =>
             ({
                 row: 0,
                 column: 0,
+                margin: new Thickness(0, 2, 0, 0),
                 text: getLoc('labelCurrentRun'),
                 horizontalOptions: LayoutOptions.CENTER,
                 verticalOptions: LayoutOptions.END
@@ -997,6 +1041,7 @@ let createHistoryMenu = () =>
             ({
                 row: 0,
                 column: 1,
+                margin: new Thickness(0, 2, 0, 0),
                 text: getLoc('labelLastRun'),
                 horizontalOptions: LayoutOptions.CENTER,
                 verticalOptions: LayoutOptions.END
@@ -1019,6 +1064,43 @@ let createHistoryMenu = () =>
             lastPubHistory
         ]
     });
+    let tmpMimick = mimickLastHistory;
+    let mimickSwitch = ui.createSwitch
+    ({
+        isVisible: mimickPerma.level > 0,
+        isToggled: tmpMimick,
+        row: 0,
+        column: 1,
+        horizontalOptions: LayoutOptions.END,
+        onTouched: (e) =>
+        {
+            if(e.type == TouchType.SHORTPRESS_RELEASED ||
+            e.type == TouchType.LONGPRESS_RELEASED)
+            {
+                Sound.playClick();
+                tmpMimick = !tmpMimick;
+                mimickSwitch.isToggled = tmpMimick;
+            }
+        }
+    });
+    let tmpPreserve = preserveLastHistory;
+    let preserveSwitch = ui.createSwitch
+    ({
+        isToggled: tmpPreserve,
+        row: 1,
+        column: 1,
+        horizontalOptions: LayoutOptions.END,
+        onTouched: (e) =>
+        {
+            if(e.type == TouchType.SHORTPRESS_RELEASED ||
+            e.type == TouchType.LONGPRESS_RELEASED)
+            {
+                Sound.playClick();
+                tmpPreserve = !tmpPreserve;
+                preserveSwitch.isToggled = tmpPreserve;
+            }
+        }
+    });
 
     let menu = ui.createPopup
     ({
@@ -1030,9 +1112,10 @@ let createHistoryMenu = () =>
             [
                 ui.createGrid
                 ({
-                    rowDefinitions: [getSmallBtnSize(ui.screenWidth)],
+                    rowDefinitions: [getMediumBtnSize(ui.screenWidth)],
                     columnDefinitions: ['8*', '5*', '9*'],
                     columnSpacing: 8,
+                    margin: new Thickness(0, 6),
                     children:
                     [
                         toggleIdxButton,
@@ -1040,6 +1123,11 @@ let createHistoryMenu = () =>
                         toggleLvlButton
                     ]
                 }),
+                // ui.createBox
+                // ({
+                //     heightRequest: 1,
+                //     margin: new Thickness(0, 6)
+                // }),
                 ui.createScrollView
                 ({
                     // heightRequest: ui.screenHeight * 0.32,
@@ -1051,12 +1139,48 @@ let createHistoryMenu = () =>
                     heightRequest: 1,
                     margin: new Thickness(0, 6)
                 }),
+                ui.createGrid
+                ({
+                    rowDefinitions:
+                    [
+                        mimickPerma.level > 0 ? getImageSize(ui.screenWidth) :
+                        0,
+                        getImageSize(ui.screenWidth)
+                    ],
+                    columnDefinitions: ['4*', '1*'],
+                    margin: new Thickness(0, 0, 0, 6),
+                    children:
+                    [
+                        ui.createLatexLabel
+                        ({
+                            isVisible: mimickPerma.level > 0,
+                            text: Utils.getMath(getLoc('labelMimickLatex')),
+                            row: 0,
+                            column: 0,
+                            verticalTextAlignment: TextAlignment.CENTER
+                        }),
+                        mimickSwitch,
+                        ui.createLatexLabel
+                        ({
+                            text: getLoc('labelPreserve'),
+                            row: 1,
+                            column: 0,
+                            verticalTextAlignment: TextAlignment.CENTER
+                        }),
+                        preserveSwitch
+                    ]
+                }),
                 ui.createButton
                 ({
-                    text: getLoc('btnClose'),
+                    text: getLoc('btnSave'),
                     onClicked: () =>
                     {
                         Sound.playClick();
+                        mimickLastHistory = tmpMimick;
+                        if(mimickLastHistory)
+                            nextNudge = binarySearch(Object.keys(lastHistory),
+                            turns);
+                        preserveLastHistory = tmpPreserve;
                         menu.hide();
                     }
                 })
@@ -1087,9 +1211,11 @@ var getCurrencyFromTau = (tau) =>
 var prePublish = () =>
 {
     totalIncLevel = nudgec.level - getIncrementPenalty(incrementc.level);
-    lastHistory = history;
+    if(!preserveLastHistory)
+        lastHistory = history;
     lastHistoryLength = Object.keys(lastHistory).length;
 }
+
 var postPublish = () =>
 {
     turns = 0;
@@ -1105,6 +1231,9 @@ var postPublish = () =>
     c = 0n;
     cBigNum = BigNumber.from(c);
     cIterProgBar.progressTo(0, 220, Easing.CUBIC_INOUT);
+
+    if(mimickLastHistory)
+        nextNudge = binarySearch(Object.keys(lastHistory), turns);
 
     theory.invalidatePrimaryEquation();
     theory.invalidateTertiaryEquation();
@@ -1138,7 +1267,9 @@ var getInternalState = () => JSON.stringify
     history: history,
     lastHistory: lastHistory,
     historyNumMode: historyNumMode,
-    historyIdxMode: historyIdxMode
+    historyIdxMode: historyIdxMode,
+    mimickLastHistory: mimickLastHistory,
+    preserveLastHistory: preserveLastHistory,
 })
 
 var setInternalState = (stateStr) =>
@@ -1171,10 +1302,19 @@ var setInternalState = (stateStr) =>
 
     if('history' in state)
         history = state.history;
+
+    if('mimickLastHistory' in state)
+        mimickLastHistory = mimickPerma.level > 0 ?
+        state.mimickLastHistory : false;
+    if('preserveLastHistory' in state)
+        preserveLastHistory = state.preserveLastHistory;
     if('lastHistory' in state)
     {
-        lastHistory = state.lastHistory;    
-        lastHistoryLength = Object.keys(lastHistory).length;
+        lastHistory = state.lastHistory;
+        LHObj = Object.keys(lastHistory);
+        lastHistoryLength = LHObj.length;
+        if(mimickLastHistory)
+            nextNudge = binarySearch(LHObj, turns);
     }
     if('historyNumMode' in state)
         historyNumMode = state.historyNumMode;
