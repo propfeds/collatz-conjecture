@@ -36,10 +36,10 @@ var getDescription = (language) =>
 Warning: for spoiler purposes, it is ill-advised to
 share your sequences to new players.
 
-'If it's odd, triple it plus one,
-If it's even, divide it in two.
+'If it's odd, take triple and one,
+If it's even, cut in two.
 
-If you woke up today and ate bread,
+If you woke up with bread in hand,
 what would you do?'`,
     };
 
