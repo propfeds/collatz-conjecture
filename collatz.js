@@ -99,7 +99,7 @@ const cLevelCap = [24, 36, 48, 64];
 const cooldown = [42, 30, 20, 12];
 
 const tauRate = 0.1;
-const pubExp = 3.01;
+const pubExp = 4;
 var getPublicationMultiplier = (tau) => tau.pow(pubExp);
 var getPublicationMultiplierFormula = (symbol) => `{${symbol}}^{${pubExp}}`;
 

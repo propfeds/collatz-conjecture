@@ -10,8 +10,8 @@
     - Like t5
     - Makes freeze a bit less useful
     - [ ] Speed vs. depth issue
-    - [x] Nerf pub exp again, harsh, to like at least 3.01 or 2.2
-    - [x] UI clogging issue
+    - [ ] Balance between pub exp and c farming
+    - [ ] UI clogging issue
   - [x] Nerf pub exp again
   - From 0 to e44 is the tutorial. The players must both learn about running
   - quickly (early) and running deep (before e44).
