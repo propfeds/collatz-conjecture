@@ -5,6 +5,13 @@
 - Ask Gilles:
   - [ ] Make a bonus levels function like perma levels from stars
 - Better to defer these to when XLII comes online to sim
+  - [x] rho dot is influenced by sum of all c values passed through
+    - This way it can still stack after it ends, and income stops fluctuating
+    - Like t5
+    - Makes freeze a bit less useful
+    - [ ] Speed vs. depth issue
+    - [x] Nerf pub exp again, harsh, to like at least 3.01 or 2.2
+    - [x] UI clogging issue
   - [x] Nerf pub exp again
   - From 0 to e44 is the tutorial. The players must both learn about running
   - quickly (early) and running deep (before e44).
