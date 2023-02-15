@@ -841,13 +841,6 @@ var tick = (elapsedTime, multiplier) =>
         {
             cIterProgBar.progressTo(0, 33, Easing.LINEAR);
 
-            if(mimickLastHistory && nextNudge in lastHistory &&
-            turns == lastHistory[nextNudge][0])
-            {
-                nudge.buy(1);
-                ++nextNudge;
-            }
-
             if(c % 2n != 0)
                 c = 3n * c + 1n;
             else
@@ -855,6 +848,16 @@ var tick = (elapsedTime, multiplier) =>
 
             cSum += cBigNum;
             cBigNum = BigNumber.from(c);
+
+            if(mimickLastHistory)
+            {
+                while(nextNudge in lastHistory &&
+                turns == lastHistory[nextNudge][0])
+                {
+                    nudge.buy(1);
+                    ++nextNudge;
+                }
+            }
 
             if(nudge.level > totalIncLevel)
                 ++turns;
