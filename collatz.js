@@ -528,7 +528,7 @@ let binarySearch = (arr, target) =>
     while(l < r)
     {
         let m = Math.floor((l + r) / 2);
-        if(lastHistory[m][0] < target)
+        if(lastHistory[m][0] <= target)
             l = m + 1;
         else
             r = m;
@@ -564,11 +564,11 @@ var init = () =>
         nudge.getInfo = (_) => `${nudge.level & 1 ?
         Localization.getUpgradeDecCustomInfo('c', 1) :
         Localization.getUpgradeIncCustomInfo('c', 1)}${getLoc('alternating')}`;
-        nudge.bought = (_) =>
+        nudge.bought = (amount) =>
         {
             if(nudge.isAutoBuyable)
             {
-                nudge.refund(1);
+                nudge.refund(amount);
                 return;
             }
             if(writeHistory)
