@@ -285,6 +285,18 @@ let getImageSize = (width) =>
     return 20;
 }
 
+let getBtnSize = (width) =>
+{
+    if(width >= 1080)
+        return 96;
+    if(width >= 720)
+        return 72;
+    if(width >= 360)
+        return 48;
+
+    return 40;
+}
+
 let getMediumBtnSize = (width) =>
 {
     if(width >= 1080)
@@ -307,18 +319,6 @@ let getSmallBtnSize = (width) =>
         return 40;
 
     return 32;
-}
-
-let getSeparatorSize = (width) =>
-{
-    if(width >= 1080)
-        return 25;
-    if(width >= 720)
-        return 19;
-    if(width >= 360)
-        return 13;
-
-    return 11;
 }
 
 const historyFrame = ui.createFrame
@@ -1140,7 +1140,7 @@ let createHistoryMenu = () =>
             [
                 ui.createGrid
                 ({
-                    rowDefinitions: [getMediumBtnSize(ui.screenWidth)],
+                    rowDefinitions: [getBtnSize(ui.screenWidth)],
                     columnDefinitions: ['8*', '5*', '9*'],
                     columnSpacing: 8,
                     margin: new Thickness(0, 6),
