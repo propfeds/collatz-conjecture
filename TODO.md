@@ -16,18 +16,6 @@
   - From 0 to e44 is the tutorial. The players must both learn about running
   - quickly (early) and running deep (before e44).
     - [ ] Nerf initial pub mult to make mod 4 strat impossible near e44
-  - [x] Move freeze up to 58? as e44 milestone is enough to run for a while
-  - [x] Nerf level caps to 24/36/48/64, as current runs are too long
-    - Rescale marathon achievement?
-  - [x] Move 3rd ms to 176 but move extra increments forward
-    - Right now, extra increments seem useless
-    - The players must know about how strong the borrow milestone can be?
-    - But how are they gonna know if it's worth it if they've been running the
-    level cap upgrade all this time?
-    - Is blocking their progress enough? Unlocking extra increments would only
-    make borrowing worse
-    - By the way, extra increments can also be run with borrow instead of cap
-  - [x] Change step length of penalty to 6
 
 ## 0.07
 
@@ -40,6 +28,20 @@
 - From d4N:
   - [x] Make a Collatz Conjoiner that makes ~~decision trees~~ sequences
   - [z] Make runs less monotonous
+
+- Pre-sim Era:
+  - [x] Move freeze up to 58? as e44 milestone is enough to run for a while
+  - [x] Nerf level caps to 24/36/48/64, as current runs are too long
+    - Rescale marathon achievement?
+  - [x] Move 3rd ms to 176 but move extra increments forward
+    - Right now, extra increments seem useless
+    - The players must know about how strong the borrow milestone can be?
+    - But how are they gonna know if it's worth it if they've been running the
+    level cap upgrade all this time?
+    - Is blocking their progress enough? Unlocking extra increments would only
+    make borrowing worse
+    - By the way, extra increments can also be run with borrow instead of cap
+  - [x] Change step length of penalty to 6
 
 ## 0.06
 

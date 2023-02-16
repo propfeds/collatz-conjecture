@@ -839,6 +839,7 @@ var tick = (elapsedTime, multiplier) =>
         time += elapsedTime * 10;
         if(time >= cooldown[cooldownMs.level])
         {
+            time -= cooldown[cooldownMs.level];
             cIterProgBar.progressTo(0, 33, Easing.LINEAR);
 
             if(c % 2n != 0)
@@ -848,6 +849,9 @@ var tick = (elapsedTime, multiplier) =>
 
             cSum += cBigNum;
             cBigNum = BigNumber.from(c);
+
+            if(nudge.level > totalIncLevel)
+                ++turns;
 
             if(mimickLastHistory)
             {
@@ -859,11 +863,8 @@ var tick = (elapsedTime, multiplier) =>
                 }
             }
 
-            if(nudge.level > totalIncLevel)
-                ++turns;
             theory.invalidatePrimaryEquation();
             theory.invalidateTertiaryEquation();
-            time -= cooldown[cooldownMs.level];
         }
         else
             cIterProgBar.progressTo(Math.min(1,
