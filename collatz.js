@@ -256,7 +256,10 @@ cDispColour.set(Theme.LIGHT, '434343');
 
 const cIterProgBar = ui.createProgressBar
 ({
-    margin: new Thickness(6, 0)
+    margin: new Thickness(6, 0),
+    progressColor: () => !mimickLastHistory || (nudge &&
+    nudge.level == nudge.maxLevel) || (nextNudge in lastHistory &&
+    turns == lastHistory[nextNudge][0] - 1) ? Color.TEXT : Color.BORDER
 });
 /* Image size reference
 Size 20:
@@ -837,10 +840,12 @@ var tick = (elapsedTime, multiplier) =>
     if(freeze.level % 2 == 0)
     {
         time += elapsedTime * 10;
-        if(time >= cooldown[cooldownMs.level])
+        if(time + 1e-8 >= cooldown[cooldownMs.level])
         {
             time -= cooldown[cooldownMs.level];
-            cIterProgBar.progressTo(0, 33, Easing.LINEAR);
+            cIterProgBar.progressTo(0, mimickLastHistory &&
+            nextNudge in lastHistory && turns == lastHistory[nextNudge][0] - 2 ?
+            0 : 33, Easing.LINEAR);
 
             if(c % 2n != 0)
                 c = 3n * c + 1n;
@@ -868,7 +873,7 @@ var tick = (elapsedTime, multiplier) =>
         }
         else
             cIterProgBar.progressTo(Math.min(1,
-            (time / (cooldown[cooldownMs.level] - 1)) ** 1.5), 110,
+            (time / (cooldown[cooldownMs.level] - 1)) ** 1.5), 100,
             Easing.LINEAR);
     }
 
