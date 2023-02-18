@@ -958,17 +958,15 @@ var getSecondaryEquation = () =>
 var getTertiaryEquation = () =>
 {
     let mStr = '';
-    let cStr = '';
+    let cStr = `(${cBigNum < 0 ? '' : '+'}${cBigNum.toString(0)})`;
     if(reachedFirstPub)
-        mStr = `t=${turns}`;
-    if(historyNumMode & 2 || c > 1e6 || c < -1e6)
-        cStr = `c=${cBigNum.toString(0)}`;
+        mStr = `t=${turns},&`;
     
-    let mcStr = `\\begin{matrix}${mStr}${mStr && cStr ? ',&' : ''}${cStr}
-    \\end{matrix}`;
     let csStr = `\\Sigma\\,c=${cSum.toString(0)}`;
+    let mcStr = `\\begin{matrix}${mStr}${csStr}
+    \\end{matrix}`;
 
-    return `\\begin{array}{c}${mcStr}\\\\${csStr}\\end{array}`;
+    return `\\begin{array}{c}${mcStr}\\\\${cStr}\\end{array}`;
 }
 
 let createHistoryMenu = () =>
