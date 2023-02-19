@@ -22,6 +22,7 @@
     - A fun idea to replace it
       - Ideally, it could be a step to work towards creating a more interesting meta that involves using more than 1 sequence over and over again
     - Because once you've found what you love, the theory becomes just q1q2
+    - Although, extra increments solve the setback from having to recover from overstaying pub
 
 ## 0.07
 
@@ -33,7 +34,7 @@
   - Tracks the next move
 - From d4N:
   - [x] Make a Collatz Conjoiner that makes ~~decision trees~~ sequences
-  - [z] Make runs less monotonous
+  - [x] Make runs less monotonous
 
 - Pre-sim Era:
   - [x] Move freeze up to 58? as e44 milestone is enough to run for a while

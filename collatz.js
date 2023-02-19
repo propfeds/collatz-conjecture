@@ -378,7 +378,7 @@ const mimickFrame = ui.createFrame
     horizontalOptions: LayoutOptions.END,
     verticalOptions: LayoutOptions.END,
     margin: new Thickness(9.5),
-    padding: new Thickness(0, 0, 0, 1),
+    // padding: new Thickness(0, 0, 0, 1),
     hasShadow: true,
     heightRequest: getImageSize(ui.screenWidth),
     widthRequest: getImageSize(ui.screenWidth),
