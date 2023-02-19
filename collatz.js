@@ -118,7 +118,7 @@ const locStrings =
         longTick: 'Tick: {0}s',
 
         historyDesc: `\\begin{{array}}{{c}}\\text{{History}}\\\\{{{0}}}/{{{1}}}
-        \\\\\\text{{{2}}}\\end{{array}}`,
+        \\end{{array}}`,
         historyInfo: 'Shows the last and current publications\' sequences',
         freezeDesc: ['Freeze {0}', 'Unfreeze {0}'],
         freezeInfo:
@@ -147,7 +147,7 @@ const locStrings =
         alternating: ' (alternating)',
         penalty: '{0} level penalty = ',
         deductFromc: '\\text{{ (- }} {{{0}}} \\text{{ levels from }}c)',
-        auto : '(Auto)',
+        auto: ['Auto: off', 'Auto: on'],
 
         ch1Title: 'Preface',
         ch1Text: `You are a talented undergraduate student.
@@ -333,7 +333,9 @@ const historyFrame = ui.createFrame
     horizontalOptions: LayoutOptions.END,
     verticalOptions: LayoutOptions.START,
     margin: new Thickness(9.5),
+    padding: new Thickness(0, 0, 0, 1),
     hasShadow: true,
+    heightRequest: getImageSize(ui.screenWidth),
     widthRequest: getImageSize(ui.screenWidth),
     content: ui.createImage
     ({
@@ -360,10 +362,56 @@ const historyLabel = ui.createLatexLabel
     column: 2,
     horizontalOptions: LayoutOptions.END,
     verticalTextAlignment: TextAlignment.START,
-    margin: new Thickness(2.5, 40),
+    margin: new Thickness(2.5, 41, 2.5, 0),
     text: () => Utils.getMath(Localization.format(getLoc('historyDesc'),
     (nudge ? nudge.level : 0) + (extraInc ? extraInc.level : 0) -
-    totalIncLevel, lastHistoryLength, mimickLastHistory ? getLoc('auto') : '')),
+    totalIncLevel, lastHistoryLength)),
+    fontSize: 9,
+    textColor: () => Color.fromHex(cDispColour.get(game.settings.theme))
+});
+const mimickFrame = ui.createFrame
+({
+    isVisible: false,
+    row: 1,
+    column: 2,
+    cornerRadius: 1,
+    horizontalOptions: LayoutOptions.END,
+    verticalOptions: LayoutOptions.END,
+    margin: new Thickness(9.5),
+    padding: new Thickness(0, 0, 0, 1),
+    hasShadow: true,
+    heightRequest: getImageSize(ui.screenWidth),
+    widthRequest: getImageSize(ui.screenWidth),
+    content: ui.createImage
+    ({
+        source: () => mimickLastHistory && nudge &&
+        nudge.level < nudge.maxLevel ? ImageSource.STAR_FULL :
+        ImageSource.STAR_EMPTY,
+        aspect: Aspect.ASPECT_FIT,
+        useTint: false
+    }),
+    onTouched: (e) =>
+    {
+        if(e.type == TouchType.SHORTPRESS_RELEASED ||
+        e.type == TouchType.LONGPRESS_RELEASED)
+        {
+            Sound.playClick();
+            mimickLastHistory = !mimickLastHistory;
+            if(mimickLastHistory)
+            nextNudge = binarySearch(Object.keys(lastHistory), turns);
+        }
+    }
+});
+const mimickLabel = ui.createLatexLabel
+({
+    isVisible: false,
+    row: 1,
+    column: 2,
+    horizontalOptions: LayoutOptions.END,
+    verticalTextAlignment: TextAlignment.START,
+    verticalOptions: LayoutOptions.END,
+    margin: new Thickness(2.5, 0, 2.5, 42),
+    text: () => (getLoc('auto')[Number(mimickLastHistory)]),
     fontSize: 9,
     textColor: () => Color.fromHex(cDispColour.get(game.settings.theme))
 });
@@ -823,6 +871,11 @@ var updateAvailability = () =>
     }
     extraIncPerma.isAvailable = freezePerma.level > 0;
     mimickPerma.isAvailable = extraIncPerma.level > 0;
+    if(mimickPerma.level)
+    {
+        mimickFrame.isVisible = true;
+        mimickLabel.isVisible = true;
+    }
     marathonBadge = theory.achievements[1].isUnlocked;
     extraInc.isAvailable = extraIncPerma.level > 0 &&
     nudge.level == nudge.maxLevel;
@@ -889,10 +942,14 @@ var getEquationOverlay = () =>
 {
     let result = ui.createGrid
     ({
-        rowDefinitions: ['auto', '1*', '1*'],
+        verticalOptions: LayoutOptions.FILL,
+        rowDefinitions: ['1*', '1*'],
         columnDefinitions: ['1*', '2*', '1*'],
         children:
         [
+            // For reference
+            // ui.createFrame({row: 0, column: 2}),
+            // ui.createFrame({row: 1, column: 2}),
             ui.createLatexLabel
             ({
                 row: 0,
@@ -915,17 +972,19 @@ var getEquationOverlay = () =>
             }),
             historyFrame,
             historyLabel,
-            ui.createLatexLabel
-            ({
-                row: 2,
-                column: 2,
-                horizontalOptions: LayoutOptions.END,
-                verticalTextAlignment: TextAlignment.END,
-                margin: new Thickness(6, 3),
-                text: () => longTickMsg,
-                fontSize: 9,
-                textColor: Color.TEXT_MEDIUM
-            })
+            // ui.createLatexLabel
+            // ({
+            //     row: 1,
+            //     column: 2,
+            //     horizontalOptions: LayoutOptions.END,
+            //     verticalTextAlignment: TextAlignment.END,
+            //     margin: new Thickness(6, 3),
+            //     text: () => longTickMsg,
+            //     fontSize: 9,
+            //     textColor: Color.TEXT_MEDIUM
+            // }),
+            mimickFrame,
+            mimickLabel
         ]
     });
     return result;
@@ -1095,30 +1154,11 @@ let createHistoryMenu = () =>
             lastPubHistory
         ]
     });
-    let tmpMimick = mimickLastHistory;
-    let mimickSwitch = ui.createSwitch
-    ({
-        isVisible: mimickPerma.level > 0,
-        isToggled: tmpMimick,
-        row: 0,
-        column: 1,
-        horizontalOptions: LayoutOptions.END,
-        onTouched: (e) =>
-        {
-            if(e.type == TouchType.SHORTPRESS_RELEASED ||
-            e.type == TouchType.LONGPRESS_RELEASED)
-            {
-                Sound.playClick();
-                tmpMimick = !tmpMimick;
-                mimickSwitch.isToggled = tmpMimick;
-            }
-        }
-    });
     let tmpPreserve = preserveLastHistory;
     let preserveSwitch = ui.createSwitch
     ({
         isToggled: tmpPreserve,
-        row: 1,
+        row: 0,
         column: 1,
         horizontalOptions: LayoutOptions.END,
         onTouched: (e) =>
@@ -1172,30 +1212,15 @@ let createHistoryMenu = () =>
                 }),
                 ui.createGrid
                 ({
-                    rowDefinitions:
-                    [
-                        mimickPerma.level > 0 ? getImageSize(ui.screenWidth) :
-                        0,
-                        getImageSize(ui.screenWidth)
-                    ],
+                    rowDefinitions: [getImageSize(ui.screenWidth)],
                     columnDefinitions: ['4*', '1*'],
                     margin: new Thickness(0, 0, 0, 6),
                     children:
                     [
                         ui.createLatexLabel
                         ({
-                            isVisible: mimickPerma.level > 0,
-                            text: Localization.format(getLoc('labelMimick'),
-                            Utils.getMath('c')),
-                            row: 0,
-                            column: 0,
-                            verticalTextAlignment: TextAlignment.CENTER
-                        }),
-                        mimickSwitch,
-                        ui.createLatexLabel
-                        ({
                             text: getLoc('labelPreserve'),
-                            row: 1,
+                            row: 0,
                             column: 0,
                             verticalTextAlignment: TextAlignment.CENTER
                         }),
@@ -1208,10 +1233,6 @@ let createHistoryMenu = () =>
                     onClicked: () =>
                     {
                         Sound.playClick();
-                        mimickLastHistory = tmpMimick;
-                        if(mimickLastHistory)
-                            nextNudge = binarySearch(Object.keys(lastHistory),
-                            turns);
                         preserveLastHistory = tmpPreserve;
                         menu.hide();
                     }

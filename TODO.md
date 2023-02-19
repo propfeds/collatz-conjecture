@@ -16,6 +16,12 @@
   - From 0 to e44 is the tutorial. The players must both learn about running
   - quickly (early) and running deep (before e44).
     - [ ] Nerf initial pub mult to make mod 4 strat impossible near e44
+  - [x] Auto-nudge button in main screen
+  - [ ] Issue: extra increments are not interesting currently
+    - Because it sets back progress for not much short-term benefit
+    - A fun idea to replace it
+      - Ideally, it could be a step to work towards creating a more interesting meta that involves using more than 1 sequence over and over again
+    - Because once you've found what you love, the theory becomes just q1q2
 
 ## 0.07
 
