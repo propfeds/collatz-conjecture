@@ -202,9 +202,23 @@ A shiver shook you up, and suddenly, you
 chanced upon that colleague in the hallway.
 She is the only one who knows this.`,
 
-        ch4Title: 'Something about the Auto-nudge',
-        ch4Text: `Something about the Auto-nudge being a mysterious tool gifted
-to you and you are suspicious of it and totally not super scared.`,
+        ch4Title: 'Honestly',
+        ch4Text: `'..., what is this? Why?'
+
+You hold before yourself an odd machine.
+This is called, an Auto-Nudge. Armed with a
+mechanical hand, programmable rhythms,
+foot-cranked toggle control, histographs.
+Even a toaster slot attached to the heat sink.
+
+What in the world could create this machine,
+tailored to every nook of your nature,
+urging you to multiply your operations
+and get you busted?
+Some kind of vendetta.
+
+You see two signatures on the
+back of the machine.`,
 
         achNegativeTitle: 'Shrouded by Fog',
         achNegativeDesc: `Publish with an odd level of c and go negative.`,
