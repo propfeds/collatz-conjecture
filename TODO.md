@@ -20,12 +20,21 @@
 - [ ] q2 return to 2^x
   - [ ] Also solves the problem of 1st pub being too big
 - [ ] Add q3 (unlocked with milestone)
+  - (!) Consider other changes first like q1 and log10(Ec/r)
   - q3 = 3^lv (+1 with badge)
   - Probably gonna make the milestone compete with q1 exponent
-  - Cost starts at e301 to hint at auto?
-- [ ] q1 milestone buffs level by log10(Ec) instead
+  - Cost starts at e300 to hint at e301 auto?
+    - Cost increment smaller than 30.1 to make it interesting
+    - But not too small to make it reasonable
+    - Is it too late to be that strong?
+    - Nerf pub exp lol
 - [ ] Extra levels instead impose penalty by dividing the whole income
-  - rho dot = q1q2|Ec|/r, with r being a (2, 5 stepwise from 1?)
+  - rho dot = q1q2|Ec|/(2^r), with r being a (2, 4) stepwise (wtf??)
+    - Story: You begin attaching random /2s in your sequence in hopes of not being discovered...
+  - I'll figure out the best form of punishment later when playtesting
+  - This sounds like a legit good level farming method
+  - Needs a max level, not too high to be abuseable, not too low to be worthless
+- [ ] q1 milestone buffs level by log10(Ec) instead of 64
 - I'm not even sure?
   - [ ] (?) Add a new level to cap ms: 16/24/36/48/64
     - Interval: 42/36/27/18/12
