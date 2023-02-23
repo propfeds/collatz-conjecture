@@ -23,10 +23,17 @@
       - Ideally, it could be a step to work towards creating a more interesting meta that involves using more than 1 sequence over and over again
     - Because once you've found what you love, the theory becomes just q1q2
     - Although, extra increments solve the setback from having to recover from overstaying pub
-  - [ ] q1 turn into (2, 10) stepwise for increased activeness?
+  - [ ] Add a new level to cap ms: 16/24/36/48/64
+    - Interval: 42/36/27/18/12
+  - [ ] q1 turn into (2, 10) stepwise with low cost increment for activeness?
+    - 2.06 or just 1.505?
+  - [ ] q2 return to 2^x
     - [ ] Also solves the problem of 1st pub being too big
+  - [ ] Add q3 (unlocked with milestone)
+    - q3 = 3^lv (+1 with badge)
   - [ ] c level farming has diminishing returns?
     - Does get better a bit with exp milestone
+  - [ ] q1 milestone buffs level by log10(Ec) instead
 
 ## 0.07
 
