@@ -940,7 +940,7 @@ var tick = (elapsedTime, multiplier) =>
         }
         else
             cIterProgBar.progressTo(Math.min(1,
-            (time / (cooldown[cooldownMs.level] - 1)) ** 1.5), 100,
+            (time / (cooldown[cooldownMs.level] - 1)) ** 1.5), 105,
             Easing.LINEAR);
     }
 

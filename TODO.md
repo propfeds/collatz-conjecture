@@ -12,6 +12,27 @@
   - Because once you've found what you love, the theory becomes just q1q2
   - Although, extra increments solve the setback from having to recover from overstaying pub
 
+- [ ] Reverse star icon lighting? (on = manual, off = auto)
+  - Change text to Manual / Auto
+
+- [ ] q1 turn into (2, 10) stepwise with low cost increment for activeness?
+  - 2.09 or just 1.76? divisible by 11 this time
+- [ ] q2 return to 2^x
+  - [ ] Also solves the problem of 1st pub being too big
+- [ ] Add q3 (unlocked with milestone)
+  - q3 = 3^lv (+1 with badge)
+  - Probably gonna make the milestone compete with q1 exponent
+  - Cost starts at e301 to hint at auto?
+- [ ] q1 milestone buffs level by log10(Ec) instead
+- [ ] Extra levels instead impose penalty by dividing the whole income
+  - rho dot = q1q2|Ec|/r, with r being a (2, 5 stepwise from 1?)
+- I'm not even sure?
+  - [ ] (?) Add a new level to cap ms: 16/24/36/48/64
+    - Interval: 42/36/27/18/12
+  - [ ] (?) c level farming has diminishing returns?
+    - Does get better a bit with exp milestone
+    - Theory loses that uniqueness
+
 - [x] rho dot is influenced by sum of all c values passed through
   - This way it can still stack after it ends, and income stops fluctuating
   - Like t5
@@ -22,22 +43,6 @@
 - From 0 to e44 is the tutorial. The players must both learn about running
 - quickly (early) and running deep (before e44).
   - [ ] (?) Nerf initial pub mult to make mod 4 strat impossible near e44
-
-- [ ] q1 turn into (2, 10) stepwise with low cost increment for activeness?
-  - 2.09 or just 1.76? divisible by 11 this time
-- [ ] q2 return to 2^x
-  - [ ] Also solves the problem of 1st pub being too big
-- [ ] Add q3 (unlocked with milestone)
-  - q3 = 3^lv (+1 with badge)
-- [ ] q1 milestone buffs level by log10(Ec) instead
-- [ ] Extra levels instead impose penalty by dividing the whole income
-  - rho dot = q1q2|Ec|/r, with r being a (2, 5 stepwise from 1?)
-- I'm not even sure?
-  - [ ] (?) Add a new level to cap ms: 16/24/36/48/64
-    - Interval: 42/36/27/18/12
-  - [ ] (?) c level farming has diminishing returns?
-    - Does get better a bit with exp milestone
-    - Theory loses that uniqueness
 
 ## 0.07
 
