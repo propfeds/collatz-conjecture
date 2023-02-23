@@ -2,17 +2,61 @@
 
 ## In consideration
 
-- [ ] History menu option to enable/disable last pub preservation
 - Ask Gilles:
   - [ ] Make a bonus levels function like perma levels from stars
-- Better to defer these to when XLII comes online to sim
-  - From 0 to e44 is the tutorial. The players must both learn about running
-  - quickly (early) and running deep (before e44).
-    - [ ] Nerf initial pub mult to make mod 4 strat impossible near e44
-  - [ ] Move freeze up to 58? as e44 milestone is enough to run for a while
-  - [ ] Nerf level caps to 24/36/48/64, as current runs are too long
+
+- [ ] Issue: extra increments are not interesting currently
+  - Because it sets back progress for not much short-term benefit
+  - A fun idea to replace it
+    - Ideally, it could be a step to work towards creating a more interesting meta that involves using more than 1 sequence over and over again
+  - Because once you've found what you love, the theory becomes just q1q2
+  - Although, extra increments solve the setback from having to recover from overstaying pub
+
+- [x] rho dot is influenced by sum of all c values passed through
+  - This way it can still stack after it ends, and income stops fluctuating
+  - Like t5
+  - Makes freeze a bit less useful
+  - [ ] Speed vs. depth issue
+  - [ ] Balance between pub exp and c farming
+  - [ ] UI clogging issue
+- From 0 to e44 is the tutorial. The players must both learn about running
+- quickly (early) and running deep (before e44).
+  - [ ] (?) Nerf initial pub mult to make mod 4 strat impossible near e44
+
+- [ ] q1 turn into (2, 10) stepwise with low cost increment for activeness?
+  - 2.09 or just 1.76? divisible by 11 this time
+- [ ] q2 return to 2^x
+  - [ ] Also solves the problem of 1st pub being too big
+- [ ] Add q3 (unlocked with milestone)
+  - q3 = 3^lv (+1 with badge)
+- [ ] q1 milestone buffs level by log10(Ec) instead
+- [ ] Extra levels instead impose penalty by dividing the whole income
+  - rho dot = q1q2|Ec|/r, with r being a (2, 5 stepwise from 1?)
+- I'm not even sure?
+  - [ ] (?) Add a new level to cap ms: 16/24/36/48/64
+    - Interval: 42/36/27/18/12
+  - [ ] (?) c level farming has diminishing returns?
+    - Does get better a bit with exp milestone
+    - Theory loses that uniqueness
+
+## 0.07
+
+- [x] Auto-nudge button in main screen
+- [x] History menu option to enable/disable last pub preservation
+- [x] Perma upgrade that automatically copies last history (Weyl Group style)
+  - Does not auto-freeze!
+  - Reduces activeness and input error
+  - Probably set it at e301, else it will inhibit experimentation
+  - Tracks the next move
+- From d4N:
+  - [x] Make a Collatz Conjoiner that makes ~~decision trees~~ sequences
+  - [x] Make runs less monotonous
+
+- Pre-sim Era:
+  - [x] Move freeze up to 58? as e44 milestone is enough to run for a while
+  - [x] Nerf level caps to 24/36/48/64, as current runs are too long
     - Rescale marathon achievement?
-  - [ ] Move 3rd ms to 176 but move extra increments forward
+  - [x] Move 3rd ms to 176 but move extra increments forward
     - Right now, extra increments seem useless
     - The players must know about how strong the borrow milestone can be?
     - But how are they gonna know if it's worth it if they've been running the
@@ -20,25 +64,7 @@
     - Is blocking their progress enough? Unlocking extra increments would only
     make borrowing worse
     - By the way, extra increments can also be run with borrow instead of cap
-  - [ ] Change step length of penalty to 6
-  - [x] Perma upgrade that automatically copies last history (Weyl Group style)
-    - Does not auto-freeze!
-    - Reduces activeness and input error
-    - Probably set it at e301, else it will inhibit experimentation
-    - Tracks the next move's turn in internal state
-- From d4N:
-  - Make a Collatz Conjurator/Conjoiner that makes decision trees or sequences
-  -  Make runs less monotonous
-- Make pub exponent go down gradually like `y=(10/log(x+1)+6.22)`?
-  - This is to make early game more lenient
-  - Disproven: early game is very normal at 5.22
-  - Counter: make pub exponent go up gradually to 5.22
-    - This is to make early game players not delusional about pub multipliers
-- From pietro:
-  - Save some levels for the next pub if not used up in current one
-    - Solves the problem of players being confused by c level
-    - But also trivialises the game by allowing you to farm massive amounts of
-    levels
+  - [x] Change step length of penalty to 6
 
 ## 0.06
 
@@ -90,3 +116,16 @@
 
 - [x] Interval milestone also increases level cap
 - [x] Buff c2 by reduce 1/2 of cost growth
+
+## Scrapped
+
+- Make pub exponent go down gradually like `y=(10/log(x+1)+6.22)`?
+  - This is to make early game more lenient
+  - Disproven: early game is very normal at 5.22
+  - Counter: make pub exponent go up gradually to 5.22
+    - This is to make early game players not delusional about pub multipliers
+- (From pietro) Save some levels for the next pub if not used up
+  - Solves the problem of players being confused by c level
+  - But also trivialises the game by allowing you to farm massive amounts of
+  levels early on
+  - With the q1 milestone, this is useless anyway
