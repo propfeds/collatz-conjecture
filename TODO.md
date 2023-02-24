@@ -12,9 +12,6 @@
   - Because once you've found what you love, the theory becomes just q1q2
   - Although, extra increments solve the setback from having to recover from overstaying pub
 
-- [ ] Reverse star icon lighting? (on = manual, off = auto)
-  - Change text to Manual / Auto
-
 - [ ] q1 turn into (2, 10) stepwise with low cost increment for activeness?
   - 2.09 or just 1.76? divisible by 11 this time
 - [ ] q2 return to 2^x
@@ -27,7 +24,7 @@
     - Cost increment smaller than 30.1 to make it interesting
     - But not too small to make it reasonable
     - Is it too late to be that strong?
-    - Nerf pub exp lol
+    - Or unlock it at e120 or sth and nerf pub exp to like 2.2 lol
 - [ ] Extra levels instead impose penalty by dividing the whole income
   - rho dot = q1q2|Ec|/(2^r), with r being a (2, 4) stepwise (wtf??)
     - Story: You begin attaching random /2s in your sequence in hopes of not being discovered...

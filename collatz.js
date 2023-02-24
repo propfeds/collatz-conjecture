@@ -67,7 +67,6 @@ let nextNudge = 0;
 let preserveLastHistory = false;
 let reachedFirstPub = false;
 let marathonBadge = false;
-let longTickMsg = '';
 
 let bigNumArray = (array) => array.map(x => BigNumber.from(x));
 
@@ -147,7 +146,7 @@ const locStrings =
         alternating: ' (alternating)',
         penalty: '{0} level penalty = ',
         deductFromc: '\\text{{ (- }} {{{0}}} \\text{{ levels from }}c)',
-        auto: ['Auto: off', 'Auto: on'],
+        auto: ['', 'Auto'],
 
         ch1Title: 'Preface',
         ch1Text: `You are a talented undergraduate student.
@@ -422,9 +421,9 @@ const mimickLabel = ui.createLatexLabel
     row: 1,
     column: 2,
     horizontalOptions: LayoutOptions.END,
-    verticalTextAlignment: TextAlignment.START,
     verticalOptions: LayoutOptions.END,
-    margin: new Thickness(2.5, 0, 2.5, 42),
+    verticalTextAlignment: TextAlignment.START,
+    margin: new Thickness(2.5, 0, 8, 42),
     text: () => (getLoc('auto')[Number(mimickLastHistory)]),
     fontSize: 9,
     textColor: () => Color.fromHex(cDispColour.get(game.settings.theme))
@@ -897,18 +896,16 @@ var updateAvailability = () =>
 
 var tick = (elapsedTime, multiplier) =>
 {
-    if(elapsedTime > 0.1)
-        longTickMsg = Localization.format(getLoc('longTick'),
-        elapsedTime.toFixed(3));
-
     nudge.isAutoBuyable = false;
     extraInc.isAutoBuyable = false;
 
     if(freeze.level % 2 == 0)
     {
         time += elapsedTime * 10;
-        if(time + 1e-8 >= cooldown[cooldownMs.level])
+        let turned = false;
+        while(time + 1e-8 >= cooldown[cooldownMs.level])
         {
+            turned = true;
             time -= cooldown[cooldownMs.level];
             cIterProgBar.progressTo(0, mimickLastHistory &&
             nextNudge in lastHistory && turns == lastHistory[nextNudge][0] - 2 ?
@@ -938,7 +935,7 @@ var tick = (elapsedTime, multiplier) =>
             theory.invalidatePrimaryEquation();
             theory.invalidateTertiaryEquation();
         }
-        else
+        if(!turned)
             cIterProgBar.progressTo(Math.min(1,
             (time / (cooldown[cooldownMs.level] - 1)) ** 1.5), 105,
             Easing.LINEAR);
@@ -1023,7 +1020,7 @@ var getPrimaryEquation = () =>
 var getSecondaryEquation = () =>
 {
     let result = `\\begin{matrix}\\dot{\\rho}=q_1${q1ExpMs.level > 0 ?
-    `^{${getq1Exponent(q1ExpMs.level)}}` : ''}q_2\\,|\\sum c\\,|,&
+    `^{${getq1Exponent(q1ExpMs.level)}}` : ''}q_2\\left|\\sum c\\right|,&
     ${theory.latexSymbol}=\\max{\\rho}^{0.1}\\end{matrix}`;
     return result;
 }
