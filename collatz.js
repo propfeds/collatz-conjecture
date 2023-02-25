@@ -104,7 +104,7 @@ const cooldown = [42, 30, 20, 12];
 
 const tauRate = 0.1;
 const pubExp = 2.7;
-const pubMult = 8;
+const pubMult = 4;
 var getPublicationMultiplier = (tau) => tau.pow(pubExp) * pubMult;
 var getPublicationMultiplierFormula = (symbol) => `${pubMult}\\times{${symbol}}^{${pubExp}}`;
 
