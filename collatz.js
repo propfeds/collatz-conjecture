@@ -753,6 +753,7 @@ var init = () =>
     theory.createPublicationUpgrade(0, currency, permaCosts[0]);
     theory.createBuyAllUpgrade(1, currency, permaCosts[1]);
     theory.createAutoBuyerUpgrade(2, currency, permaCosts[2]);
+    theory.autoBuyerUpgrade.bought = (_) => updateAvailability();
     /* Unlocks freeze
     Shame that you unlock such a useful tool really late.
     */
