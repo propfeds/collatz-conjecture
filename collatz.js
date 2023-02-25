@@ -92,7 +92,7 @@ const getq3 = (level) => BigNumber.THREE.pow(level) + (marathonBadge ? 1 : 0);
 const getr = (level) => Utils.getStepwisePowerSum(level, 2, 6, 0);
 const getrPenalty = (level) => BigNumber.TWO.pow(getr(level));
 
-const permaCosts = bigNumArray(['1e12', '1e22', '1e31', '1e58', '1e126',
+const permaCosts = bigNumArray(['1e12', '1e22', '1e27', '1e56', '1e140',
 '1e301']);
 // 44, 88, 176, 264, 352, 440, 528, 616, 704
 // cap cap  cap  bor  q3  exp  exp  exp  exp
@@ -941,7 +941,7 @@ var tick = (elapsedTime, multiplier) =>
                 c /= 2n;
             cBigNum = BigNumber.from(c);
 
-            if(nudge.level > totalIncLevel)
+            if(nudge.level > totalIncLevel % 2)
                 ++turns;
 
             if(mimickLastHistory)
