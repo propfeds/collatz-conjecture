@@ -831,9 +831,6 @@ var init = () =>
         q1BorrowMs.description = Localization.getUpgradeIncCustomDesc(getLoc(
         'q1Level'), Localization.format(getLoc('Eclog'), borrowFactor));
         q1BorrowMs.info = getLoc('EclogInfo');
-        q1BorrowMs.boughtOrRefunded = (_) => updateAvailability();
-        q1BorrowMs.canBeRefunded = (_) => q1ExpMs.level == 0 &&
-        q3UnlockMs.level == 0;
     }
     /* q1 exponent
     Standard exponent upgrade.
@@ -844,7 +841,6 @@ var init = () =>
         q1ExpInc);
         q1ExpMs.info = Localization.getUpgradeIncCustomExpInfo('q_1', q1ExpInc);
         q1ExpMs.boughtOrRefunded = (_) => theory.invalidateSecondaryEquation();
-        q1ExpMs.isAvailable = false;
     }
     /* q3 unlock
     Standard unlock.
@@ -858,7 +854,6 @@ var init = () =>
             updateAvailability();
             theory.invalidateSecondaryEquation();
         };
-        q3UnlockMs.isAvailable = false;
     }
 
     theory.createStoryChapter(0, getLoc('ch1Title'), getLoc('ch1Text'),
@@ -905,8 +900,8 @@ var updateAvailability = () =>
         mimickFrame.isVisible = true;
         mimickLabel.isVisible = true;
     }
-    q1ExpMs.isAvailable = q1BorrowMs.level > 0;
-    q3UnlockMs.isAvailable = q1BorrowMs.level > 0;
+    q1ExpMs.isAvailable = theory.milestonesTotal > 1;
+    q3UnlockMs.isAvailable = theory.milestonesTotal > 1;
     q3.isAvailable = q3UnlockMs.level > 0;
     marathonBadge = theory.achievements[1].isUnlocked;
 }
