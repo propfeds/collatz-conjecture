@@ -844,6 +844,7 @@ var init = () =>
         q1BorrowMs.description = Localization.getUpgradeIncCustomDesc(getLoc(
         'q1Level'), getLoc('Eclog'));
         q1BorrowMs.info = getLoc('EclogInfo');
+        q1BorrowMs.boughtOrRefunded = (_) => updateAvailability();
     }
     /* q1 exponent
     Standard exponent upgrade.
@@ -854,6 +855,7 @@ var init = () =>
         q1ExpInc);
         q1ExpMs.info = Localization.getUpgradeIncCustomExpInfo('q_1', q1ExpInc);
         q1ExpMs.boughtOrRefunded = (_) => theory.invalidateSecondaryEquation();
+        q1ExpMs.isAvailable = false;
     }
     /* q3 unlock
     Standard unlock.
@@ -866,7 +868,8 @@ var init = () =>
         {
             updateAvailability();
             theory.invalidateSecondaryEquation();
-        }
+        };
+        q3UnlockMs.isAvailable = false;
     }
 
     theory.createStoryChapter(0, getLoc('ch1Title'), getLoc('ch1Text'),
@@ -905,6 +908,8 @@ var updateAvailability = () =>
         reachedFirstPub = true;
     }
     extraIncPerma.isAvailable = freezePerma.level > 0;
+    extraInc.isAvailable = extraIncPerma.level > 0 &&
+    nudge.level == nudge.maxLevel;
     mimickPerma.isAvailable = extraIncPerma.level > 0;
     if(mimickPerma.level)
     {
@@ -913,8 +918,11 @@ var updateAvailability = () =>
     }
     q3.isAvailable = q3UnlockMs.level > 0;
     marathonBadge = theory.achievements[1].isUnlocked;
-    extraInc.isAvailable = extraIncPerma.level > 0 &&
-    nudge.level == nudge.maxLevel;
+    if(q1BorrowMs.level)
+    {
+        q1ExpMs.isAvailable = true;
+        q3UnlockMs.isAvailable = true;
+    }
 }
 
 var tick = (elapsedTime, multiplier) =>
