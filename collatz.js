@@ -103,7 +103,7 @@ const cLevelCap = [18, 32, 48, 66];
 const cooldown = [42, 30, 20, 12];
 
 const tauRate = 0.1;
-const pubExp = 2.4;
+const pubExp = 2.7;
 var getPublicationMultiplier = (tau) => tau.pow(pubExp);
 var getPublicationMultiplierFormula = (symbol) => `{${symbol}}^{${pubExp}}`;
 
@@ -143,7 +143,7 @@ const locStrings =
         cLevelth: `1/{{{0}}}^\\text{{{{th}}}}\\text{{{{ of }}}}c
         \\text{{{{ level}}}}`,
         Eclog: '\\log_{10}\\Sigma\\,c\\text{{{{ (cumulative)}}}}',
-        EclogInfo: 'Stacks additively across publications',
+        EclogInfo: 'Stacks across publications',
         cLevelCap: 'c\\text{{ level cap}}',
         cooldown: '\\text{{interval}}',
         cooldownInfo: 'Interval',
