@@ -104,8 +104,9 @@ const cooldown = [42, 30, 20, 12];
 
 const tauRate = 0.1;
 const pubExp = 2.7;
-var getPublicationMultiplier = (tau) => tau.pow(pubExp);
-var getPublicationMultiplierFormula = (symbol) => `{${symbol}}^{${pubExp}}`;
+const pubMult = 8;
+var getPublicationMultiplier = (tau) => tau.pow(pubExp) * pubMult;
+var getPublicationMultiplierFormula = (symbol) => `${pubMult}\\times{${symbol}}^{${pubExp}}`;
 
 var freeze;
 var nudge, q1, q2, q3, extraInc;
@@ -143,7 +144,7 @@ const locStrings =
         cLevelth: `1/{{{0}}}^\\text{{{{th}}}}\\text{{{{ of }}}}c
         \\text{{{{ level}}}}`,
         Eclog: '\\log_{10}\\Sigma\\,c\\text{{{{ (cumulative)}}}}',
-        EclogInfo: 'Stacks across publications',
+        EclogInfo: 'Stacks additively across publications',
         cLevelCap: 'c\\text{{ level cap}}',
         cooldown: '\\text{{interval}}',
         cooldownInfo: 'Interval',
