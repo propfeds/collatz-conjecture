@@ -1058,7 +1058,9 @@ var getSecondaryEquation = () =>
 var getTertiaryEquation = () =>
 {
     let mStr = '';
-    let cStr = `\\\\(${cBigNum < 0 ? '' : '+\\,'}${cBigNum.toString(0)})`;
+    let cStr = '';
+    if(historyNumMode & 2 || c > 1e9 || c < -1e8)
+        cStr =  `\\\\(${cBigNum < 0 ? '' : '+\\,'}${cBigNum.toString(0)})`;
     if(reachedFirstPub)
         mStr = `t=${turns},&`;
     
@@ -1066,7 +1068,7 @@ var getTertiaryEquation = () =>
     let mcStr = `\\begin{matrix}${mStr}${csStr}
     \\end{matrix}`;
 
-    return `\\begin{array}{c}${mcStr}${c != 0n ? cStr : ''}\\end{array}`;
+    return `\\begin{array}{c}${mcStr}${cStr}\\end{array}`;
 }
 
 let createHistoryMenu = () =>
