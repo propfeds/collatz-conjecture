@@ -175,14 +175,9 @@ It's certainly interesting: even though it's
 bound to fall, if you cheat by even just a little bit,
 the outcome can get a lot better.
 
-Impressed by your work, a professor offers you
-an internship in his research lab.
 Occasionally, you can be heard in the lab,
 giggling with some of your online chat friends,
-who call you: the CEO of Nudge.
-
-But inside, you are afraid.
-It's bound to fall.`,
+who call you: the CEO of Nudge.`,
 
         ch3Title: 'Escalations',
         ch3Text: `Eventually, a colleague of yours has come to
