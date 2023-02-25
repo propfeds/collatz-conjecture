@@ -12,6 +12,11 @@
   - Because once you've found what you love, the theory becomes just q1q2
   - Although, extra increments solve the setback from having to recover from overstaying pub
 
+- [ ] Farm rate is stronger than before
+  - (55/2) / (72/4) = 1.53
+  - [x] For now, change into log2(Ec) / 10 -> half of rate before
+  - Need more testing
+
 - [x] q1 turn into (2, 10) stepwise with low cost increment for activeness?
   - 2.09 or just 1.76? divisible by 11 this time
 - [x] q2 return to 2^x

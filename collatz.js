@@ -55,7 +55,7 @@ let time = 0;
 let c = 0n;
 let cBigNum = BigNumber.from(c);
 let cSum = cBigNum;
-let cLog = cSum.max(BigNumber.ONE).log10().toNumber();
+let cLog = cSum.max(BigNumber.ONE).log2().toNumber();
 let totalEclog = 0;
 let totalIncLevel = 0;
 let history = {};
@@ -74,10 +74,11 @@ let bigNumArray = (array) => array.map(x => BigNumber.from(x));
 
 // All balance parameters are aggregated for ease of access
 
+const borrowFactor = 0.1;
 const q1Cost = new FirstFreeCost(new ExponentialCost(1, 1.76));
-const getq1BonusLevels = (bl) => (totalEclog + cLog) * bl;
-const getq1 = (level) => Utils.getStepwisePowerSum(level + getq1BonusLevels(
-q1BorrowMs.level), 2, 10, 0);
+const getq1BonusLevels = (bl) => (totalEclog + cLog) * borrowFactor * bl;
+const getq1 = (level) => Utils.getStepwisePowerSum(level + Math.floor(
+getq1BonusLevels(q1BorrowMs.level)), 2, 10, 0);
 
 const q1ExpInc = 0.02;
 const q1ExpMaxLevel = 4;
@@ -106,7 +107,8 @@ const tauRate = 0.1;
 const pubExp = 2.7;
 const pubMult = 8;
 var getPublicationMultiplier = (tau) => tau.pow(pubExp) * pubMult;
-var getPublicationMultiplierFormula = (symbol) => `${pubMult}\\times{${symbol}}^{${pubExp}}`;
+var getPublicationMultiplierFormula = (symbol) =>
+`${pubMult}\\times{${symbol}}^{${pubExp}}`;
 
 var freeze;
 var nudge, q1, q2, q3, extraInc;
@@ -143,7 +145,7 @@ const locStrings =
         cLevel: '1/{{{0}}}\\text{{{{ of }}}}c\\text{{{{ level}}}}',
         cLevelth: `1/{{{0}}}^\\text{{{{th}}}}\\text{{{{ of }}}}c
         \\text{{{{ level}}}}`,
-        Eclog: '\\log_{10}\\Sigma\\,c\\text{{{{ (cumulative)}}}}',
+        Eclog: '{{{0}}}\\times\\log_{{2}}\\Sigma\\,c\\text{{ (cumulative)}}',
         EclogInfo: 'Stacks additively across publications',
         cLevelCap: 'c\\text{{ level cap}}',
         cooldown: '\\text{{interval}}',
@@ -663,24 +665,12 @@ var init = () =>
         nudge.maxLevel = cLevelCap[0];
     }
     /* q1 (c1 prior to 0.06)
-    Most theories use a (2, 10) stepwise power, which I criticise to be too weak
-    to be worth putting autobuy on. In Botched, a (3, 6) was used, and c1's cost
-    there would align with c2 near perfectly at ~6 c1 upgrades per c2 upgrade.
-    Collatz uses a (2, 5), which aligns more with tradition, while being twice
-    more powerful.
-    Optimal cost ratios (mod 5) against q2: 3/(10+2r) --> inverse: 4+0.667r
-    r=1,    2,     3,     4,     5
-    3/12,   14,    16,    18,    20
-    0.25, 0.214, 0.188, 0.167, 0.15
-      4,  4.667, 5,333,   6,   6,667
+    Standard (2, 10) stepwise power.
     */
     {
-        let getDesc = (level) =>
-        {
-            let blSub = q1BorrowMs.level ? `_{(+
-            ${getq1BonusLevels(q1BorrowMs.level).toFixed(2)})}\\,` : '';
-            return `${blSub}q_1=${getq1(level).toString(0)}`;
-        }
+        let getLevelPrefix = (level) => level ? `_{(+
+        ${getq1BonusLevels(level).toFixed(2)})}\\,` : '';
+        let getDesc = (level) => `q_1=${getq1(level).toString(0)}`;
         let getInfo = (level) =>
         {
             if(q1ExpMs.level > 0)
@@ -690,8 +680,10 @@ var init = () =>
             return getDesc(level);
         }
         q1 = theory.createUpgrade(1, currency, q1Cost);
-        q1.getDescription = (_) => Utils.getMath(getDesc(q1.level));
-        q1.getInfo = (amount) => Utils.getMathTo(getInfo(q1.level),
+        q1.getDescription = (_) => Utils.getMath(
+        getLevelPrefix(q1BorrowMs.level) + getDesc(q1.level));
+        q1.getInfo = (amount) => Utils.getMathTo(
+        getLevelPrefix(q1BorrowMs.level) + getInfo(q1.level),
         getInfo(q1.level + amount));
     }
     /* q2 (c2 prior to 0.06)
@@ -842,9 +834,11 @@ var init = () =>
     {
         q1BorrowMs = theory.createMilestoneUpgrade(1, 1);
         q1BorrowMs.description = Localization.getUpgradeIncCustomDesc(getLoc(
-        'q1Level'), getLoc('Eclog'));
+        'q1Level'), Localization.format(getLoc('Eclog'), borrowFactor));
         q1BorrowMs.info = getLoc('EclogInfo');
         q1BorrowMs.boughtOrRefunded = (_) => updateAvailability();
+        q1BorrowMs.canBeRefunded = (_) => q1ExpMs.level == 0 &&
+        q3UnlockMs.level == 0;
     }
     /* q1 exponent
     Standard exponent upgrade.
@@ -916,13 +910,10 @@ var updateAvailability = () =>
         mimickFrame.isVisible = true;
         mimickLabel.isVisible = true;
     }
+    q1ExpMs.isAvailable = q1BorrowMs.level > 0;
+    q3UnlockMs.isAvailable = q1BorrowMs.level > 0;
     q3.isAvailable = q3UnlockMs.level > 0;
     marathonBadge = theory.achievements[1].isUnlocked;
-    if(q1BorrowMs.level)
-    {
-        q1ExpMs.isAvailable = true;
-        q3UnlockMs.isAvailable = true;
-    }
 }
 
 var tick = (elapsedTime, multiplier) =>
@@ -943,7 +934,7 @@ var tick = (elapsedTime, multiplier) =>
             0 : 33, Easing.LINEAR);
 
             cSum += cBigNum;
-            cLog = cSum.max(BigNumber.ONE).log10().toNumber();
+            cLog = cSum.max(BigNumber.ONE).log2().toNumber();
 
             if(c % 2n != 0)
                 c = 3n * c + 1n;
@@ -1338,7 +1329,7 @@ var postPublish = () =>
     c = 0n;
     cBigNum = BigNumber.from(c);
     cSum = cBigNum;
-    cLog = cSum.max(BigNumber.ONE).log10().toNumber();
+    cLog = cSum.max(BigNumber.ONE).log2().toNumber();
     cIterProgBar.progressTo(0, 220, Easing.CUBIC_INOUT);
 
     if(mimickLastHistory)
@@ -1403,7 +1394,7 @@ var setInternalState = (stateStr) =>
     if('cSum' in state)
         cSum = BigNumber.fromBase64String(state.cSum);
 
-    cLog = cSum.max(BigNumber.ONE).log10().toNumber();
+    cLog = cSum.max(BigNumber.ONE).log2().toNumber();
     if('totalEclog' in state)
         totalEclog = state.totalEclog;
 
