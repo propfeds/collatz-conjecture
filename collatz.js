@@ -76,7 +76,7 @@ let bigNumArray = (array) => array.map(x => BigNumber.from(x));
 
 const borrowFactor = 0.1;
 const q1Cost = new FirstFreeCost(new ExponentialCost(1, 1.76));
-const getq1BonusLevels = (bl) => (totalEclog + cLog) * borrowFactor * bl;
+const getq1BonusLevels = (bl) => bl ? (totalEclog + cLog) * borrowFactor : 0;
 const getq1 = (level) => Utils.getStepwisePowerSum(level + Math.floor(
 getq1BonusLevels(q1BorrowMs.level)), 2, 10, 0);
 
@@ -87,7 +87,7 @@ const getq1Exponent = (level) => 1 + q1ExpInc * level;
 const q2Cost = new ExponentialCost(2.2e7, 11);
 const getq2 = (level) => BigNumber.TWO.pow(level);
 
-const q3Cost = new ExponentialCost(BigNumber.from('1e270'), 18);
+const q3Cost = new ExponentialCost(BigNumber.from('1e270'), 17.6);
 const getq3 = (level) => BigNumber.THREE.pow(level) + (marathonBadge ? 1 : 0);
 
 const getr = (level) => Utils.getStepwisePowerSum(level, 2, 6, 0);
@@ -230,6 +230,7 @@ back of the machine.`,
         achSixNineTitle: 'I\'m proud of you.',
         achSixNineDesc: 'Reach a c value of 69.',
 
+        btnClose: 'Close',
         btnSave: 'Save',
         btnIndexingMode: ['Indexing: Turns', 'Indexing: Levels'],
         btnNotationMode: ['Notation: Digits', 'Notation: Scientific'],
@@ -1187,10 +1188,9 @@ let createHistoryMenu = () =>
             lastPubHistory
         ]
     });
-    let tmpPreserve = preserveLastHistory;
     let preserveSwitch = ui.createSwitch
     ({
-        isToggled: tmpPreserve,
+        isToggled: preserveLastHistory,
         row: 0,
         column: 1,
         horizontalOptions: LayoutOptions.END,
@@ -1200,8 +1200,8 @@ let createHistoryMenu = () =>
             e.type == TouchType.LONGPRESS_RELEASED)
             {
                 Sound.playClick();
-                tmpPreserve = !tmpPreserve;
-                preserveSwitch.isToggled = tmpPreserve;
+                preserveLastHistory = !preserveLastHistory;
+                preserveSwitch.isToggled = preserveLastHistory;
             }
         }
     });
@@ -1262,11 +1262,10 @@ let createHistoryMenu = () =>
                 }),
                 ui.createButton
                 ({
-                    text: getLoc('btnSave'),
+                    text: getLoc('btnClose'),
                     onClicked: () =>
                     {
                         Sound.playClick();
-                        preserveLastHistory = tmpPreserve;
                         menu.hide();
                     }
                 })
