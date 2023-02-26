@@ -37,9 +37,9 @@ Warning: for spoiler purposes, it is ill-advised to
 share your sequences to new players.
 
 'If it's odd, take triple and one,
-If it's even, cut in two.
+If it's even, cut that in two.
 
-If you woke up with bread in hand,
+If you woke up with a bread in hand,
 what would you do?'`,
     };
 
@@ -104,11 +104,10 @@ const cLevelCap = [18, 32, 48, 66];
 const cooldown = [42, 30, 20, 12];
 
 const tauRate = 0.1;
-const pubExp = 2.7;
-const pubMult = 8;
-var getPublicationMultiplier = (tau) => tau.pow(pubExp) * pubMult;
+const pubExp = 3.01;
+var getPublicationMultiplier = (tau) => tau.pow(pubExp);
 var getPublicationMultiplierFormula = (symbol) =>
-`${pubMult}\\times{${symbol}}^{${pubExp}}`;
+`{${symbol}}^{${pubExp}}`;
 
 var freeze;
 var nudge, q1, q2, q3, extraInc;
