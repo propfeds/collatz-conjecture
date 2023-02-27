@@ -900,8 +900,8 @@ var updateAvailability = () =>
         mimickFrame.isVisible = true;
         mimickLabel.isVisible = true;
     }
-    q1ExpMs.isAvailable = theory.milestonesTotal > 1;
-    q3UnlockMs.isAvailable = theory.milestonesTotal > 1;
+    q1ExpMs.isAvailable = theory.milestonesTotal > 2;
+    q3UnlockMs.isAvailable = theory.milestonesTotal > 2;
     q3.isAvailable = q3UnlockMs.level > 0;
     marathonBadge = theory.achievements[1].isUnlocked;
 }
