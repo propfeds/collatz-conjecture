@@ -74,11 +74,11 @@ let bigNumArray = (array) => array.map(x => BigNumber.from(x));
 
 // All balance parameters are aggregated for ease of access
 
-const borrowFactor = .15;
+const borrowFactor = .12;
 const q1Cost = new FirstFreeCost(new ExponentialCost(1, 1.76));
 const getq1BonusLevels = (bl) => bl ? (totalEclog + cLog) * borrowFactor : 0;
 const getq1 = (level) => Utils.getStepwisePowerSum(level + Math.floor(
-getq1BonusLevels(q1BorrowMs.level)), 2, 10, 0);
+getq1BonusLevels(q1BorrowMs.level)), 2, 8, 0);
 
 const q1ExpInc = 0.02;
 const q1ExpMaxLevel = 4;
@@ -660,7 +660,9 @@ var init = () =>
         nudge.maxLevel = cLevelCap[0];
     }
     /* q1 (c1 prior to 0.06)
-    Standard (2, 10) stepwise power.
+    Non-standard (2, 8) stepwise power.
+    Ratios against q2: 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8
+    Ratios against q3: 6, 6.67, 7.33, 8, 8.67, 9.33, 10, 10.67
     */
     {
         let getLevelPrefix = (level) => level ? `_{(+
