@@ -135,8 +135,8 @@ const locStrings =
 
         permaFreeze: '\\text{{the ability to freeze }}c',
         permaIncrement: `\\text{{extra in/decrements for }}c`,
-        permaIncrementInfo: `Dependent on {0}'s sign, and incurs a penalty ` +
-`on its level`,
+        permaIncrementInfo: `Dependent on {0}'s sign; incurs penalty ` +
+`on overall income`,
         permaMimick: 'Auto-nudge {0}',
         permaMimickInfo: 'Follows the last publication',
 
@@ -214,19 +214,19 @@ mechanical hand, programmable rhythms,
 foot-cranked toggle control, histographs.
 Even a toaster slot attached to the heat sink.
 
-What in the world could create this machine,
+Who in the world could create this machine,
 tailored to every nook of your nature,
 urging you to multiply your operations
 and get you busted?
-Some kind of vendetta.
 
 You see two signatures on the
 back of the machine.`,
 
         achNegativeTitle: 'Shrouded by Fog',
         achNegativeDesc: `Publish with an odd level of c and go negative.`,
-        achMarathonTitle: 'Annual Lothar-athon',
-        achMarathonDesc: 'Reach a c value of ±1e60. Reward: +1 to q3.',
+        achMarathonTitle: 'Local Marathon',
+        achMarathonDesc: 'Reach a c value of ±1e60 without using extra ' +
+        'levels. Reward: +1 to q3.',
         achSixNineTitle: 'I\'m proud of you.',
         achSixNineDesc: 'Reach a c value of 69.',
 
@@ -872,7 +872,8 @@ var init = () =>
     theory.createAchievement(0, undefined, getLoc('achNegativeTitle'),
     getLoc('achNegativeDesc'), () => cBigNum < 0);
     theory.createAchievement(1, undefined, getLoc('achMarathonTitle'),
-    getLoc('achMarathonDesc'), () => cBigNum.abs() >= 1e60, () => c == 0n ? 0 :
+    getLoc('achMarathonDesc'), () => cBigNum.abs() >= 1e60 &&
+    extraInc.level == 0, () => c == 0n ? 0 :
     cBigNum.abs().log10().toNumber() / 60);
     theory.createAchievement(2, undefined, getLoc('achSixNineTitle'),
     getLoc('achSixNineDesc'), () => c == 69n);
