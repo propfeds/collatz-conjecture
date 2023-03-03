@@ -973,7 +973,6 @@ var getEquationOverlay = () =>
 {
     let result = ui.createGrid
     ({
-        verticalOptions: LayoutOptions.FILL,
         rowDefinitions: ['1*', '1*'],
         columnDefinitions: ['1*', '2*', '1*'],
         children:
