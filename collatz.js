@@ -968,7 +968,7 @@ var tick = (elapsedTime, multiplier) =>
     currency.value += dt * cSum.abs() * q1Term * q2Term * q3Term * bonus
     / rTerm;
 }
-/*
+
 var getEquationOverlay = () =>
 {
     let result = ui.createGrid
@@ -986,7 +986,7 @@ var getEquationOverlay = () =>
                 column: 0,
                 verticalTextAlignment: TextAlignment.START,
                 margin: new Thickness(6, 3),
-                text: getLoc('versionName')
+                text: getLoc('versionName'),
                 fontSize: 9,
                 textColor: Color.TEXT_MEDIUM
             }),
@@ -1018,7 +1018,7 @@ var getEquationOverlay = () =>
     });
     return result;
 }
-*/
+
 var getPrimaryEquation = () =>
 {
     let cStr = historyNumMode & 2 ? getShortBinaryString(c) :
