@@ -13,6 +13,9 @@
   - Although, extra increments solve the setback from having to recover from overstaying pub
 
 - [ ] Apply LSR workload technique to history menu
+- [x] q3 upgrades are too close together -> chaotic, too strong
+  - 17.6 -> 22
+- [ ] iOS UI bug that makes it super big and mess up the game entirely
 
 - [ ] Farm rate is weaker than before
   - (55/2) / (72/4) = 1.53

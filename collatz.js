@@ -87,7 +87,7 @@ const getq1Exponent = (level) => 1 + q1ExpInc * level;
 const q2Cost = new ExponentialCost(2.2e7, 11);
 const getq2 = (level) => BigNumber.TWO.pow(level);
 
-const q3Cost = new ExponentialCost(BigNumber.from('1e270'), 17.6);
+const q3Cost = new ExponentialCost(BigNumber.from('1e270'), 22);
 const getq3 = (level) => BigNumber.THREE.pow(level) + (marathonBadge ? 1 : 0);
 
 const getr = (level) => Utils.getStepwisePowerSum(level, 2, 6, 0);
