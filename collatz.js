@@ -15,12 +15,12 @@ import { Easing } from '../api/ui/properties/Easing';
 import { ScrollOrientation } from '../api/ui/properties/ScrollOrientation';
 import { TextAlignment } from '../api/ui/properties/TextAlignment';
 
-var id = 'collatz_conjecture_b';
+var id = 'collatz_conjecture';
 var getName = (language) =>
 {
     let names =
     {
-        en: 'Colla🅱z Con🅱ecture',
+        en: 'Collatz Conjecture',
     };
 
     return names[language] || names.en;
@@ -1383,9 +1383,10 @@ var setInternalState = (stateStr) =>
         cBigNum = BigNumber.from(c);
     }
     if('cSum' in state)
+    {
         cSum = BigNumber.fromBase64String(state.cSum);
-
-    cLog = cSum.max(BigNumber.ONE).log2().toNumber();
+        cLog = cSum.max(BigNumber.ONE).log2().toNumber();
+    }
     if('totalEclog' in state)
         totalEclog = state.totalEclog;
 

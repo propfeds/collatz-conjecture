@@ -12,10 +12,13 @@
   - Because once you've found what you love, the theory becomes just q1q2
   - Although, extra increments solve the setback from having to recover from overstaying pub
 
+- [ ] Apply LSR workload technique to history menu
+
 - [ ] Farm rate is weaker than before
   - (55/2) / (72/4) = 1.53
   - [x] For now, change into log2(Ec) / 10 -> 50.7% of rate before
   - Need more testing
+  - Currently: 76% (0.12 Eclog with 2, 8 q1)
 
 - [x] q1 turn into (2, 10) stepwise with low cost increment for activeness?
   - 2.09 or just 1.76? divisible by 11 this time
