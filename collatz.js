@@ -388,7 +388,7 @@ const historyLabel = ui.createLatexLabel
 const mimickFrame = ui.createFrame
 ({
     isVisible: false,
-    row: 1,
+    row: 0,
     column: 2,
     cornerRadius: 1,
     horizontalOptions: LayoutOptions.END,
@@ -421,7 +421,7 @@ const mimickFrame = ui.createFrame
 const mimickLabel = ui.createLatexLabel
 ({
     isVisible: false,
-    row: 1,
+    row: 0,
     column: 2,
     horizontalOptions: LayoutOptions.END,
     verticalOptions: LayoutOptions.END,
@@ -973,7 +973,7 @@ var getEquationOverlay = () =>
 {
     let result = ui.createGrid
     ({
-        rowDefinitions: ['1*', '1*'],
+        // rowDefinitions: ['1*', '1*'],
         columnDefinitions: ['1*', '2*', '1*'],
         children:
         [
