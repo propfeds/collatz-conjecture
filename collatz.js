@@ -45,9 +45,9 @@ what would you do?'`,
 
     return descs[language] || descs.en;
 }
-var authors = 'propfeds#5988\n\nThanks to:\nCipher#9599, the original ' +
-'suggester\nXLII#0042, a computer pretending to be a normal player, acting ' +
-'at the speed of light';
+var authors = 'propfeds\n\nThanks to:\nCipher#9599, the original suggester\n' +
+'XLII#0042, a computer pretending to be a normal player, acting at the speed ' +
+'of light';
 var version = 0.08;
 
 let turns = 0;
@@ -87,7 +87,7 @@ const getq1Exponent = (level) => 1 + q1ExpInc * level;
 const q2Cost = new ExponentialCost(2.2e7, 11);
 const getq2 = (level) => BigNumber.TWO.pow(level);
 
-const q3Cost = new ExponentialCost(BigNumber.from('1e270'), 22);
+const q3Cost = new ExponentialCost(BigNumber.from('1e272'), Math.log2(1e8));
 const getq3 = (level) => BigNumber.THREE.pow(level) + (marathonBadge ? 1 : 0);
 
 const getr = (level) => Utils.getStepwisePowerSum(level, 2, 6, 0);
