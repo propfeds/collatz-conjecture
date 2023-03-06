@@ -120,7 +120,7 @@ const locStrings =
 {
     en:
     {
-        versionName: 'v0.0B, Work in\\\\Progress',
+        versionName: 'v0.08 (WIP)',
         longTick: 'Tick: {0}s',
 
         historyDesc: `\\begin{{array}}{{c}}\\text{{History}}\\\\{{{0}}}/{{{1}}}

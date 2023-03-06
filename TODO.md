@@ -21,11 +21,13 @@
 - [x] Balance later intervals to 22/14?
   - Recovery too strong, making the buying process chaotic
 
-- [ ] Farm rate is weaker than before
-  - (55/2) / (72/4) = 1.53
-  - [x] For now, change into log2(Ec) / 10 -> 50.7% of rate before
-  - Need more testing
-  - Currently: 76% (0.12 Eclog with 2, 8 q1)
+- [ ] Current farm rate compared to before
+  - 65.2% at e55 (6 extra levels)
+    - `(55*2/72) * log2(10) * 0.12 * (5/4) * (6/7)`
+  - 65.5% at e69 (24 extra levels, taking extra time into account)
+    - `(69*2/72) * log2(10) * 0.12 * (5/4) * (6/7) * (72/90)`
+    - Extra levels are actually not weaker than regular?
+  - (0.12 Eclog with 2, 8 q1 and 14 interval)
 
 - [x] q1 turn into (2, 10) stepwise with low cost increment for activeness?
   - 2.09 or just 1.76? divisible by 11 this time
