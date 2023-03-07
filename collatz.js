@@ -135,7 +135,7 @@ const locStrings =
         permaIncrementInfo: `Dependent on {0}'s sign; incurs penalty ` +
 `on overall income`,
         permaMimick: 'Auto-nudge {0}',
-        permaMimickInfo: 'Follows the last publication',
+        permaMimickInfo: 'Mimicks your last publication',
 
         q1Level: 'q_1\\text{{ level}}',
         cLevel: '1/{{{0}}}\\text{{{{ of }}}}c\\text{{{{ level}}}}',
