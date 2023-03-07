@@ -91,7 +91,7 @@ const getr = (level) => Utils.getStepwisePowerSum(level, 2, 6, 0);
 const getrPenalty = (level) => BigNumber.TWO.pow(getr(level));
 
 const permaCosts = bigNumArray(['1e12', '1e22', '1e27', '1e56', '1e140',
-'1e301']);
+'1e100']);
 // 44, 88, 176, 264, 352, 440, 528, 616, 704
 // cap cap  cap  bor  q3  exp  exp  exp  exp
 const milestoneCost = new CompositeCost(2, new LinearCost(4.4, 4.4),
@@ -754,6 +754,18 @@ var init = () =>
         freezePerma.bought = (_) => updateAvailability();
         freezePerma.maxLevel = 1;
     }
+    /* Mimick history
+    Now that's quality of life.
+    */
+    {
+        mimickPerma = theory.createPermanentUpgrade(5, currency,
+        new ConstantCost(permaCosts[5]));
+        mimickPerma.description = Localization.format(getLoc('permaMimick'),
+        Utils.getMath('c'));
+        mimickPerma.info = getLoc('permaMimickInfo');
+        mimickPerma.bought = (_) => updateAvailability();
+        mimickPerma.maxLevel = 1;
+    }
     /* Extra increments
     Generally used to aid with catching up. Not sure if it's actually effective.
     */
@@ -764,24 +776,12 @@ var init = () =>
         'permaIncrement'));
         extraIncPerma.info = Localization.format(getLoc('permaIncrementInfo'),
         Utils.getMath('c'));
-        extraIncPerma.bought = (_) => updateAvailability();
         extraIncPerma.maxLevel = 1;
     }
     /* Preserve c
     We had the chance to test out this one. It breaks progression, and poses a
     threat to the theory's performance.
     */
-    /* Mimick history
-    Now that's quality of life.
-    */
-    {
-        mimickPerma = theory.createPermanentUpgrade(5, currency,
-        new ConstantCost(permaCosts[5]));
-        mimickPerma.description = Localization.format(getLoc('permaMimick'),
-        Utils.getMath('c'));
-        mimickPerma.info = getLoc('permaMimickInfo');
-        mimickPerma.maxLevel = 1;
-    }
 
     theory.setMilestoneCost(milestoneCost);
     /* Interval speed-up
@@ -884,24 +884,29 @@ var init = () =>
 
 var updateAvailability = () =>
 {
-    freeze.isAvailable = freezePerma.level > 0;
     if(theory.autoBuyerUpgrade.level)
     {
         historyFrame.isVisible = true;
         historyLabel.isVisible = true;
         reachedFirstPub = true;
     }
-    extraIncPerma.isAvailable = freezePerma.level > 0;
-    extraInc.isAvailable = extraIncPerma.level > 0 &&
-    nudge.level == nudge.maxLevel;
-    mimickPerma.isAvailable = extraIncPerma.level > 0;
+
+    freezePerma.isAvailable = theory.autoBuyerUpgrade.level > 0;
+    freeze.isAvailable = freezePerma.level > 0;
+
+    mimickPerma.isAvailable = freezePerma.level > 0;
     if(mimickPerma.level)
     {
         mimickFrame.isVisible = true;
         mimickLabel.isVisible = true;
     }
-    q1ExpMs.isAvailable = theory.milestonesTotal > 2;
-    q3UnlockMs.isAvailable = theory.milestonesTotal > 2;
+
+    extraIncPerma.isAvailable = freezePerma.level > 0;
+    extraInc.isAvailable = extraIncPerma.level > 0 &&
+    nudge.level == nudge.maxLevel;
+
+    q1ExpMs.isAvailable = theory.milestonesTotal > 3;
+    q3UnlockMs.isAvailable = theory.milestonesTotal > 3;
     q3.isAvailable = q3UnlockMs.level > 0;
     marathonBadge = theory.achievements[1].isUnlocked;
 }
