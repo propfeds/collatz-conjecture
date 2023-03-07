@@ -33,9 +33,6 @@ var getDescription = (language) =>
 `A puzzle revolving around trying to counteract the even clause of the ` +
 `Collatz conjecture.
 
-Warning: for spoiler purposes, it is ill-advised to
-share your sequences to new players.
-
 'If it's odd, take triple and one,
 If it's even, cut that in two.
 
