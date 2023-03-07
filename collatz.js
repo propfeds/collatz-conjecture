@@ -100,7 +100,7 @@ const permaCosts = bigNumArray(['1e12', '1e22', '1e27', '1e56', '1e140',
 const milestoneCost = new CompositeCost(2, new LinearCost(4.4, 4.4),
 new LinearCost(17.6, 8.8));
 
-const cLevelCap = [18, 32, 48, 66];
+const cLevelCap = [20, 32, 48, 66];
 const cooldown = [40, 30, 22, 14];
 
 const tauRate = 0.1;
@@ -436,7 +436,7 @@ let getShortString = (n) =>
 {
     let s = n.toString();
     if(s.length > 9)
-        s = `${s.slice(0, 5)}...${s.slice(-3)}`;
+        s = `${s.slice(0, 4)}...${s.slice(-4)}`;
     return s;
 }
 
@@ -528,7 +528,7 @@ let getShorterString = (n) =>
 {
     let s = n.toString();
     if(s.length > 7)
-        s = `${s.slice(0, 3)}...${s.slice(-3)}`;
+        s = `${s.slice(0, 2)}...${s.slice(-4)}`;
     return s;
 }
 
