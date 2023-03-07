@@ -33,28 +33,27 @@ var getDescription = (language) =>
 `A puzzle revolving around trying to counteract the even clause of the ` +
 `Collatz conjecture.
 
-Warning: for spoiler purposes, it is ill-advised to
-share your sequences to new players.
-
 'If it's odd, take triple and one,
-If it's even, cut in two.
+If it's even, cut that in two.
 
-If you woke up with bread in hand,
+If you woke up with a bread in hand,
 what would you do?'`,
     };
 
     return descs[language] || descs.en;
 }
-var authors = 'propfeds#5988\n\nThanks to:\nCipher#9599, the original ' +
-'suggester\nXLII#0042, a computer pretending to be a normal player, acting ' +
-'at the speed of light';
-var version = 0.07;
+var authors = 'propfeds\n\nThanks to:\nCipher#9599, the original suggester\n' +
+'XLII#0042, a computer pretending to be a normal player, acting at the speed ' +
+'of light';
+var version = 0.08;
 
 let turns = 0;
 let time = 0;
 let c = 0n;
 let cBigNum = BigNumber.from(c);
 let cSum = cBigNum;
+let cLog = cSum.max(BigNumber.ONE).log2().toNumber();
+let totalEclog = 0;
 let totalIncLevel = 0;
 let history = {};
 let lastHistory;
@@ -72,40 +71,45 @@ let bigNumArray = (array) => array.map(x => BigNumber.from(x));
 
 // All balance parameters are aggregated for ease of access
 
-const borrowFactor = 4;
-const q1Cost = new FirstFreeCost(new ExponentialCost(1, 3.01));
-const getIncrementPenalty = (level) => Math.round(Utils.getStepwisePowerSum(
-level, 2, 6, 0).toNumber());
-const getq1BonusLevels = (bl, pl) => Math.max(Math.floor((bl * nudge.level - 
-getIncrementPenalty(pl)) / borrowFactor), 0);
-const getq1 = (level) => Utils.getStepwisePowerSum(level + getq1BonusLevels(
-q1BorrowMs.level, extraInc.level), 2, 5, 1);
+const borrowFactor = .12;
+const q1Cost = new FirstFreeCost(new ExponentialCost(1, 1.76));
+const getq1BonusLevels = (bl) => bl ? (totalEclog + cLog) * borrowFactor : 0;
+const getq1 = (level) => Utils.getStepwisePowerSum(level + Math.floor(
+getq1BonusLevels(q1BorrowMs.level)), 2, 8, 0);
 
-const q1ExpInc = 0.03;
+const q1ExpInc = 0.02;
 const q1ExpMaxLevel = 4;
 const getq1Exponent = (level) => 1 + q1ExpInc * level;
 
 const q2Cost = new ExponentialCost(2.2e7, 11);
-const getq2 = (level) => BigNumber.THREE.pow(level) + (marathonBadge ? 1 : 0);
+const getq2 = (level) => BigNumber.TWO.pow(level);
 
-const permaCosts = bigNumArray(['1e12', '1e22', '1e31', '1e58', '1e126',
+const q3Cost = new ExponentialCost(BigNumber.from('1e272'), Math.log2(1e8));
+const getq3 = (level) => BigNumber.THREE.pow(level) + (marathonBadge ? 1 : 0);
+
+const getr = (level) => Utils.getStepwisePowerSum(level, 2, 6, 0);
+const getrPenalty = (level) => BigNumber.TWO.pow(getr(level));
+
+const permaCosts = bigNumArray(['1e12', '1e22', '1e27', '1e56', '1e140',
 '1e301']);
-// 44, 88, 176, 264, 352, 480, 600, 720
+// 44, 88, 176, 264, 352, 440, 528, 616, 704
+// cap cap  cap  bor  q3  exp  exp  exp  exp
 const milestoneCost = new CompositeCost(2, new LinearCost(4.4, 4.4),
-new CompositeCost(3, new LinearCost(17.6, 8.8), new LinearCost(48, 12)));
+new LinearCost(17.6, 8.8));
 
-const cLevelCap = [24, 36, 48, 64];
-const cooldown = [42, 30, 20, 12];
+const cLevelCap = [20, 32, 48, 66];
+const cooldown = [36, 28, 20, 14];
 
 const tauRate = 0.1;
-const pubExp = 4;
+const pubExp = 3.01;
 var getPublicationMultiplier = (tau) => tau.pow(pubExp);
-var getPublicationMultiplierFormula = (symbol) => `{${symbol}}^{${pubExp}}`;
+var getPublicationMultiplierFormula = (symbol) =>
+`{${symbol}}^{${pubExp}}`;
 
 var freeze;
-var nudge, q1, q2, extraInc;
+var nudge, q1, q2, q3, extraInc;
 var freezePerma, extraIncPerma, mimickPerma;
-var cooldownMs, q1BorrowMs, q1ExpMs;
+var cooldownMs, q1BorrowMs, q1ExpMs, q3UnlockMs;
 
 var currency;
 
@@ -113,7 +117,7 @@ const locStrings =
 {
     en:
     {
-        versionName: 'v0.07, Work in\\\\Progress',
+        versionName: 'v0.08 (WIP)',
         longTick: 'Tick: {0}s',
 
         historyDesc: `\\begin{{array}}{{c}}\\text{{History}}\\\\{{{0}}}/{{{1}}}
@@ -128,8 +132,8 @@ const locStrings =
 
         permaFreeze: '\\text{{the ability to freeze }}c',
         permaIncrement: `\\text{{extra in/decrements for }}c`,
-        permaIncrementInfo: `Dependent on {0}'s sign, and incurs a penalty ` +
-`on its level`,
+        permaIncrementInfo: `Dependent on {0}'s sign; incurs penalty ` +
+`on overall income`,
         permaMimick: 'Auto-nudge {0}',
         permaMimickInfo: 'Follows the last publication',
 
@@ -137,6 +141,8 @@ const locStrings =
         cLevel: '1/{{{0}}}\\text{{{{ of }}}}c\\text{{{{ level}}}}',
         cLevelth: `1/{{{0}}}^\\text{{{{th}}}}\\text{{{{ of }}}}c
         \\text{{{{ level}}}}`,
+        Eclog: '{{{0}}}\\times\\log_{{2}}\\Sigma\\,c\\text{{ (cumulative)}}',
+        EclogInfo: 'Stacks passively across publications',
         cLevelCap: 'c\\text{{ level cap}}',
         cooldown: '\\text{{interval}}',
         cooldownInfo: 'Interval',
@@ -165,14 +171,9 @@ It's certainly interesting: even though it's
 bound to fall, if you cheat by even just a little bit,
 the outcome can get a lot better.
 
-Impressed by your work, a professor offers you
-an internship in his research lab.
 Occasionally, you can be heard in the lab,
 giggling with some of your online chat friends,
-who call you: the CEO of Nudge.
-
-But inside, you are afraid.
-It's bound to fall.`,
+who call you: the CEO of Nudge.`,
 
         ch3Title: 'Escalations',
         ch3Text: `Eventually, a colleague of yours has come to
@@ -210,22 +211,23 @@ mechanical hand, programmable rhythms,
 foot-cranked toggle control, histographs.
 Even a toaster slot attached to the heat sink.
 
-What in the world could create this machine,
+Who in the world could create this machine,
 tailored to every nook of your nature,
 urging you to multiply your operations
 and get you busted?
-Some kind of vendetta.
 
 You see two signatures on the
 back of the machine.`,
 
         achNegativeTitle: 'Shrouded by Fog',
         achNegativeDesc: `Publish with an odd level of c and go negative.`,
-        achMarathonTitle: 'Annual Lothar-athon',
-        achMarathonDesc: 'Reach a c value of ±1e60. Reward: +1 to q2.',
+        achMarathonTitle: 'Local Marathon',
+        achMarathonDesc: 'Reach a c value of ±1e60 without using extra ' +
+        'levels. Reward: +1 to q3.',
         achSixNineTitle: 'I\'m proud of you.',
         achSixNineDesc: 'Reach a c value of 69.',
 
+        btnClose: 'Close',
         btnSave: 'Save',
         btnIndexingMode: ['Indexing: Turns', 'Indexing: Levels'],
         btnNotationMode: ['Notation: Digits', 'Notation: Scientific'],
@@ -239,9 +241,7 @@ back of the machine.`,
         errorInvalidNumMode: 'Invalid number mode',
         errorBinExpLimit: 'Too big',
 
-        reset: `You are about to reset the current publication.
-Note: resetting is disabled if publishing opens while extra c levels are ` +
-`bought.`
+        reset: `You are about to reset the current publication.`
     }
 };
 
@@ -378,14 +378,14 @@ const historyLabel = ui.createLatexLabel
     margin: new Thickness(2.5, 41, 2.5, 0),
     text: () => Utils.getMath(Localization.format(getLoc('historyDesc'),
     (nudge ? nudge.level : 0) + (extraInc ? extraInc.level : 0) -
-    totalIncLevel, lastHistoryLength)),
+    totalIncLevel % 2, lastHistoryLength)),
     fontSize: 9,
     textColor: () => Color.fromHex(cDispColour.get(game.settings.theme))
 });
 const mimickFrame = ui.createFrame
 ({
     isVisible: false,
-    row: 1,
+    row: 0,
     column: 2,
     cornerRadius: 1,
     horizontalOptions: LayoutOptions.END,
@@ -418,7 +418,7 @@ const mimickFrame = ui.createFrame
 const mimickLabel = ui.createLatexLabel
 ({
     isVisible: false,
-    row: 1,
+    row: 0,
     column: 2,
     horizontalOptions: LayoutOptions.END,
     verticalOptions: LayoutOptions.END,
@@ -433,7 +433,7 @@ let getShortString = (n) =>
 {
     let s = n.toString();
     if(s.length > 9)
-        s = `${s.slice(0, 5)}...${s.slice(-3)}`;
+        s = `${s.slice(0, 4)}...${s.slice(-4)}`;
     return s;
 }
 
@@ -525,7 +525,7 @@ let getShorterString = (n) =>
 {
     let s = n.toString();
     if(s.length > 7)
-        s = `${s.slice(0, 3)}...${s.slice(-3)}`;
+        s = `${s.slice(0, 2)}...${s.slice(-4)}`;
     return s;
 }
 
@@ -636,22 +636,20 @@ var init = () =>
                 return;
             }
             if(writeHistory)
-                history[nudge.level] = [turns, c.toString()];
+                history[totalIncLevel + nudge.level - nudge.maxLevel % 2] =
+                [turns, c.toString()];
             // even level: -1, odd level: +1, because this is post-processing
             if(nudge.level & 1)
-            {
                 c += 1n;
-                // cSum += BigNumber.ONE;
-            }
             else
-            {
                 c -= 1n;
-                // cSum -= BigNumber.ONE;
-            }
             cBigNum = BigNumber.from(c);
 
             if(nudge.level == nudge.maxLevel)
+            {
                 updateAvailability();
+                theory.invalidateSecondaryEquation();
+            }
             theory.invalidatePrimaryEquation();
             theory.invalidateTertiaryEquation();
         }
@@ -659,24 +657,14 @@ var init = () =>
         nudge.maxLevel = cLevelCap[0];
     }
     /* q1 (c1 prior to 0.06)
-    Most theories use a (2, 10) stepwise power, which I criticise to be too weak
-    to be worth putting autobuy on. In Botched, a (3, 6) was used, and c1's cost
-    there would align with c2 near perfectly at ~6 c1 upgrades per c2 upgrade.
-    Collatz uses a (2, 5), which aligns more with tradition, while being twice
-    more powerful.
-    Optimal cost ratios (mod 5) against q2: 3/(10+2r) --> inverse: 4+0.667r
-    r=1,    2,     3,     4,     5
-    3/12,   14,    16,    18,    20
-    0.25, 0.214, 0.188, 0.167, 0.15
-      4,  4.667, 5,333,   6,   6,667
+    Non-standard (2, 8) stepwise power.
+    Ratios against q2: 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8
+    Ratios against q3: 6, 6.67, 7.33, 8, 8.67, 9.33, 10, 10.67
     */
     {
-        let getDesc = (level) =>
-        {
-            let blSub = q1BorrowMs.level ? `_{(+
-            ${getq1BonusLevels(q1BorrowMs.level, extraInc.level)})}\\,` : '';
-            return `${blSub}q_1=${getq1(level).toString(0)}`;
-        }
+        let getLevelPrefix = (level) => level ? `_{(+
+        ${getq1BonusLevels(level).toFixed(2)})}\\,` : '';
+        let getDesc = (level) => `q_1=${getq1(level).toString(0)}`;
         let getInfo = (level) =>
         {
             if(q1ExpMs.level > 0)
@@ -686,36 +674,48 @@ var init = () =>
             return getDesc(level);
         }
         q1 = theory.createUpgrade(1, currency, q1Cost);
-        q1.getDescription = (_) => Utils.getMath(getDesc(q1.level));
-        q1.getInfo = (amount) => Utils.getMathTo(getInfo(q1.level),
+        q1.getDescription = (_) => Utils.getMath(
+        getLevelPrefix(q1BorrowMs.level) + getDesc(q1.level));
+        q1.getInfo = (amount) => Utils.getMathTo(
+        getLevelPrefix(q1BorrowMs.level) + getInfo(q1.level),
         getInfo(q1.level + amount));
     }
     /* q2 (c2 prior to 0.06)
     Standard doubling upgrade.
     */
     {
-        let getDesc = (level) => `q_2=3^{${level}}${marathonBadge ? '+1' : ''}`;
+        let getDesc = (level) => `q_2=2^{${level}}`;
         let getInfo = (level) => `q_2=${getq2(level).toString(0)}`;
         q2 = theory.createUpgrade(2, currency, q2Cost);
         q2.getDescription = (_) => Utils.getMath(getDesc(q2.level));
         q2.getInfo = (amount) => Utils.getMathTo(getInfo(q2.level),
         getInfo(q2.level + amount));
     }
-    /* Increment c
-    Unlike nudge, this upgrade only increments c. It is both weaker in positive
-    and negative.
+    /* q3 (q2 prior to 0.08)
+    Standard tripling upgrade.
     */
     {
-        let getDesc = (level) => `c \\leftarrow c${c < 0n ? '-' : '+'}1
-        ${Localization.format(getLoc('deductFromc'),
-        getIncrementPenalty(level))}`;
-        extraInc = theory.createUpgrade(3, currency, new FreeCost);
+        let getDesc = (level) => `q_3=3^{${level}}${marathonBadge ? '+1' : ''}`;
+        let getInfo = (level) => `q_3=${getq3(level).toString(0)}`;
+        q3 = theory.createUpgrade(3, currency, q3Cost);
+        q3.getDescription = (_) => Utils.getMath(getDesc(q3.level));
+        q3.getInfo = (amount) => Utils.getMathTo(getInfo(q3.level),
+        getInfo(q3.level + amount));
+        q3.isAvailable = false;
+    }
+    /* Increment c
+    Unlike nudge, this upgrade does not change polarity. It is stronger in
+    negative than positive.
+    */
+    {
+        let getDesc = (level) => `c\\leftarrow c
+        ${c < 0n ? '-' : '+'}1;\\enspace r=${getr(level).toString(0)}`;
+        let getInfo = (level) => `r=${getr(level).toString(0)}`;
+        extraInc = theory.createUpgrade(4, currency, new FreeCost);
         extraInc.getDescription = () => Utils.getMath(getDesc(
         extraInc.level));
-        extraInc.getInfo = (amount) => `${Localization.format(
-        getLoc('penalty'), Utils.getMath('c'))}
-        ${Utils.getMathTo(getIncrementPenalty(extraInc.level),
-        getIncrementPenalty(extraInc.level + amount))}`;
+        extraInc.getInfo = (amount) => Utils.getMathTo(getInfo(extraInc.level),
+        getInfo(extraInc.level + amount));
         extraInc.bought = (_) =>
         {
             if(extraInc.isAutoBuyable)
@@ -724,20 +724,15 @@ var init = () =>
                 return;
             }
             if(c < 0n)
-            {
                 c -= 1n;
-                // cSum -= BigNumber.ONE;
-            }
             else
-            {
                 c += 1n;
-                // cSum += BigNumber.ONE;
-            }
             cBigNum = BigNumber.from(c);
 
             theory.invalidatePrimaryEquation();
             theory.invalidateTertiaryEquation();
         }
+        extraInc.maxLevel = 24;
         extraInc.isAutoBuyable = false;
         extraInc.isAvailable = false;
     }
@@ -745,6 +740,7 @@ var init = () =>
     theory.createPublicationUpgrade(0, currency, permaCosts[0]);
     theory.createBuyAllUpgrade(1, currency, permaCosts[1]);
     theory.createAutoBuyerUpgrade(2, currency, permaCosts[2]);
+    theory.autoBuyerUpgrade.bought = (_) => updateAvailability();
     /* Unlocks freeze
     Shame that you unlock such a useful tool really late.
     */
@@ -820,10 +816,10 @@ var init = () =>
         }
         cooldownMs.boughtOrRefunded = (_) =>
         {
-            nudge.maxLevel = totalIncLevel + cLevelCap[cooldownMs.level];
+            nudge.maxLevel = totalIncLevel % 2 + cLevelCap[cooldownMs.level];
         };
         cooldownMs.canBeRefunded = (amount) => nudge.level <=
-        totalIncLevel + cLevelCap[cooldownMs.level - amount];
+        totalIncLevel % 2 + cLevelCap[cooldownMs.level - amount];
     }
     /* Level borrowing
     It'll be useless for a while at first when you unlock it at e44. But, it can
@@ -832,9 +828,8 @@ var init = () =>
     {
         q1BorrowMs = theory.createMilestoneUpgrade(1, 1);
         q1BorrowMs.description = Localization.getUpgradeIncCustomDesc(getLoc(
-        'q1Level'), Localization.format(getLoc('cLevelth'), borrowFactor));
-        q1BorrowMs.info = Localization.getUpgradeIncCustomInfo(getLoc(
-        'q1Level'), Localization.format(getLoc('cLevelth'), borrowFactor));
+        'q1Level'), Localization.format(getLoc('Eclog'), borrowFactor));
+        q1BorrowMs.info = getLoc('EclogInfo');
     }
     /* q1 exponent
     Standard exponent upgrade.
@@ -845,6 +840,19 @@ var init = () =>
         q1ExpInc);
         q1ExpMs.info = Localization.getUpgradeIncCustomExpInfo('q_1', q1ExpInc);
         q1ExpMs.boughtOrRefunded = (_) => theory.invalidateSecondaryEquation();
+    }
+    /* q3 unlock
+    Standard unlock.
+    */
+    {
+        q3UnlockMs = theory.createMilestoneUpgrade(3, 1);
+        q3UnlockMs.description = Localization.getUpgradeAddTermDesc('q_3');
+        q3UnlockMs.info = Localization.getUpgradeAddTermInfo('q_3');
+        q3UnlockMs.boughtOrRefunded = (_) =>
+        {
+            updateAvailability();
+            theory.invalidateSecondaryEquation();
+        };
     }
 
     theory.createStoryChapter(0, getLoc('ch1Title'), getLoc('ch1Text'),
@@ -861,7 +869,8 @@ var init = () =>
     theory.createAchievement(0, undefined, getLoc('achNegativeTitle'),
     getLoc('achNegativeDesc'), () => cBigNum < 0);
     theory.createAchievement(1, undefined, getLoc('achMarathonTitle'),
-    getLoc('achMarathonDesc'), () => cBigNum.abs() >= 1e60, () => c == 0n ? 0 :
+    getLoc('achMarathonDesc'), () => cBigNum.abs() >= 1e60 &&
+    extraInc.level == 0, () => c == 0n ? 0 :
     cBigNum.abs().log10().toNumber() / 60);
     theory.createAchievement(2, undefined, getLoc('achSixNineTitle'),
     getLoc('achSixNineDesc'), () => c == 69n);
@@ -870,7 +879,7 @@ var init = () =>
 
     theory.primaryEquationHeight = 66;
     theory.primaryEquationScale = 0.9;
-    // theory.secondaryEquationHeight = 66;
+    theory.secondaryEquationHeight = 32;
 }
 
 var updateAvailability = () =>
@@ -883,15 +892,18 @@ var updateAvailability = () =>
         reachedFirstPub = true;
     }
     extraIncPerma.isAvailable = freezePerma.level > 0;
+    extraInc.isAvailable = extraIncPerma.level > 0 &&
+    nudge.level == nudge.maxLevel;
     mimickPerma.isAvailable = extraIncPerma.level > 0;
     if(mimickPerma.level)
     {
         mimickFrame.isVisible = true;
         mimickLabel.isVisible = true;
     }
+    q1ExpMs.isAvailable = theory.milestonesTotal > 2;
+    q3UnlockMs.isAvailable = theory.milestonesTotal > 2;
+    q3.isAvailable = q3UnlockMs.level > 0;
     marathonBadge = theory.achievements[1].isUnlocked;
-    extraInc.isAvailable = extraIncPerma.level > 0 &&
-    nudge.level == nudge.maxLevel;
 }
 
 var tick = (elapsedTime, multiplier) =>
@@ -911,15 +923,16 @@ var tick = (elapsedTime, multiplier) =>
             nextNudge in lastHistory && turns == lastHistory[nextNudge][0] - 2 ?
             0 : 33, Easing.LINEAR);
 
+            cSum += cBigNum;
+            cLog = cSum.max(BigNumber.ONE).log2().toNumber();
+
             if(c % 2n != 0)
                 c = 3n * c + 1n;
             else
                 c /= 2n;
-
-            cSum += cBigNum;
             cBigNum = BigNumber.from(c);
 
-            if(nudge.level > totalIncLevel)
+            if(nudge.level > totalIncLevel % 2)
                 ++turns;
 
             if(mimickLastHistory)
@@ -944,17 +957,20 @@ var tick = (elapsedTime, multiplier) =>
     let dt = BigNumber.from(elapsedTime * multiplier);
     let q1Term = getq1(q1.level).pow(getq1Exponent(q1ExpMs.level));
     let q2Term = getq2(q2.level);
+    let q3Term = q3UnlockMs.level > 0 ? getq3(q3.level) : BigNumber.ONE;
     let bonus = theory.publicationMultiplier;
+    let rTerm = nudge.level == nudge.maxLevel ? getrPenalty(extraInc.level) :
+    BigNumber.ONE;
 
-    currency.value += dt * cSum.abs() * q1Term * q2Term * bonus;
+    currency.value += dt * cSum.abs() * q1Term * q2Term * q3Term * bonus
+    / rTerm;
 }
 
 var getEquationOverlay = () =>
 {
     let result = ui.createGrid
     ({
-        verticalOptions: LayoutOptions.FILL,
-        rowDefinitions: ['1*', '1*'],
+        // rowDefinitions: ['1*', '1*'],
         columnDefinitions: ['1*', '2*', '1*'],
         children:
         [
@@ -967,8 +983,7 @@ var getEquationOverlay = () =>
                 column: 0,
                 verticalTextAlignment: TextAlignment.START,
                 margin: new Thickness(6, 3),
-                text: getLoc('versionName')/* +
-                Utils.getMath(getLoc('changeLog'))*/,
+                text: getLoc('versionName'),
                 fontSize: 9,
                 textColor: Color.TEXT_MEDIUM
             }),
@@ -1019,16 +1034,22 @@ var getPrimaryEquation = () =>
 
 var getSecondaryEquation = () =>
 {
-    let result = `\\begin{matrix}\\dot{\\rho}=q_1${q1ExpMs.level > 0 ?
-    `^{${getq1Exponent(q1ExpMs.level)}}` : ''}q_2\\left|\\sum c\\right|,&
+    let EcStr = extraIncPerma.level > 0 && nudge.level == nudge.maxLevel ?
+    '\\displaystyle\\frac{\\left|\\Sigma\\,c\\right|}{2^r}' : '\\left|\\sum c\\right|';
+    let result = `\\begin{matrix}\\dot{\\rho}=q_1
+    ${q1ExpMs.level > 0 ?`^{${getq1Exponent(q1ExpMs.level)}}` : ''}q_2
+    ${q3UnlockMs.level > 0 ? 'q_3' : ''}${EcStr},&
     ${theory.latexSymbol}=\\max{\\rho}^{0.1}\\end{matrix}`;
+
     return result;
 }
 
 var getTertiaryEquation = () =>
 {
     let mStr = '';
-    let cStr = `(${cBigNum < 0 ? '' : '+'}${cBigNum.toString(0)})`;
+    let cStr = '';
+    if(historyNumMode & 2 || c > 1e9 || c < -1e8)
+        cStr =  `\\\\(${cBigNum < 0 ? '' : '+\\,'}${cBigNum.toString(0)})`;
     if(reachedFirstPub)
         mStr = `t=${turns},&`;
     
@@ -1036,7 +1057,7 @@ var getTertiaryEquation = () =>
     let mcStr = `\\begin{matrix}${mStr}${csStr}
     \\end{matrix}`;
 
-    return `\\begin{array}{c}${mcStr}\\\\${cStr}\\end{array}`;
+    return `\\begin{array}{c}${mcStr}${cStr}\\end{array}`;
 }
 
 let createHistoryMenu = () =>
@@ -1165,10 +1186,9 @@ let createHistoryMenu = () =>
             lastPubHistory
         ]
     });
-    let tmpPreserve = preserveLastHistory;
     let preserveSwitch = ui.createSwitch
     ({
-        isToggled: tmpPreserve,
+        isToggled: preserveLastHistory,
         row: 0,
         column: 1,
         horizontalOptions: LayoutOptions.END,
@@ -1178,8 +1198,8 @@ let createHistoryMenu = () =>
             e.type == TouchType.LONGPRESS_RELEASED)
             {
                 Sound.playClick();
-                tmpPreserve = !tmpPreserve;
-                preserveSwitch.isToggled = tmpPreserve;
+                preserveLastHistory = !preserveLastHistory;
+                preserveSwitch.isToggled = preserveLastHistory;
             }
         }
     });
@@ -1240,11 +1260,10 @@ let createHistoryMenu = () =>
                 }),
                 ui.createButton
                 ({
-                    text: getLoc('btnSave'),
+                    text: getLoc('btnClose'),
                     onClicked: () =>
                     {
                         Sound.playClick();
-                        preserveLastHistory = tmpPreserve;
                         menu.hide();
                     }
                 })
@@ -1274,7 +1293,8 @@ var getCurrencyFromTau = (tau) =>
 // Will not trigger if you press reset.
 var prePublish = () =>
 {
-    totalIncLevel = nudge.level - getIncrementPenalty(extraInc.level);
+    totalEclog += cLog;
+    totalIncLevel += nudge.level - nudge.maxLevel % 2;
     if(!preserveLastHistory)
         lastHistory = history;
     lastHistoryLength = Object.keys(lastHistory).length;
@@ -1286,8 +1306,8 @@ var postPublish = () =>
     time = 0;
     // Disabling history write circumvents the extra levelling
     writeHistory = false;
-    nudge.maxLevel = totalIncLevel + cLevelCap[cooldownMs.level];
-    nudge.level = totalIncLevel;
+    nudge.maxLevel = totalIncLevel % 2 + cLevelCap[cooldownMs.level];
+    nudge.level = totalIncLevel % 2;
     writeHistory = true;
     history = {};
     // c is reset to 0 afterwards
@@ -1295,25 +1315,24 @@ var postPublish = () =>
     c = 0n;
     cBigNum = BigNumber.from(c);
     cSum = cBigNum;
+    cLog = cSum.max(BigNumber.ONE).log2().toNumber();
     cIterProgBar.progressTo(0, 220, Easing.CUBIC_INOUT);
 
     if(mimickLastHistory)
         nextNudge = binarySearch(Object.keys(lastHistory), turns);
 
     theory.invalidatePrimaryEquation();
+    theory.invalidateSecondaryEquation();
     theory.invalidateTertiaryEquation();
     updateAvailability();
 }
 
-var canResetStage = () => !theory.canPublish || extraInc.level == 0;
+var canResetStage = () => true;
 
 var getResetStageMessage = () => getLoc('reset');
 
 var resetStage = () =>
 {
-    if(theory.canPublish && extraInc.level)
-        return;
-
     for(let i = 0; i < theory.upgrades.length; ++i)
         theory.upgrades[i].level = 0;
 
@@ -1329,6 +1348,7 @@ var getInternalState = () => JSON.stringify
     time: time,
     c: c.toString(),
     cSum: cSum.toBase64String(),
+    totalEclog: totalEclog,
     totalIncLevel: totalIncLevel,
     history: history,
     lastHistory: lastHistory,
@@ -1358,17 +1378,18 @@ var setInternalState = (stateStr) =>
         cBigNum = BigNumber.from(c);
     }
     if('cSum' in state)
+    {
         cSum = BigNumber.fromBase64String(state.cSum);
-    else
-        cSum = cBigNum;
+        cLog = cSum.max(BigNumber.ONE).log2().toNumber();
+    }
+    if('totalEclog' in state)
+        totalEclog = state.totalEclog;
 
-    let tmpIML = cLevelCap[cooldownMs.level];
     if('totalIncLevel' in state)
     {
         totalIncLevel = state.totalIncLevel;
-        tmpIML += totalIncLevel;
+        nudge.maxLevel = cLevelCap[cooldownMs.level] + totalIncLevel % 2;
     }
-    nudge.maxLevel = tmpIML;
 
     if('history' in state)
         history = state.history;

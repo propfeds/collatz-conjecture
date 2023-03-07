@@ -12,11 +12,28 @@
   - Because once you've found what you love, the theory becomes just q1q2
   - Although, extra increments solve the setback from having to recover from overstaying pub
 
-- [ ] q1 turn into (2, 10) stepwise with low cost increment for activeness?
+- [ ] Apply LSR workload technique to history menu
+  - Scrapped - is actually slower than normal
+- [x] q3 upgrades are too close together -> chaotic, too strong
+  - 17.6 -> 22
+- [ ] iOS UI bug that makes it super big and mess up the game entirely
+
+- [x] Balance later intervals to 22/14?
+  - Recovery too strong, making the buying process chaotic
+
+- [ ] Current farm rate compared to before
+  - 65.2% at e55 (6 extra levels)
+    - `(55*2/72) * log2(10) * 0.12 * (5/4) * (6/7)`
+  - 65.5% at e69 (24 extra levels, taking extra time into account)
+    - `(69*2/72) * log2(10) * 0.12 * (5/4) * (6/7) * (72/90)`
+    - Extra levels are actually not weaker than regular?
+  - (0.12 Eclog with 2, 8 q1 and 14 interval)
+
+- [x] q1 turn into (2, 10) stepwise with low cost increment for activeness?
   - 2.09 or just 1.76? divisible by 11 this time
-- [ ] q2 return to 2^x
-  - [ ] Also solves the problem of 1st pub being too big
-- [ ] Add q3 (unlocked with milestone)
+- [x] q2 return to 2^x
+  - [x] Also solves the problem of 1st pub being too big
+- [x] Add q3 (unlocked with milestone)
   - (!) Consider other changes first like q1 and log10(Ec/r)
   - q3 = 3^lv (+1 with badge)
   - Probably gonna make the milestone compete with q1 exponent
@@ -25,19 +42,21 @@
     - But not too small to make it reasonable
     - Is it too late to be that strong?
     - Or unlock it at e120 or sth and nerf pub exp to like 2.2 lol
-- [ ] Extra levels instead impose penalty by dividing the whole income
+- [x] Extra levels instead impose penalty by dividing the whole income
   - rho dot = q1q2|Ec|/(2^r), with r being a (2, 4) stepwise (wtf??)
+    - Or maybe (2, 6) and buff final cap to 66 (18/30/48/66)
     - Story: You begin attaching random /2s in your sequence in hopes of not being discovered...
   - I'll figure out the best form of punishment later when playtesting
   - This sounds like a legit good level farming method
   - Needs a max level, not too high to be abuseable, not too low to be worthless
-- [ ] q1 milestone buffs level by log10(Ec) instead of 64
+- [x] q1 milestone buffs level by log10(Ec) instead of 64
 - I'm not even sure?
   - [ ] (?) Add a new level to cap ms: 16/24/36/48/64
     - Interval: 42/36/27/18/12
-  - [ ] (?) c level farming has diminishing returns?
+  - [ ] (?) q1 level farming has diminishing returns?
     - Does get better a bit with exp milestone
     - Theory loses that uniqueness
+  - [ ] (?) q1 level farming has limit at the end of story?
 
 - [x] rho dot is influenced by sum of all c values passed through
   - This way it can still stack after it ends, and income stops fluctuating
