@@ -21,6 +21,12 @@
 - [x] Balance later intervals to 22/14?
   - Recovery too strong, making the buying process chaotic
 
+- [ ] Balance caps to very small something like 48 at max level
+  - Easier to share, less confusing
+  - Compensate by increasing farm rate for better early game but worse later
+  - Rescale interval to be a bit longer later but not too long
+  - Do I need to shorten q2 cost?
+
 - [ ] Current farm rate compared to before
   - 65.2% at e55 (6 extra levels)
     - `(55*2/72) * log2(10) * 0.12 * (5/4) * (6/7)`
