@@ -238,12 +238,12 @@ a single student to do all the hard work?
 Can you put blame on him, when neither of
 you really communicated with each other from the start?
 
-Note: q1 levels will stop stacking.`,
+Note: q1 levels have stopped stacking.`,
 
         achNegativeTitle: 'Shrouded by Fog',
         achNegativeDesc: `Publish with an odd level of c and go negative.`,
         achMarathonTitle: 'Local Marathon',
-        achMarathonDesc: 'Reach a c value of ±1e60 without using extra ' +
+        achMarathonDesc: 'Reach a c value of ±1e48 without using extra ' +
         'levels. Reward: +1 to q3.',
         achSixNineTitle: 'I\'m proud of you.',
         achSixNineDesc: 'Reach a c value of 69.',
@@ -896,9 +896,9 @@ var init = () =>
     theory.createAchievement(0, undefined, getLoc('achNegativeTitle'),
     getLoc('achNegativeDesc'), () => cBigNum < 0);
     theory.createAchievement(1, undefined, getLoc('achMarathonTitle'),
-    getLoc('achMarathonDesc'), () => cBigNum.abs() >= 1e60 &&
+    getLoc('achMarathonDesc'), () => cBigNum.abs() >= BigNumber.from(1e48) &&
     extraInc.level == 0, () => c == 0n ? 0 :
-    cBigNum.abs().log10().toNumber() / 60);
+    cBigNum.abs().log10().toNumber() / 48);
     theory.createAchievement(2, undefined, getLoc('achSixNineTitle'),
     getLoc('achSixNineDesc'), () => c == 69n);
 
