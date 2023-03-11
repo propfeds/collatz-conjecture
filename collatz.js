@@ -99,7 +99,7 @@ const milestoneCost = new CompositeCost(2, new LinearCost(4.4, 4.4),
 new LinearCost(17.6, 8.8));
 
 const cLevelCap = [20, 28, 36, 48];
-const cooldown = [36, 28, 22, 16];
+const cooldown = [36, 30, 24, 18];
 
 const tauRate = 0.1;
 const pubExp = 3.01;
