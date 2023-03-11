@@ -71,9 +71,10 @@ let bigNumArray = (array) => array.map(x => BigNumber.from(x));
 
 // All balance parameters are aggregated for ease of access
 
-const borrowFactor = .12;
+const borrowFactor = .15;
 const q1Cost = new FirstFreeCost(new ExponentialCost(1, 1.76));
-const getq1BonusLevels = (bl) => bl ? (totalEclog + cLog) * borrowFactor : 0;
+const getq1BonusLevels = (bl) => bl ? Math.min((totalEclog + cLog) *
+borrowFactor, 9232) : 0;
 const getq1 = (level) => Utils.getStepwisePowerSum(level + Math.floor(
 getq1BonusLevels(q1BorrowMs.level)), 2, 8, 0);
 
@@ -81,13 +82,13 @@ const q1ExpInc = 0.02;
 const q1ExpMaxLevel = 4;
 const getq1Exponent = (level) => 1 + q1ExpInc * level;
 
-const q2Cost = new ExponentialCost(2.2e7, 11);
+const q2Cost = new ExponentialCost(2.2e7, 9);
 const getq2 = (level) => BigNumber.TWO.pow(level);
 
 const q3Cost = new ExponentialCost(BigNumber.from('1e272'), Math.log2(1e8));
 const getq3 = (level) => BigNumber.THREE.pow(level) + (marathonBadge ? 1 : 0);
 
-const getr = (level) => Utils.getStepwisePowerSum(level, 2, 6, 0);
+const getr = (level) => 2 * Utils.getStepwisePowerSum(level, 2, 6, 0);
 const getrPenalty = (level) => BigNumber.TWO.pow(getr(level));
 
 const permaCosts = bigNumArray(['1e12', '1e22', '1e27', '1e56', '1e140',
@@ -97,8 +98,8 @@ const permaCosts = bigNumArray(['1e12', '1e22', '1e27', '1e56', '1e140',
 const milestoneCost = new CompositeCost(2, new LinearCost(4.4, 4.4),
 new LinearCost(17.6, 8.8));
 
-const cLevelCap = [20, 32, 48, 66];
-const cooldown = [36, 28, 20, 14];
+const cLevelCap = [20, 28, 36, 48];
+const cooldown = [36, 28, 22, 16];
 
 const tauRate = 0.1;
 const pubExp = 3.01;
@@ -197,27 +198,47 @@ fruitless beggings, and then I was caught again.
 My punishments escalated.
 But I don't want to be a criminal...'
 
-You woke yourself up, looking frozen all over.
-A shiver shook you up, and suddenly, you
-chanced upon that colleague in the hallway.
+You wake yourself up, looking frozen all over.
+A shiver shakes you up, and suddenly, you
+chance upon that colleague in the hallway.
 She is the only one who knows this.`,
 
         ch4Title: 'Honestly',
-        ch4Text: `'..., what is this? Why?'
+        ch4Text: `'..., what really is this?'
 
-You hold before yourself an odd machine.
-This is called, an Auto-Nudge. Armed with a
-mechanical hand, programmable rhythms,
-foot-cranked toggle control, histographs.
-Even a toaster slot attached to the heat sink.
+You have been using your Auto-Nudge machine
+for a while now. It's fairly reliable.
+It's got a mechanical hand, programmable rhythms,
+a foot-cranked toggle, histograph displays...
 
-Who in the world could create this machine,
+You begin to wonder: Who in the world would
+gift you this machine in the first place,
 tailored to every nook of your nature,
 urging you to multiply your operations
 and get you busted?
 
 You see two signatures on the
-back of the machine.`,
+back of the machine.
+The thought sickens you.`,
+
+        ch5Title: 'LONG chapter where you lash out',
+        ch5Text: `You had a dream last night.
+etc. etc. at the end of it you are about to scream at your prof but you
+frown and cover your mouth in a knuckle (blowgun) shape and go to the toilet`,
+
+        ch6Title: 'Chapter where the prof forgives you',
+        ch6Text: `Your prof forgives you but not really.
+Thesis deadline draws near (probably a month).`,
+
+        ch7Title: 'Final chapter when you reach 9232 levels',
+        ch7Text: `9232 pages of research on modular arithmetic.
+You graduate, but nowhere closer to solving the Collatz conjecture.
+Can you put blame on yourself, when your prof was the one who tasked
+a single student to do all the hard work?
+Can you put blame on him, when neither of
+you really communicated with each other from the start?
+
+Note: q1 levels will stop stacking.`,
 
         achNegativeTitle: 'Shrouded by Fog',
         achNegativeDesc: `Publish with an odd level of c and go negative.`,
@@ -732,7 +753,7 @@ var init = () =>
             theory.invalidatePrimaryEquation();
             theory.invalidateTertiaryEquation();
         }
-        extraInc.maxLevel = 24;
+        extraInc.maxLevel = 18;
         extraInc.isAutoBuyable = false;
         extraInc.isAvailable = false;
     }
@@ -860,11 +881,17 @@ var init = () =>
     theory.createStoryChapter(1, getLoc('ch2Title'), getLoc('ch2Text'),
     () => totalIncLevel >= 480);
     theory.createStoryChapter(2, getLoc('ch3Title'), getLoc('ch3Text'),
-    () => totalIncLevel >= 1200);
+    () => totalIncLevel >= 960);
     theory.createStoryChapter(3, getLoc('ch3bTitle'), getLoc('ch3bText'),
     () => theory.storyChapters[2].isUnlocked && (c == 1n || c == -1n));
     theory.createStoryChapter(4, getLoc('ch4Title'), getLoc('ch4Text'),
-    () => mimickPerma.level > 0);
+    () => totalIncLevel >= 1600);
+    theory.createStoryChapter(5, getLoc('ch5Title'), getLoc('ch5Text'),
+    () => totalIncLevel >= 3200);
+    theory.createStoryChapter(6, getLoc('ch6Title'), getLoc('ch6Text'),
+    () => totalIncLevel >= 3280);
+    theory.createStoryChapter(7, getLoc('ch7Title'), getLoc('ch7Text'),
+    () => totalEclog * borrowFactor >= 9232);
 
     theory.createAchievement(0, undefined, getLoc('achNegativeTitle'),
     getLoc('achNegativeDesc'), () => cBigNum < 0);

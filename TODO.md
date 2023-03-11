@@ -21,7 +21,7 @@
 - [x] Balance later intervals to 22/14?
   - Recovery too strong, making the buying process chaotic
 
-- [ ] Balance caps to very small something like 48 at max level
+- [x] Balance caps to very small something like 48 at max level
   - Easier to share, less confusing
   - Compensate by increasing farm rate for better early game but worse later
   - Rescale interval to be a bit longer later but not too long
