@@ -103,9 +103,10 @@ const cooldown = [36, 30, 24, 18];
 
 const tauRate = 0.1;
 const pubExp = 3.01;
-var getPublicationMultiplier = (tau) => tau.pow(pubExp);
+const pubMult = 8;
+var getPublicationMultiplier = (tau) => tau.pow(pubExp) * pubMult;
 var getPublicationMultiplierFormula = (symbol) =>
-`{${symbol}}^{${pubExp}}`;
+`${pubMult}\\times{${symbol}}^{${pubExp}}`;
 
 var freeze;
 var nudge, q1, q2, q3, extraInc;
