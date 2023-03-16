@@ -212,32 +212,72 @@ for a while now. It's fairly reliable.
 It's got a mechanical hand, programmable rhythms,
 a foot-cranked toggle, histograph displays...
 
-You begin to wonder: Who in the world would
+You begin to wonder: Who in the world would've
 gift you this machine in the first place,
-tailored to every nook of your nature,
-urging you to multiply your operations
-and get you busted?
+tailored to every nook of your nature.
+Urging you to multiply your operations
+and get you busted.
 
 You see two signatures on the
 back of the machine.
 The thought sickens you.`,
 
-        ch5Title: 'LONG chapter where you lash out',
+        ch5Title: 'I Hate You',
         ch5Text: `You had a dream last night.
-etc. etc. at the end of it you are about to scream at your prof but you
-frown and cover your mouth in a knuckle (blowgun) shape and go to the toilet`,
+The lab was covered with stacks of paper.
+8, 9 stacks here, 28 boxes there, 27, 82, 41,...
+You scrambled all of it up. Where did you leave
+the Auto-Nudge?
 
-        ch6Title: 'Chapter where the prof forgives you',
-        ch6Text: `Your prof forgives you but not really.
-Thesis deadline draws near (probably a month).`,
+Your supervisor came into the lab.
+'I have already told you since last week
+that you have to clean this mess up.
+Do it before tomorrow.
+And by the way, your friend came to visit.'
 
-        ch7Title: 'Final chapter when you reach 9232 levels',
-        ch7Text: `9232 pages of research on modular arithmetic.
-You graduate, but nowhere closer to solving the Collatz conjecture.
-Can you put blame on yourself, when your prof was the one who tasked
-a single student to do all the hard work?
+You turned your face towards him.
+Your knuckle instinctively covered your
+bloating mouth like a blowgun, your eyes
+like taking aim.
+'I hate you, you made me do this!',
+you mumbled, before running out of breath
+and walking away from the lab.`,
+
+        ch6Title: 'You Hear Me?',
+        ch6Text: `'I did not make you do this.
+When I showed you the conjecture, you were the one
+who went in with eyes determined, sleeves ready
+to roll. Then, I found out that you were merely
+pretending to solve what you couldn't.
+I don't see how dodging away from the problem
+would fulfill what I am asking of you:
+simple really. Just the best your honesty can do.'
+
+The deadline is next month. Finish it.`,
+
+        ch7Title: 'Fault',
+        ch7Text: `9232 pages of modular arithmetic.
+In your graduation thesis, you have documented
+sequences that seemingly go from 0 to
+breaking the integer limits.
+
+You have graduated.
+Although nowhere closer to solving the Collatz
+conjecture, for both you and your supervisor.
+Can you put blame on yourself, when he
+was the one who tasked a single student
+to do all the hard work?
 Can you put blame on him, when neither of
-you really communicated with each other from the start?
+you really communicated with each other
+from the start?
+
+You decide to spend a day out with yourself.
+Lying on a hill, you notice the clouds looking
+as if they're multiplying by three plus one.
+And then you close your eyes, and envision
+yourself just rolling off gently through
+the grass...
+until you hit a bush.
 
 Note: q1 levels have stopped stacking.`,
 
@@ -882,15 +922,15 @@ var init = () =>
     theory.createStoryChapter(1, getLoc('ch2Title'), getLoc('ch2Text'),
     () => totalIncLevel >= 480);
     theory.createStoryChapter(2, getLoc('ch3Title'), getLoc('ch3Text'),
-    () => totalIncLevel >= 960);
+    () => totalIncLevel >= 1000);
     theory.createStoryChapter(3, getLoc('ch3bTitle'), getLoc('ch3bText'),
-    () => theory.storyChapters[2].isUnlocked && (c == 1n || c == -1n));
+    () => theory.storyChapters[2].isUnlocked && c!= 0n && mimickLastHistory);
     theory.createStoryChapter(4, getLoc('ch4Title'), getLoc('ch4Text'),
-    () => totalIncLevel >= 1600);
+    () => totalIncLevel >= 1780);
     theory.createStoryChapter(5, getLoc('ch5Title'), getLoc('ch5Text'),
-    () => totalIncLevel >= 3200);
+    () => totalIncLevel >= 4000);
     theory.createStoryChapter(6, getLoc('ch6Title'), getLoc('ch6Text'),
-    () => totalIncLevel >= 3280);
+    () => totalIncLevel >= 4400);
     theory.createStoryChapter(7, getLoc('ch7Title'), getLoc('ch7Text'),
     () => totalEclog * borrowFactor >= 9232);
 
