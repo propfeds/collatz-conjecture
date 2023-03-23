@@ -71,7 +71,7 @@ let bigNumArray = (array) => array.map(x => BigNumber.from(x));
 
 // All balance parameters are aggregated for ease of access
 
-const borrowFactor = .12;
+const borrowFactor = .13;
 const q1Cost = new FirstFreeCost(new ExponentialCost(1, 1.76));
 const getq1BonusLevels = (bl) => bl ? Math.min((totalEclog + cLog) *
 borrowFactor, 9232) : 0;
