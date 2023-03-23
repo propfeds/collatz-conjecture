@@ -71,7 +71,7 @@ let bigNumArray = (array) => array.map(x => BigNumber.from(x));
 
 // All balance parameters are aggregated for ease of access
 
-const borrowFactor = .15;
+const borrowFactor = .12;
 const q1Cost = new FirstFreeCost(new ExponentialCost(1, 1.76));
 const getq1BonusLevels = (bl) => bl ? Math.min((totalEclog + cLog) *
 borrowFactor, 9232) : 0;
@@ -82,10 +82,10 @@ const q1ExpInc = 0.02;
 const q1ExpMaxLevel = 4;
 const getq1Exponent = (level) => 1 + q1ExpInc * level;
 
-const q2Cost = new ExponentialCost(2.2e7, 9);
+const q2Cost = new ExponentialCost(2.2e7, 6);
 const getq2 = (level) => BigNumber.TWO.pow(level);
 
-const q3Cost = new ExponentialCost(BigNumber.from('1e272'), Math.log2(1e8));
+const q3Cost = new ExponentialCost(BigNumber.from('1e274'), Math.log2(1e6));
 const getq3 = (level) => BigNumber.THREE.pow(level) + (marathonBadge ? 1 : 0);
 
 const getr = (level) => 2 * Utils.getStepwisePowerSum(level, 2, 6, 0);
@@ -144,7 +144,7 @@ const locStrings =
         cLevelth: `1/{{{0}}}^\\text{{{{th}}}}\\text{{{{ of }}}}c
         \\text{{{{ level}}}}`,
         Eclog: '{{{0}}}\\times\\log_{{2}}\\Sigma\\,c\\text{{ (cumulative)}}',
-        EclogInfo: 'Stacks passively across publications',
+        EclogInfo: 'Carries over across publications',
         cLevelCap: 'c\\text{{ level cap}}',
         cooldown: '\\text{{interval}}',
         cooldownInfo: 'Interval',
