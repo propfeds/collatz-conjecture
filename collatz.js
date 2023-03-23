@@ -1108,7 +1108,8 @@ var getPrimaryEquation = () =>
 var getSecondaryEquation = () =>
 {
     let EcStr = extraIncPerma.level > 0 && nudge.level == nudge.maxLevel ?
-    '\\displaystyle\\frac{\\left|\\Sigma\\,c\\right|}{2^r}' : '\\left|\\sum c\\right|';
+    '\\displaystyle\\frac{\\left|\\Sigma\\,c\\right|}{2^r}' :
+    '\\left|\\sum_{0}^{t-1} c\\right|';
     let result = `\\begin{matrix}\\dot{\\rho}=q_1
     ${q1ExpMs.level > 0 ?`^{${getq1Exponent(q1ExpMs.level)}}` : ''}q_2
     ${q3UnlockMs.level > 0 ? 'q_3' : ''}${EcStr},&
