@@ -82,7 +82,7 @@ const q1ExpInc = 0.02;
 const q1ExpMaxLevel = 4;
 const getq1Exponent = (level) => 1 + q1ExpInc * level;
 
-const q2Cost = new ExponentialCost(2.2e7, 6);
+const q2Cost = new ExponentialCost(2.2e7, 6.4);
 const getq2 = (level) => BigNumber.TWO.pow(level);
 
 const q3Cost = new ExponentialCost(BigNumber.from('1e274'), Math.log2(1e6));
