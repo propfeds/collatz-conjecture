@@ -88,7 +88,7 @@ const getq2 = (level) => BigNumber.TWO.pow(level);
 const q3Cost = new ExponentialCost(BigNumber.from('1e274'), Math.log2(1e6));
 const getq3 = (level) => BigNumber.THREE.pow(level) + (marathonBadge ? 1 : 0);
 
-const getr = (level) => 2 * Utils.getStepwisePowerSum(level, 2, 6, 0);
+const getr = (level) => Utils.getStepwisePowerSum(level, 2, 4, 0);
 const getrPenalty = (level) => BigNumber.TWO.pow(getr(level));
 
 const permaCosts = bigNumArray(['1e12', '1e22', '1e27', '1e56', '1e140',
@@ -122,6 +122,7 @@ const locStrings =
         versionName: 'v0.08 (WIP)',
         longTick: 'Tick: {0}s',
 
+        history: 'History',
         historyDesc: `\\begin{{array}}{{c}}\\text{{History}}\\\\{{{0}}}/{{{1}}}
         \\end{{array}}`,
         historyInfo: 'Shows the last and current publications\' sequences',
@@ -438,9 +439,7 @@ const historyLabel = ui.createLatexLabel
     horizontalOptions: LayoutOptions.END,
     verticalTextAlignment: TextAlignment.START,
     margin: new Thickness(2.5, 41, 2.5, 0),
-    text: () => Utils.getMath(Localization.format(getLoc('historyDesc'),
-    (nudge ? nudge.level : 0) + (extraInc ? extraInc.level : 0) -
-    totalIncLevel % 2, lastHistoryLength)),
+    text: getLoc('history'),
     fontSize: 9,
     textColor: () => Color.fromHex(cDispColour.get(game.settings.theme))
 });
@@ -682,12 +681,12 @@ var init = () =>
     4 again, which can be super annoying.
     */
     {
-        let getDesc = (level) => `c \\leftarrow c${level & 1 ? '-' : '+'}1
-        \\text{${getLoc('alternating')}}`;
+        let getDesc = (level) => `c \\leftarrow c${(level + totalIncLevel) & 1 ?
+        '-' : '+'}1\\text{${getLoc('alternating')}}`;
         nudge = theory.createUpgrade(0, currency, new FreeCost);
         nudge.getDescription = (_) => Utils.getMath(
         getDesc(nudge.level));
-        nudge.getInfo = (_) => `${nudge.level & 1 ?
+        nudge.getInfo = (_) => `${(nudge.level + totalIncLevel) & 1 ?
         Localization.getUpgradeDecCustomInfo('c', 1) :
         Localization.getUpgradeIncCustomInfo('c', 1)}${getLoc('alternating')}`;
         nudge.bought = (amount) =>
@@ -698,10 +697,9 @@ var init = () =>
                 return;
             }
             if(writeHistory)
-                history[totalIncLevel + nudge.level - nudge.maxLevel % 2] =
-                [turns, c.toString()];
+                history[totalIncLevel + nudge.level] = [turns, c.toString()];
             // even level: -1, odd level: +1, because this is post-processing
-            if(nudge.level & 1)
+            if((nudge.level + totalIncLevel) & 1)
                 c += 1n;
             else
                 c -= 1n;
@@ -878,10 +876,10 @@ var init = () =>
         }
         cooldownMs.boughtOrRefunded = (_) =>
         {
-            nudge.maxLevel = totalIncLevel % 2 + cLevelCap[cooldownMs.level];
+            nudge.maxLevel = cLevelCap[cooldownMs.level];
         };
         cooldownMs.canBeRefunded = (amount) => nudge.level <=
-        totalIncLevel % 2 + cLevelCap[cooldownMs.level - amount];
+        cLevelCap[cooldownMs.level - amount];
     }
     /* Level borrowing
     It'll be useless for a while at first when you unlock it at e44. But, it can
@@ -1005,7 +1003,8 @@ var tick = (elapsedTime, multiplier) =>
                 c /= 2n;
             cBigNum = BigNumber.from(c);
 
-            if(nudge.level > totalIncLevel % 2)
+            // Only counts if c != 0
+            if(nudge.level)
                 ++turns;
 
             if(mimickLastHistory)
@@ -1368,7 +1367,7 @@ var getCurrencyFromTau = (tau) =>
 var prePublish = () =>
 {
     totalEclog += cLog;
-    totalIncLevel += nudge.level - nudge.maxLevel % 2;
+    totalIncLevel += nudge.level;
     if(!preserveLastHistory)
         lastHistory = history;
     lastHistoryLength = Object.keys(lastHistory).length;
@@ -1380,8 +1379,8 @@ var postPublish = () =>
     time = 0;
     // Disabling history write circumvents the extra levelling
     writeHistory = false;
-    nudge.maxLevel = totalIncLevel % 2 + cLevelCap[cooldownMs.level];
-    nudge.level = totalIncLevel % 2;
+    nudge.maxLevel = cLevelCap[cooldownMs.level];
+    nudge.level = 0;
     writeHistory = true;
     history = {};
     // c is reset to 0 afterwards
@@ -1462,7 +1461,7 @@ var setInternalState = (stateStr) =>
     if('totalIncLevel' in state)
     {
         totalIncLevel = state.totalIncLevel;
-        nudge.maxLevel = cLevelCap[cooldownMs.level] + totalIncLevel % 2;
+        nudge.maxLevel = cLevelCap[cooldownMs.level];
     }
 
     if('history' in state)
