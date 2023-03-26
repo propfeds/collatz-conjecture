@@ -145,7 +145,7 @@ const locStrings =
         cLevelth: `1/{{{0}}}^\\text{{{{th}}}}\\text{{{{ of }}}}c
         \\text{{{{ level}}}}`,
         Eclog: '{{{0}}}\\times\\log_{{2}}\\Sigma\\,c\\text{{ (cumulative)}}',
-        EclogInfo: 'Carries over across publications',
+        EclogInfo: 'Accumulates across publications (max 9232)',
         cLevelCap: 'c\\text{{ level cap}}',
         cooldown: '\\text{{interval}}',
         cooldownInfo: 'Interval',
