@@ -88,8 +88,8 @@ const getq2 = (level) => BigNumber.TWO.pow(level);
 const q3Cost = new ExponentialCost(BigNumber.from('1e274'), Math.log2(1e6));
 const getq3 = (level) => BigNumber.THREE.pow(level) + (marathonBadge ? 1 : 0);
 
-const getr = (level) => Utils.getStepwisePowerSum(level, 2, 4, 0);
-const getrPenalty = (level) => BigNumber.TWO.pow(getr(level));
+const getr = (level) => Utils.getStepwisePowerSum(level, 2, 6, 0);
+const getrPenalty = (level) => BigNumber.FOUR.pow(getr(level));
 
 const permaCosts = bigNumArray(['1e12', '1e22', '1e27', '1e56', '1e140',
 '1e100']);
@@ -1107,7 +1107,7 @@ var getPrimaryEquation = () =>
 var getSecondaryEquation = () =>
 {
     let EcStr = extraIncPerma.level > 0 && nudge.level == nudge.maxLevel ?
-    '\\displaystyle\\frac{\\left|\\Sigma\\,c\\right|}{2^r}' :
+    '\\displaystyle\\frac{\\left|\\Sigma\\,c\\right|}{2^{2r}}' :
     '\\left|\\sum_{0}^{t-1} c\\right|';
     let result = `\\begin{matrix}\\dot{\\rho}=q_1
     ${q1ExpMs.level > 0 ?`^{${getq1Exponent(q1ExpMs.level)}}` : ''}q_2
