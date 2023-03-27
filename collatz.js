@@ -57,14 +57,12 @@ let totalEclog = 0;
 let totalIncLevel = 0;
 let history = {};
 let lastHistory;
-let lastHistoryLength = 0;
 let writeHistory = true;
 let historyNumMode = 0;
 let historyIdxMode = 1;
 let mimickLastHistory = false;
 let nextNudge = 0;
 let preserveLastHistory = false;
-let reachedFirstPub = false;
 let marathonBadge = false;
 
 let bigNumArray = (array) => array.map(x => BigNumber.from(x));
@@ -294,7 +292,8 @@ Note: q1 levels have stopped stacking.`,
         btnSave: 'Save',
         btnIndexingMode: ['Indexing: Turns', 'Indexing: Levels'],
         btnNotationMode: ['Notation: Digits', 'Notation: Scientific'],
-        btnBaseMode: ['Base: 10', 'Base: 2'],
+        btnBaseMode: ['Change base: 10', 'Change base: 2'],
+        permaBaseInfo: 'Changes the display of {0} on the equation',
 
         menuHistory: 'Sequence History',
         labelCurrentRun: 'Current publication:',
@@ -797,6 +796,23 @@ var init = () =>
         extraInc.isAvailable = false;
     }
 
+    /* Toggle base
+    QoL!
+    */
+    {
+        basePerma = theory.createPermanentUpgrade(10, currency, new FreeCost);
+        basePerma.getDescription = () => getLoc('btnBaseMode')[
+        (historyNumMode & 2) >> 1];
+        basePerma.info = Localization.format(getLoc('permaBaseInfo'),
+        Utils.getMath('c'));
+        basePerma.bought = (_) =>
+        {
+            basePerma.level = 0;
+            historyNumMode = historyNumMode ^ 2;
+            theory.invalidatePrimaryEquation();
+            theory.invalidateTertiaryEquation();
+        }
+    }
     theory.createPublicationUpgrade(0, currency, permaCosts[0]);
     theory.createBuyAllUpgrade(1, currency, permaCosts[1]);
     theory.createAutoBuyerUpgrade(2, currency, permaCosts[2]);
@@ -954,7 +970,6 @@ var updateAvailability = () =>
     {
         historyFrame.isVisible = true;
         historyLabel.isVisible = true;
-        reachedFirstPub = true;
     }
 
     freezePerma.isAvailable = theory.autoBuyerUpgrade.level > 0;
@@ -1119,12 +1134,10 @@ var getSecondaryEquation = () =>
 
 var getTertiaryEquation = () =>
 {
-    let mStr = '';
+    let mStr = `t=${turns},&`;
     let cStr = '';
     if(historyNumMode & 2 || c > 1e9 || c < -1e8)
         cStr =  `\\\\(${cBigNum < 0 ? '' : '+\\,'}${cBigNum.toString(0)})`;
-    if(reachedFirstPub)
-        mStr = `t=${turns},&`;
     
     let csStr = `\\Sigma\\,c=${cSum.toString(0)}`;
     let mcStr = `\\begin{matrix}${mStr}${csStr}
@@ -1154,28 +1167,6 @@ let createHistoryMenu = () =>
             toggleIdxMode();
         }
     });
-    let toggleBaseMode = () =>
-    {
-        historyNumMode = historyNumMode ^ 2;
-        currentPubHistory.text = getSequence(history, historyNumMode,
-        historyIdxMode);
-        lastPubHistory.text = getSequence(lastHistory, historyNumMode,
-        historyIdxMode);
-        toggleLvlButton.text = getLoc('btnBaseMode')[(historyNumMode & 2) >>
-        1];
-        theory.invalidatePrimaryEquation();
-        theory.invalidateTertiaryEquation();
-    };
-    let toggleLvlButton = ui.createButton
-    ({
-        column: 1,
-        text: getLoc('btnBaseMode')[(historyNumMode & 2) >> 1],
-        onClicked: () =>
-        {
-            Sound.playClick();
-            toggleBaseMode();
-        }
-    });
     let toggleNotationMode = () =>
     {
         historyNumMode = historyNumMode ^ 1;
@@ -1187,7 +1178,7 @@ let createHistoryMenu = () =>
     };
     let toggleNumButton = ui.createButton
     ({
-        column: 2,
+        column: 1,
         text: getLoc('btnNotationMode')[historyNumMode & 1],
         onClicked: () =>
         {
@@ -1288,14 +1279,13 @@ let createHistoryMenu = () =>
                 ui.createGrid
                 ({
                     rowDefinitions: [getBtnSize(ui.screenWidth)],
-                    columnDefinitions: ['8*', '5*', '9*'],
+                    columnDefinitions: ['1*', '1*'],
                     columnSpacing: 8,
                     margin: new Thickness(0, 6),
                     children:
                     [
                         toggleIdxButton,
-                        toggleNumButton,
-                        toggleLvlButton
+                        toggleNumButton
                     ]
                 }),
                 // ui.createBox
