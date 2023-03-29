@@ -69,15 +69,16 @@ let bigNumArray = (array) => array.map(x => BigNumber.from(x));
 
 // All balance parameters are aggregated for ease of access
 
-const borrowFactor = .1;
+const borrowFactor = .13;
+const borrowCap = 9232;
 const q1Cost = new FirstFreeCost(new ExponentialCost(1, 1.76));
 const getq1BonusLevels = (bl) => bl ? Math.min((totalEclog + cLog) *
-borrowFactor, 9232) : 0;
+borrowFactor, borrowCap) : 0;
 const getq1 = (level) => Utils.getStepwisePowerSum(level + Math.floor(
 getq1BonusLevels(q1BorrowMs.level)), 2, 8, 0);
 
 const q1ExpInc = 0.02;
-const q1ExpMaxLevel = 6;
+const q1ExpMaxLevel = 4;
 const getq1Exponent = (level) => 1 + q1ExpInc * level;
 
 const q2Cost = new ExponentialCost(2.2e7, 6.4);
@@ -86,6 +87,7 @@ const getq2 = (level) => BigNumber.TWO.pow(level);
 const q3Cost = new ExponentialCost(BigNumber.from('1e274'), Math.log2(1e6));
 const getq3 = (level) => BigNumber.THREE.pow(level) + (marathonBadge ? 1 : 0);
 
+const maxExtraInc = 18;
 const getr = (level) => Utils.getStepwisePowerSum(level, 2, 6, 0);
 const getrPenalty = (level) => BigNumber.FOUR.pow(getr(level));
 
@@ -112,6 +114,8 @@ var freezePerma, extraIncPerma, mimickPerma;
 var cooldownMs, q1BorrowMs, q1ExpMs, q3UnlockMs;
 
 var currency;
+
+var finalChapter;
 
 const locStrings =
 {
@@ -143,7 +147,7 @@ const locStrings =
         cLevelth: `1/{{{0}}}^\\text{{{{th}}}}\\text{{{{ of }}}}c
         \\text{{{{ level}}}}`,
         Eclog: '{{{0}}}\\times\\log_{{2}}\\Sigma\\,c\\text{{ (cumulative)}}',
-        EclogInfo: 'Accumulates across publications (max 9232)',
+        EclogInfo: 'Accumulates across publications (max {0})',
         cLevelCap: 'c\\text{{ level cap}}',
         cooldown: '\\text{{interval}}',
         cooldownInfo: 'Interval',
@@ -255,7 +259,7 @@ simple really. Just the best your honesty can do.'
 The deadline is next month. Finish it.`,
 
         ch7Title: 'Fault',
-        ch7Text: `9232 pages of modular arithmetic.
+        ch7Text: `{0} pages of modular arithmetic.
 In your graduation thesis, you have documented
 sequences that seemingly go from 0 to
 breaking the integer limits.
@@ -721,8 +725,13 @@ var init = () =>
     Ratios against q3: 6, 6.67, 7.33, 8, 8.67, 9.33, 10, 10.67
     */
     {
-        let getLevelPrefix = (level) => level ? `_{(+
-        ${getq1BonusLevels(level).toFixed(2)})}\\,` : '';
+        let getLevelPrefix = (level) =>
+        {
+            if(!level)
+                return '';
+            let b = getq1BonusLevels(level);
+            return `_{(+${b >= borrowCap ? b : b.toFixed(2)})}\\,`;
+        };
         let getDesc = (level) => `q_1=${getq1(level).toString(0)}`;
         let getInfo = (level) =>
         {
@@ -791,7 +800,7 @@ var init = () =>
             theory.invalidatePrimaryEquation();
             theory.invalidateTertiaryEquation();
         }
-        extraInc.maxLevel = 18;
+        extraInc.maxLevel = maxExtraInc;
         extraInc.isAutoBuyable = false;
         extraInc.isAvailable = false;
     }
@@ -905,7 +914,7 @@ var init = () =>
         q1BorrowMs = theory.createMilestoneUpgrade(1, 1);
         q1BorrowMs.description = Localization.getUpgradeIncCustomDesc(getLoc(
         'q1Level'), Localization.format(getLoc('Eclog'), borrowFactor));
-        q1BorrowMs.info = getLoc('EclogInfo');
+        q1BorrowMs.info = Localization.format(getLoc('EclogInfo'), borrowCap);
     }
     /* q1 exponent
     Standard exponent upgrade.
@@ -945,8 +954,9 @@ var init = () =>
     () => totalIncLevel >= 4000);
     theory.createStoryChapter(6, getLoc('ch6Title'), getLoc('ch6Text'),
     () => totalIncLevel >= 4400);
-    theory.createStoryChapter(7, getLoc('ch7Title'), getLoc('ch7Text'),
-    () => totalEclog * borrowFactor >= 9232);
+    finalChapter = theory.createStoryChapter(7, getLoc('ch7Title'),
+    Localization.format(getLoc('ch7Text'), borrowCap),
+    () => getq1BonusLevels(q1BorrowMs.level) >= borrowCap);
 
     theory.createAchievement(0, undefined, getLoc('achNegativeTitle'),
     getLoc('achNegativeDesc'), () => cBigNum < 0);
