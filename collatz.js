@@ -103,10 +103,10 @@ const cooldown = [36, 30, 24, 18];
 
 const tauRate = 0.1;
 const pubExp = 3.01;
-const pubMult = 8;
-var getPublicationMultiplier = (tau) => tau.pow(pubExp) * pubMult;
+// const pubMult = 8;
+var getPublicationMultiplier = (tau) => tau.pow(pubExp);
 var getPublicationMultiplierFormula = (symbol) =>
-`${pubMult}\\times{${symbol}}^{${pubExp}}`;
+`{${symbol}}^{${pubExp}}`;
 
 var freeze;
 var nudge, q1, q2, q3, extraInc;
@@ -146,7 +146,7 @@ const locStrings =
         cLevel: '1/{{{0}}}\\text{{{{ of }}}}c\\text{{{{ level}}}}',
         cLevelth: `1/{{{0}}}^\\text{{{{th}}}}\\text{{{{ of }}}}c
         \\text{{{{ level}}}}`,
-        Eclog: '{{{0}}}\\times\\log_{{2}}\\Sigma\\,c\\text{{ (cumulative)}}',
+        Eclog: '{{{0}}}\\times\\log_{{2}}\\Sigma c\\text{{ (cumulative)}}',
         EclogInfo: 'Accumulates across publications (max {0})',
         cLevelCap: 'c\\text{{ level cap}}',
         cooldown: '\\text{{interval}}',
@@ -307,7 +307,8 @@ Note: q1 levels have stopped stacking.`,
         errorInvalidNumMode: 'Invalid number mode',
         errorBinExpLimit: 'Too big',
 
-        reset: `You are about to reset the current publication.`
+        reset: `You are about to reset the current publication.
+Everything except Σc will be reset.`
     }
 };
 
@@ -1132,7 +1133,7 @@ var getPrimaryEquation = () =>
 var getSecondaryEquation = () =>
 {
     let EcStr = extraIncPerma.level > 0 && nudge.level == nudge.maxLevel ?
-    '\\displaystyle\\frac{\\left|\\Sigma\\,c\\right|}{2^{2r}}' :
+    '\\displaystyle\\frac{\\left|\\Sigma c\\right|}{2^{2r}}' :
     '\\left|\\sum_{0}^{t-1} c\\right|';
     let result = `\\begin{matrix}\\dot{\\rho}=q_1
     ${q1ExpMs.level > 0 ?`^{${getq1Exponent(q1ExpMs.level)}}` : ''}q_2
@@ -1149,7 +1150,7 @@ var getTertiaryEquation = () =>
     if(historyNumMode & 2 || c > 1e9 || c < -1e8)
         cStr =  `\\\\(${cBigNum < 0 ? '' : '+\\,'}${cBigNum.toString(0)})`;
     
-    let csStr = `\\Sigma\\,c=${cSum.toString(0)}`;
+    let csStr = `\\Sigma c=${cSum.toString(0)}`;
     let mcStr = `\\begin{matrix}${mStr}${csStr}
     \\end{matrix}`;
 
@@ -1410,8 +1411,30 @@ var resetStage = () =>
         theory.upgrades[i].level = 0;
 
     currency.value = 0;
+
+    turns = 0;
+    time = 0;
+    // Disabling history write circumvents the extra levelling
+    writeHistory = false;
+    nudge.maxLevel = cLevelCap[cooldownMs.level];
+    nudge.level = 0;
+    writeHistory = true;
+    history = {};
+    // c is reset to 0 afterwards
+
+    c = 0n;
+    cBigNum = BigNumber.from(c);
+    cIterProgBar.progressTo(0, 220, Easing.CUBIC_INOUT);
+
+    if(mimickLastHistory)
+        nextNudge = binarySearch(Object.keys(lastHistory), turns);
+
+    theory.invalidatePrimaryEquation();
+    theory.invalidateSecondaryEquation();
+    theory.invalidateTertiaryEquation();
+    updateAvailability();
+
     theory.clearGraph();
-    postPublish();
 }
 
 var getInternalState = () => JSON.stringify
