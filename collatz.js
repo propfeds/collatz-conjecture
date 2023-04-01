@@ -121,7 +121,7 @@ const locStrings =
 {
     en:
     {
-        versionName: 'v0.08 (WIP)',
+        versionName: 'v0.08',
         longTick: 'Tick: {0}s',
 
         history: 'History',
@@ -442,7 +442,7 @@ const historyLabel = ui.createLatexLabel
     column: 2,
     horizontalOptions: LayoutOptions.END,
     verticalTextAlignment: TextAlignment.START,
-    margin: new Thickness(0, 41, 2, 0),
+    margin: new Thickness(0, 40, 2.5, 0),
     text: getLoc('history'),
     fontSize: 9,
     textColor: () => Color.fromHex(cDispColour.get(game.settings.theme))
