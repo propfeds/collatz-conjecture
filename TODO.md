@@ -5,6 +5,9 @@
 - Ask Gilles:
   - [ ] Make a bonus levels function like perma levels from stars
 
+- [ ] Issue: End-game reset grind
+  - Add t term?
+
 - [ ] Issue: extra increments are not interesting currently
   - Because it sets back progress for not much short-term benefit
   - A fun idea to replace it
