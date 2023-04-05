@@ -415,7 +415,7 @@ const historyFrame = ui.createFrame
     margin: new Thickness(9),
     padding: new Thickness(1, 1, 1, 2),
     hasShadow: true,
-    heightRequest: getImageSize(ui.screenWidth),
+    heightRequest: getImageSize(360),
     widthRequest: getImageSize(ui.screenWidth),
     content: ui.createImage
     ({
