@@ -416,7 +416,7 @@ const historyFrame = ui.createFrame
     padding: new Thickness(1, 1, 1, 2),
     hasShadow: true,
     heightRequest: getImageSize(360),
-    widthRequest: getImageSize(ui.screenWidth),
+    widthRequest: getImageSize(360),
     content: ui.createImage
     ({
         // margin: new Thickness(2),
@@ -458,8 +458,8 @@ const mimickFrame = ui.createFrame
     margin: new Thickness(9),
     padding: new Thickness(1, 1, 1, 2),
     hasShadow: true,
-    heightRequest: getImageSize(ui.screenWidth),
-    widthRequest: getImageSize(ui.screenWidth),
+    heightRequest: getImageSize(360),
+    widthRequest: getImageSize(360),
     content: ui.createImage
     ({
         source: () => mimickLastHistory && nudge &&
@@ -1289,7 +1289,7 @@ let createHistoryMenu = () =>
             [
                 ui.createGrid
                 ({
-                    rowDefinitions: [getBtnSize(ui.screenWidth)],
+                    rowDefinitions: [getBtnSize(360)],
                     columnDefinitions: ['1*', '1*'],
                     columnSpacing: 8,
                     margin: new Thickness(0, 6),
@@ -1317,7 +1317,7 @@ let createHistoryMenu = () =>
                 }),
                 ui.createGrid
                 ({
-                    rowDefinitions: [getImageSize(ui.screenWidth)],
+                    rowDefinitions: [getImageSize(360)],
                     columnDefinitions: ['4*', '1*'],
                     margin: new Thickness(0, 0, 0, 6),
                     children:
