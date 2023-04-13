@@ -69,7 +69,7 @@ let bigNumArray = (array) => array.map(x => BigNumber.from(x));
 
 // All balance parameters are aggregated for ease of access
 
-const borrowFactor = .13;
+const borrowFactor = .12;
 const borrowCap = 9232;
 const q1Cost = new FirstFreeCost(new ExponentialCost(1, 1.76));
 const getq1BonusLevels = (bl) => bl ? Math.min((totalEclog + cLog) *
@@ -78,7 +78,7 @@ const getq1 = (level) => Utils.getStepwisePowerSum(level + Math.floor(
 getq1BonusLevels(q1BorrowMs.level)), 2, 8, 0);
 
 const q1ExpInc = 0.02;
-const q1ExpMaxLevel = 4;
+const q1ExpMaxLevel = 6;
 const getq1Exponent = (level) => 1 + q1ExpInc * level;
 
 const q2Cost = new ExponentialCost(2.2e7, 6.4);
@@ -91,12 +91,12 @@ const maxExtraInc = 18;
 const getr = (level) => Utils.getStepwisePowerSum(level, 2, 6, 0);
 const getrPenalty = (level) => BigNumber.FOUR.pow(getr(level));
 
-const permaCosts = bigNumArray(['1e12', '1e22', '1e27', '1e56', '1e140',
+const permaCosts = bigNumArray(['1e12', '1e22', '1e27', '1e56', '1e1000',
 '1e100']);
 // 44, 88, 176, 264, 352, 440, 528, 616, 704
 // cap cap  cap  bor  q3  exp  exp  exp  exp
 const milestoneCost = new CompositeCost(2, new LinearCost(4.4, 4.4),
-new CompositeCost(7, new LinearCost(17.6, 8.8), new LinearCost(110, 13.2)));
+new CompositeCost(9, new LinearCost(17.6, 8.8), new LinearCost(110, 13.2)));
 
 const cLevelCap = [20, 28, 36, 48];
 const cooldown = [36, 30, 24, 18];
@@ -986,14 +986,14 @@ var updateAvailability = () =>
     freezePerma.isAvailable = theory.autoBuyerUpgrade.level > 0;
     freeze.isAvailable = freezePerma.level > 0;
 
-    mimickPerma.isAvailable = freezePerma.level > 0;
+    mimickPerma.isAvailable = theory.autoBuyerUpgrade.level > 0;
     if(mimickPerma.level)
     {
         mimickFrame.isVisible = true;
         mimickLabel.isVisible = true;
     }
 
-    extraIncPerma.isAvailable = freezePerma.level > 0;
+    extraIncPerma.isAvailable = mimickPerma.level > 0;
     extraInc.isAvailable = extraIncPerma.level > 0 &&
     nudge.level == nudge.maxLevel;
 
@@ -1134,7 +1134,7 @@ var getSecondaryEquation = () =>
 {
     let EcStr = extraIncPerma.level > 0 && nudge.level == nudge.maxLevel ?
     '\\displaystyle\\frac{\\left|\\Sigma c\\right|}{2^{2r}}' :
-    '\\left|\\sum_{0}^{t-1} c\\right|';
+    '\\left|\\sum c\\right|';
     let result = `\\begin{matrix}\\dot{\\rho}=q_1
     ${q1ExpMs.level > 0 ?`^{${getq1Exponent(q1ExpMs.level)}}` : ''}q_2
     ${q3UnlockMs.level > 0 ? 'q_3' : ''}${EcStr},&
