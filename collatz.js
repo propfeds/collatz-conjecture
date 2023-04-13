@@ -45,7 +45,7 @@ what would you do?'`,
 var authors = 'propfeds\n\nThanks to:\nCipher#9599, the original suggester\n' +
 'XLII#0042, a computer pretending to be a normal player, acting at the speed ' +
 'of light';
-var version = 0.08;
+var version = 0.09;
 
 let turns = 0;
 let time = 0;
@@ -121,7 +121,7 @@ const locStrings =
 {
     en:
     {
-        versionName: 'v0.08',
+        versionName: 'v0.09, WIP',
         longTick: 'Tick: {0}s',
 
         history: 'History',
