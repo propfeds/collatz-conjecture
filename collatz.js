@@ -71,7 +71,7 @@ let bigNumArray = (array) => array.map(x => BigNumber.from(x));
 
 const borrowFactor = .12;
 const borrowCap = 9232;
-const q1Cost = new FirstFreeCost(new ExponentialCost(1, 1.76));
+const q1Cost = new FirstFreeCost(new ExponentialCost(1, 1.6));
 const getq1BonusLevels = (bl) => bl ? Math.min((totalEclog + cLog) *
 borrowFactor, borrowCap) : 0;
 const getq1 = (level) => Utils.getStepwisePowerSum(level + Math.floor(
