@@ -47,6 +47,7 @@ var authors = 'propfeds\n\nThanks to:\nCipher#9599, the original suggester\n' +
 'of light';
 var version = 0.09;
 
+let haxEnabled = false;
 let turns = 0;
 let time = 0;
 let c = 0n;
@@ -69,7 +70,7 @@ let bigNumArray = (array) => array.map(x => BigNumber.from(x));
 
 // All balance parameters are aggregated for ease of access
 
-const borrowFactor = .12;
+const borrowFactor = .1;
 const borrowCap = 9232;
 const q1Cost = new FirstFreeCost(new ExponentialCost(1, 1.6));
 const getq1BonusLevels = (bl) => bl ? Math.min((totalEclog + cLog) *
@@ -111,6 +112,7 @@ var getPublicationMultiplierFormula = (symbol) =>
 var freeze;
 var nudge, q1, q2, q3, extraInc;
 var freezePerma, extraIncPerma, mimickPerma;
+var freeEclog;
 var cooldownMs, q1BorrowMs, q1ExpMs, q3UnlockMs;
 
 var currency;
@@ -307,8 +309,8 @@ Note: q1 levels have stopped stacking.`,
         errorInvalidNumMode: 'Invalid number mode',
         errorBinExpLimit: 'Too big',
 
-        reset: `You are about to reset the current publication.
-Everything except Σc will be reset.`
+        reset: `You are about to restart the current publication.
+Everything except Σc and nudge polarity will be reset.`
     }
 };
 
@@ -868,6 +870,14 @@ var init = () =>
     We had the chance to test out this one. It breaks progression, and poses a
     threat to the theory's performance.
     */
+    {
+        freeEclog = theory.createPermanentUpgrade(9001, currency,
+        new FreeCost);
+        freeEclog.description = 'Gain ten Eclogs for free';
+        freeEclog.info = 'Yields 10 Eclogs';
+        freeEclog.bought = (_) => totalEclog += 10;
+        freeEclog.isAvailable = haxEnabled;
+    }
 
     theory.setMilestoneCost(milestoneCost);
     /* Interval speed-up
@@ -1407,6 +1417,8 @@ var getResetStageMessage = () => getLoc('reset');
 
 var resetStage = () =>
 {
+    totalIncLevel += nudge.level;
+
     for(let i = 0; i < theory.upgrades.length; ++i)
         theory.upgrades[i].level = 0;
 
@@ -1439,6 +1451,7 @@ var resetStage = () =>
 
 var getInternalState = () => JSON.stringify
 ({
+    haxEnabled: haxEnabled,
     version: version,
     turns: turns,
     time: time,
@@ -1460,6 +1473,13 @@ var setInternalState = (stateStr) =>
         return;
 
     let state = JSON.parse(stateStr);
+
+    if('haxEnabled' in state)
+    {
+        haxEnabled = state.haxEnabled;
+        freeEclog.isAvailable = haxEnabled;
+    }
+
     if('turns' in state)
         turns = state.turns;
     if('time' in state)
