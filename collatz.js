@@ -248,7 +248,7 @@ like taking aim.
 you mumbled, before running out of breath
 and walking away from the lab.`,
 
-        ch6Title: 'You Hear Me?',
+        ch6Title: 'Deadline Approaches',
         ch6Text: `'I did not make you do this.
 When I showed you the conjecture, you were the one
 who went in with eyes determined, sleeves ready
@@ -260,7 +260,7 @@ simple really. Just the best your honesty can do.'
 
 The deadline is next month. Finish it.`,
 
-        ch7Title: 'Fault',
+        ch7Title: 'Plateau',
         ch7Text: `{0} pages of modular arithmetic.
 In your graduation thesis, you have documented
 sequences that seemingly go from 0 to
@@ -1063,6 +1063,7 @@ var tick = (elapsedTime, multiplier) =>
     }
 
     let dt = BigNumber.from(elapsedTime * multiplier);
+    let tTerm = BigNumber.from(turns);
     let q1Term = getq1(q1.level).pow(getq1Exponent(q1ExpMs.level));
     let q2Term = getq2(q2.level);
     let q3Term = q3UnlockMs.level > 0 ? getq3(q3.level) : BigNumber.ONE;
@@ -1070,7 +1071,7 @@ var tick = (elapsedTime, multiplier) =>
     let rTerm = nudge.level == nudge.maxLevel ? getrPenalty(extraInc.level) :
     BigNumber.ONE;
 
-    currency.value += dt * cSum.abs() * q1Term * q2Term * q3Term * bonus
+    currency.value += dt * tTerm * cSum.abs() * q1Term * q2Term * q3Term * bonus
     / rTerm;
 }
 
@@ -1145,7 +1146,7 @@ var getSecondaryEquation = () =>
     let EcStr = extraIncPerma.level > 0 && nudge.level == nudge.maxLevel ?
     '\\displaystyle\\frac{\\left|\\Sigma c\\right|}{2^{2r}}' :
     '\\left|\\sum c\\right|';
-    let result = `\\begin{matrix}\\dot{\\rho}=q_1
+    let result = `\\begin{matrix}\\dot{\\rho}=t\\times q_1
     ${q1ExpMs.level > 0 ?`^{${getq1Exponent(q1ExpMs.level)}}` : ''}q_2
     ${q3UnlockMs.level > 0 ? 'q_3' : ''}${EcStr},&
     ${theory.latexSymbol}=\\max{\\rho}^{0.1}\\end{matrix}`;
