@@ -85,7 +85,7 @@ const getq1Exponent = (level) => 1 + q1ExpInc * level;
 const q2Cost = new ExponentialCost(2.2e7, 6.4);
 const getq2 = (level) => BigNumber.TWO.pow(level);
 
-const q3Cost = new ExponentialCost(BigNumber.from('1e274'), Math.log2(1e3));
+const q3Cost = new ExponentialCost(BigNumber.from('1e301'), Math.log2(1e3));
 const getq3 = (level) => BigNumber.THREE.pow(level) + (marathonBadge ? 1 : 0);
 
 const extraIncCost = new ExponentialCost(BigNumber.from('1e1250'),
@@ -124,7 +124,7 @@ const locStrings =
 {
     en:
     {
-        versionName: 'v0.09, WIP',
+        versionName: 'v0.09',
         longTick: 'Tick: {0}s',
 
         history: 'History',
@@ -210,10 +210,10 @@ A shiver shakes you up, and suddenly, you
 chance upon that colleague in the hallway.
 She is the only one who knows this.`,
 
-        ch4Title: 'Honestly',
-        ch4Text: `'..., what really is this?'
+        ch4Title: 'Auto-Nudge',
+        ch4Text: `'Honestly, what really is this?'
 
-You have been using your Auto-Nudge machine
+You have been using the gifted Auto-Nudge machine
 for a while now. It's fairly reliable.
 It's got a mechanical hand, programmable rhythms,
 a foot-cranked toggle, histograph displays...
@@ -268,7 +268,7 @@ sequences that seemingly go from 0 to
 breaking the integer limits.
 
 You have graduated.
-Although nowhere closer to solving the Collatz
+Although, nowhere closer to solving the Collatz
 conjecture, for both you and your supervisor.
 Can you put blame on yourself, when he
 was the one who tasked a single student
@@ -279,7 +279,7 @@ from the start?
 
 You decide to spend a day out with yourself.
 Lying on a hill, you notice the clouds looking
-as if they're multiplying by three plus one.
+as if they're jumping up by three plus one.
 And then you close your eyes, and envision
 yourself just rolling off gently through
 the grass...
@@ -865,6 +865,7 @@ var init = () =>
         extraIncPerma.info = Localization.format(getLoc('permaIncrementInfo'),
         Utils.getMath('c'));
         extraIncPerma.maxLevel = 1;
+        extraIncPerma.bought = (_) => updateAvailability();
     }
     /* Preserve c
     We had the chance to test out this one. It breaks progression, and poses a
