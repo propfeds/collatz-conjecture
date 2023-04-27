@@ -85,14 +85,15 @@ const getq1Exponent = (level) => 1 + q1ExpInc * level;
 const q2Cost = new ExponentialCost(2.2e7, 6.4);
 const getq2 = (level) => BigNumber.TWO.pow(level);
 
-const q3Cost = new ExponentialCost(BigNumber.from('1e274'), Math.log2(1e6));
+const q3Cost = new ExponentialCost(BigNumber.from('1e274'), Math.log2(1e3));
 const getq3 = (level) => BigNumber.THREE.pow(level) + (marathonBadge ? 1 : 0);
 
-const maxExtraInc = 18;
+const extraIncCost = new ExponentialCost(BigNumber.from('1e1250'),
+Math.log2(1e5));
 const getr = (level) => Utils.getStepwisePowerSum(level, 2, 6, 0);
 const getrPenalty = (level) => BigNumber.FOUR.pow(getr(level));
 
-const permaCosts = bigNumArray(['1e12', '1e22', '1e27', '1e56', '1e1000',
+const permaCosts = bigNumArray(['1e12', '1e22', '1e27', '1e56', '1e1250',
 '1e100']);
 // 44, 88, 176, 264, 352, 440, 528, 616, 704
 // cap cap  cap  bor  q3  exp  exp  exp  exp
@@ -782,7 +783,7 @@ var init = () =>
         let getDesc = (level) => `c\\leftarrow c
         ${c < 0n ? '-' : '+'}1;\\enspace r=${getr(level).toString(0)}`;
         let getInfo = (level) => `r=${getr(level).toString(0)}`;
-        extraInc = theory.createUpgrade(4, currency, new FreeCost);
+        extraInc = theory.createUpgrade(4, currency, extraIncCost);
         extraInc.getDescription = () => Utils.getMath(getDesc(
         extraInc.level));
         extraInc.getInfo = (amount) => Utils.getMathTo(getInfo(extraInc.level),
@@ -803,7 +804,6 @@ var init = () =>
             theory.invalidatePrimaryEquation();
             theory.invalidateTertiaryEquation();
         }
-        extraInc.maxLevel = maxExtraInc;
         extraInc.isAutoBuyable = false;
         extraInc.isAvailable = false;
     }
@@ -982,7 +982,7 @@ var init = () =>
 
     theory.primaryEquationHeight = 66;
     theory.primaryEquationScale = 0.9;
-    theory.secondaryEquationHeight = 32;
+    theory.secondaryEquationHeight = 48;
 }
 
 var updateAvailability = () =>
@@ -1148,7 +1148,7 @@ var getSecondaryEquation = () =>
     '\\left|\\sum c\\right|';
     let result = `\\begin{matrix}\\dot{\\rho}=t\\times q_1
     ${q1ExpMs.level > 0 ?`^{${getq1Exponent(q1ExpMs.level)}}` : ''}q_2
-    ${q3UnlockMs.level > 0 ? 'q_3' : ''}${EcStr},&
+    ${q3UnlockMs.level > 0 ? 'q_3' : ''}\\times${EcStr}\\\\\\\\
     ${theory.latexSymbol}=\\max{\\rho}^{0.1}\\end{matrix}`;
 
     return result;
