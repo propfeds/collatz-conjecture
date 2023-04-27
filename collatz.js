@@ -45,8 +45,9 @@ what would you do?'`,
 var authors = 'propfeds\n\nThanks to:\nCipher#9599, the original suggester\n' +
 'XLII#0042, a computer pretending to be a normal player, acting at the speed ' +
 'of light';
-var version = 0.08;
+var version = 0.09;
 
+let haxEnabled = false;
 let turns = 0;
 let time = 0;
 let c = 0n;
@@ -69,34 +70,35 @@ let bigNumArray = (array) => array.map(x => BigNumber.from(x));
 
 // All balance parameters are aggregated for ease of access
 
-const borrowFactor = .13;
+const borrowFactor = .12;
 const borrowCap = 9232;
-const q1Cost = new FirstFreeCost(new ExponentialCost(1, 1.76));
+const q1Cost = new FirstFreeCost(new ExponentialCost(1, 1.6));
 const getq1BonusLevels = (bl) => bl ? Math.min((totalEclog + cLog) *
 borrowFactor, borrowCap) : 0;
 const getq1 = (level) => Utils.getStepwisePowerSum(level + Math.floor(
 getq1BonusLevels(q1BorrowMs.level)), 2, 8, 0);
 
 const q1ExpInc = 0.02;
-const q1ExpMaxLevel = 4;
+const q1ExpMaxLevel = 6;
 const getq1Exponent = (level) => 1 + q1ExpInc * level;
 
 const q2Cost = new ExponentialCost(2.2e7, 6.4);
 const getq2 = (level) => BigNumber.TWO.pow(level);
 
-const q3Cost = new ExponentialCost(BigNumber.from('1e274'), Math.log2(1e6));
+const q3Cost = new ExponentialCost(BigNumber.from('1e301'), Math.log2(1e3));
 const getq3 = (level) => BigNumber.THREE.pow(level) + (marathonBadge ? 1 : 0);
 
-const maxExtraInc = 18;
+const extraIncCost = new ExponentialCost(BigNumber.from('1e1250'),
+Math.log2(1e5));
 const getr = (level) => Utils.getStepwisePowerSum(level, 2, 6, 0);
 const getrPenalty = (level) => BigNumber.FOUR.pow(getr(level));
 
-const permaCosts = bigNumArray(['1e12', '1e22', '1e27', '1e56', '1e140',
+const permaCosts = bigNumArray(['1e12', '1e22', '1e27', '1e56', '1e1250',
 '1e100']);
 // 44, 88, 176, 264, 352, 440, 528, 616, 704
 // cap cap  cap  bor  q3  exp  exp  exp  exp
 const milestoneCost = new CompositeCost(2, new LinearCost(4.4, 4.4),
-new CompositeCost(7, new LinearCost(17.6, 8.8), new LinearCost(110, 13.2)));
+new CompositeCost(9, new LinearCost(17.6, 8.8), new LinearCost(110, 13.2)));
 
 const cLevelCap = [20, 28, 36, 48];
 const cooldown = [36, 30, 24, 18];
@@ -111,6 +113,7 @@ var getPublicationMultiplierFormula = (symbol) =>
 var freeze;
 var nudge, q1, q2, q3, extraInc;
 var freezePerma, extraIncPerma, mimickPerma;
+var freeEclog;
 var cooldownMs, q1BorrowMs, q1ExpMs, q3UnlockMs;
 
 var currency;
@@ -121,7 +124,7 @@ const locStrings =
 {
     en:
     {
-        versionName: 'v0.08',
+        versionName: 'v0.09',
         longTick: 'Tick: {0}s',
 
         history: 'History',
@@ -207,10 +210,10 @@ A shiver shakes you up, and suddenly, you
 chance upon that colleague in the hallway.
 She is the only one who knows this.`,
 
-        ch4Title: 'Honestly',
-        ch4Text: `'..., what really is this?'
+        ch4Title: 'Auto-Nudge',
+        ch4Text: `'Honestly, what really is this?'
 
-You have been using your Auto-Nudge machine
+You have been using the gifted Auto-Nudge machine
 for a while now. It's fairly reliable.
 It's got a mechanical hand, programmable rhythms,
 a foot-cranked toggle, histograph displays...
@@ -246,7 +249,7 @@ like taking aim.
 you mumbled, before running out of breath
 and walking away from the lab.`,
 
-        ch6Title: 'You Hear Me?',
+        ch6Title: 'Deadline Approaches',
         ch6Text: `'I did not make you do this.
 When I showed you the conjecture, you were the one
 who went in with eyes determined, sleeves ready
@@ -258,14 +261,14 @@ simple really. Just the best your honesty can do.'
 
 The deadline is next month. Finish it.`,
 
-        ch7Title: 'Fault',
+        ch7Title: 'Plateau',
         ch7Text: `{0} pages of modular arithmetic.
 In your graduation thesis, you have documented
 sequences that seemingly go from 0 to
 breaking the integer limits.
 
 You have graduated.
-Although nowhere closer to solving the Collatz
+Although, nowhere closer to solving the Collatz
 conjecture, for both you and your supervisor.
 Can you put blame on yourself, when he
 was the one who tasked a single student
@@ -276,7 +279,7 @@ from the start?
 
 You decide to spend a day out with yourself.
 Lying on a hill, you notice the clouds looking
-as if they're multiplying by three plus one.
+as if they're jumping up by three plus one.
 And then you close your eyes, and envision
 yourself just rolling off gently through
 the grass...
@@ -307,8 +310,8 @@ Note: q1 levels have stopped stacking.`,
         errorInvalidNumMode: 'Invalid number mode',
         errorBinExpLimit: 'Too big',
 
-        reset: `You are about to reset the current publication.
-Everything except Σc will be reset.`
+        reset: `You are about to restart the current publication.
+Everything except Σc and nudge polarity will be reset.`
     }
 };
 
@@ -780,7 +783,7 @@ var init = () =>
         let getDesc = (level) => `c\\leftarrow c
         ${c < 0n ? '-' : '+'}1;\\enspace r=${getr(level).toString(0)}`;
         let getInfo = (level) => `r=${getr(level).toString(0)}`;
-        extraInc = theory.createUpgrade(4, currency, new FreeCost);
+        extraInc = theory.createUpgrade(4, currency, extraIncCost);
         extraInc.getDescription = () => Utils.getMath(getDesc(
         extraInc.level));
         extraInc.getInfo = (amount) => Utils.getMathTo(getInfo(extraInc.level),
@@ -801,7 +804,6 @@ var init = () =>
             theory.invalidatePrimaryEquation();
             theory.invalidateTertiaryEquation();
         }
-        extraInc.maxLevel = maxExtraInc;
         extraInc.isAutoBuyable = false;
         extraInc.isAvailable = false;
     }
@@ -863,11 +865,20 @@ var init = () =>
         extraIncPerma.info = Localization.format(getLoc('permaIncrementInfo'),
         Utils.getMath('c'));
         extraIncPerma.maxLevel = 1;
+        extraIncPerma.bought = (_) => updateAvailability();
     }
     /* Preserve c
     We had the chance to test out this one. It breaks progression, and poses a
     threat to the theory's performance.
     */
+    {
+        freeEclog = theory.createPermanentUpgrade(9001, currency,
+        new FreeCost);
+        freeEclog.description = 'Gain ten Eclogs for free';
+        freeEclog.info = 'Yields 10 Eclogs';
+        freeEclog.bought = (_) => totalEclog += 10;
+        freeEclog.isAvailable = haxEnabled;
+    }
 
     theory.setMilestoneCost(milestoneCost);
     /* Interval speed-up
@@ -972,7 +983,7 @@ var init = () =>
 
     theory.primaryEquationHeight = 66;
     theory.primaryEquationScale = 0.9;
-    theory.secondaryEquationHeight = 32;
+    theory.secondaryEquationHeight = 48;
 }
 
 var updateAvailability = () =>
@@ -986,14 +997,14 @@ var updateAvailability = () =>
     freezePerma.isAvailable = theory.autoBuyerUpgrade.level > 0;
     freeze.isAvailable = freezePerma.level > 0;
 
-    mimickPerma.isAvailable = freezePerma.level > 0;
+    mimickPerma.isAvailable = theory.autoBuyerUpgrade.level > 0;
     if(mimickPerma.level)
     {
         mimickFrame.isVisible = true;
         mimickLabel.isVisible = true;
     }
 
-    extraIncPerma.isAvailable = freezePerma.level > 0;
+    extraIncPerma.isAvailable = mimickPerma.level > 0;
     extraInc.isAvailable = extraIncPerma.level > 0 &&
     nudge.level == nudge.maxLevel;
 
@@ -1053,6 +1064,7 @@ var tick = (elapsedTime, multiplier) =>
     }
 
     let dt = BigNumber.from(elapsedTime * multiplier);
+    let tTerm = BigNumber.from(turns);
     let q1Term = getq1(q1.level).pow(getq1Exponent(q1ExpMs.level));
     let q2Term = getq2(q2.level);
     let q3Term = q3UnlockMs.level > 0 ? getq3(q3.level) : BigNumber.ONE;
@@ -1060,7 +1072,7 @@ var tick = (elapsedTime, multiplier) =>
     let rTerm = nudge.level == nudge.maxLevel ? getrPenalty(extraInc.level) :
     BigNumber.ONE;
 
-    currency.value += dt * cSum.abs() * q1Term * q2Term * q3Term * bonus
+    currency.value += dt * tTerm * cSum.abs() * q1Term * q2Term * q3Term * bonus
     / rTerm;
 }
 
@@ -1134,10 +1146,10 @@ var getSecondaryEquation = () =>
 {
     let EcStr = extraIncPerma.level > 0 && nudge.level == nudge.maxLevel ?
     '\\displaystyle\\frac{\\left|\\Sigma c\\right|}{2^{2r}}' :
-    '\\left|\\sum_{0}^{t-1} c\\right|';
-    let result = `\\begin{matrix}\\dot{\\rho}=q_1
+    '\\left|\\sum c\\right|';
+    let result = `\\begin{matrix}\\dot{\\rho}=t\\times q_1
     ${q1ExpMs.level > 0 ?`^{${getq1Exponent(q1ExpMs.level)}}` : ''}q_2
-    ${q3UnlockMs.level > 0 ? 'q_3' : ''}${EcStr},&
+    ${q3UnlockMs.level > 0 ? 'q_3' : ''}\\times${EcStr}\\\\\\\\
     ${theory.latexSymbol}=\\max{\\rho}^{0.1}\\end{matrix}`;
 
     return result;
@@ -1407,6 +1419,8 @@ var getResetStageMessage = () => getLoc('reset');
 
 var resetStage = () =>
 {
+    totalIncLevel += nudge.level;
+
     for(let i = 0; i < theory.upgrades.length; ++i)
         theory.upgrades[i].level = 0;
 
@@ -1439,6 +1453,7 @@ var resetStage = () =>
 
 var getInternalState = () => JSON.stringify
 ({
+    haxEnabled: haxEnabled,
     version: version,
     turns: turns,
     time: time,
@@ -1460,6 +1475,13 @@ var setInternalState = (stateStr) =>
         return;
 
     let state = JSON.parse(stateStr);
+
+    if('haxEnabled' in state)
+    {
+        haxEnabled = state.haxEnabled;
+        freeEclog.isAvailable = haxEnabled;
+    }
+
     if('turns' in state)
         turns = state.turns;
     if('time' in state)
