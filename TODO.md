@@ -5,8 +5,10 @@
 - Ask Gilles:
   - [ ] Make a bonus levels function like perma levels from stars
 
-- [ ] Issue: End-game reset grind
-  - Add t term?
+- [ ] Add a pub div to dampen first pub?
+
+- Issue: End-game reset grind
+  - [x] Add t term?
 
 - [ ] Issue: extra increments are not interesting currently
   - Because it sets back progress for not much short-term benefit
