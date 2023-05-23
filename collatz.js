@@ -671,7 +671,7 @@ let binarySearch = (arr, target) =>
 var init = () =>
 {
     currency = theory.createCurrency();
-    EcCurrency = theory.createCurrency(' Σc', '\\Sigma c');
+    EcCurrency = theory.createCurrency(' Σc', ' \\Sigma c');
     /* Freeze
     Freeze c's value and the timer in place, which allows for idling. This will
     become more important later on, and also helps with farming c levels.
