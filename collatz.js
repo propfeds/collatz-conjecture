@@ -116,7 +116,7 @@ var freezePerma, extraIncPerma, mimickPerma;
 var freeEclog;
 var cooldownMs, q1BorrowMs, q1ExpMs, q3UnlockMs;
 
-var currency;
+var currency, EcCurrency;
 
 var finalChapter;
 
@@ -671,6 +671,7 @@ let binarySearch = (arr, target) =>
 var init = () =>
 {
     currency = theory.createCurrency();
+    EcCurrency = theory.createCurrency('Σc', '\\Sigma c');
     /* Freeze
     Freeze c's value and the timer in place, which allows for idling. This will
     become more important later on, and also helps with farming c levels.
@@ -1074,6 +1075,7 @@ var tick = (elapsedTime, multiplier) =>
 
     currency.value += dt * tTerm * cSum.abs() * q1Term * q2Term * q3Term * bonus
     / rTerm;
+    EcCurrency.value = cSum;
 }
 
 var getEquationOverlay = () =>
@@ -1157,16 +1159,19 @@ var getSecondaryEquation = () =>
 
 var getTertiaryEquation = () =>
 {
-    let mStr = `t=${turns},&`;
     let cStr = '';
     if(historyNumMode & 2 || c > 1e9 || c < -1e8)
-        cStr =  `\\\\(${cBigNum < 0 ? '' : '+\\,'}${cBigNum.toString(0)})`;
-    
-    let csStr = `\\Sigma c=${cSum.toString(0)}`;
-    let mcStr = `\\begin{matrix}${mStr}${csStr}
-    \\end{matrix}`;
+        cStr = `,&${cBigNum < 0 ? '' : '+\\,'}${cBigNum.toString(0)}`;
+    return `begin{matrix}t=${turns}${cStr}`;
 
-    return `\\begin{array}{c}${mcStr}${cStr}\\end{array}`;
+    let tStr = `t=${turns},&`;
+    if(historyNumMode & 2 || c > 1e9 || c < -1e8)
+        cStr =  `\\\\(${cBigNum < 0 ? '' : '+\\,'}${cBigNum.toString(0)})`;
+
+    let csStr = `\\Sigma c=${cSum.toString(0)}`;
+
+    return `\\begin{array}{c}\\begin{matrix}${tStr}${csStr}\\end{matrix}
+    ${cStr}\\end{array}`;
 }
 
 let createHistoryMenu = () =>
