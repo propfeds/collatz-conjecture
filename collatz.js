@@ -1162,7 +1162,7 @@ var getTertiaryEquation = () =>
     let cStr = '';
     if(historyNumMode & 2 || c > 1e9 || c < -1e8)
         cStr = `,&${cBigNum < 0 ? '' : '+\\,'}${cBigNum.toString(0)}`;
-    return `begin{matrix}t=${turns}${cStr}`;
+    return `\\begin{matrix}t=${turns}${cStr}\\end{matrix}`;
 
     let tStr = `t=${turns},&`;
     if(historyNumMode & 2 || c > 1e9 || c < -1e8)
