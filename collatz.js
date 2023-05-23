@@ -671,7 +671,7 @@ let binarySearch = (arr, target) =>
 var init = () =>
 {
     currency = theory.createCurrency();
-    EcCurrency = theory.createCurrency('Σc', '\\Sigma c');
+    EcCurrency = theory.createCurrency(' Σc', '\\Sigma c');
     /* Freeze
     Freeze c's value and the timer in place, which allows for idling. This will
     become more important later on, and also helps with farming c levels.
@@ -1161,7 +1161,7 @@ var getTertiaryEquation = () =>
 {
     let cStr = '';
     if(historyNumMode & 2 || c > 1e9 || c < -1e8)
-        cStr = `,&${cBigNum < 0 ? '' : '+\\,'}${cBigNum.toString(0)}`;
+        cStr = `,&c=${cBigNum < 0 ? '' : '+\\,'}${cBigNum.toString(0)}`;
     return `\\begin{matrix}t=${turns}${cStr}\\end{matrix}`;
 
     let tStr = `t=${turns},&`;
