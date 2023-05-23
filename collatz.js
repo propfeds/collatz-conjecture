@@ -88,12 +88,11 @@ const getq2 = (level) => BigNumber.TWO.pow(level);
 const q3Cost = new ExponentialCost(BigNumber.from('1e301'), Math.log2(1e3));
 const getq3 = (level) => BigNumber.THREE.pow(level) + (marathonBadge ? 1 : 0);
 
-const extraIncCost = new ExponentialCost(BigNumber.from('1e1250'),
-Math.log2(1e5));
+const extraIncCost = new ExponentialCost(1e40, Math.log2(5));
 const getr = (level) => Utils.getStepwisePowerSum(level, 2, 6, 0);
 const getrPenalty = (level) => BigNumber.FOUR.pow(getr(level));
 
-const permaCosts = bigNumArray(['1e12', '1e22', '1e27', '1e56', '1e1250',
+const permaCosts = bigNumArray(['1e12', '1e22', '1e27', '1e56', '1e1200',
 '1e100']);
 // 44, 88, 176, 264, 352, 440, 528, 616, 704
 // cap cap  cap  bor  q3  exp  exp  exp  exp
@@ -671,7 +670,7 @@ let binarySearch = (arr, target) =>
 var init = () =>
 {
     currency = theory.createCurrency();
-    EcCurrency = theory.createCurrency(' Σc', ' \\Sigma c');
+    EcCurrency = theory.createCurrency('Σc', '\\Sigma c');
     /* Freeze
     Freeze c's value and the timer in place, which allows for idling. This will
     become more important later on, and also helps with farming c levels.
@@ -784,7 +783,7 @@ var init = () =>
         let getDesc = (level) => `c\\leftarrow c
         ${c < 0n ? '-' : '+'}1;\\enspace r=${getr(level).toString(0)}`;
         let getInfo = (level) => `r=${getr(level).toString(0)}`;
-        extraInc = theory.createUpgrade(4, currency, extraIncCost);
+        extraInc = theory.createUpgrade(4, EcCurrency, extraIncCost);
         extraInc.getDescription = () => Utils.getMath(getDesc(
         extraInc.level));
         extraInc.getInfo = (amount) => Utils.getMathTo(getInfo(extraInc.level),

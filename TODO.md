@@ -2,6 +2,8 @@
 
 ## In consideration
 
+- [ ] Extra increments are bought with Ec
+
 - Ask Gilles:
   - [ ] Make a bonus levels function like perma levels from stars
 
