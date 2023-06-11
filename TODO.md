@@ -2,7 +2,8 @@
 
 ## In consideration
 
-- [ ] Extra increments are bought with Ec
+- [x] Extra increments are bought with Ec
+  - [ ] Late game Ec no longer resets on publish
 
 - Ask Gilles:
   - [ ] Make a bonus levels function like perma levels from stars
