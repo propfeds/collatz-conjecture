@@ -45,7 +45,7 @@ what would you do?'`,
 var authors = 'propfeds\n\nThanks to:\nCipher#9599, the original suggester\n' +
 'XLII#0042, a computer pretending to be a normal player, acting at the speed ' +
 'of light';
-var version = 0.09;
+var version = 0.10;
 
 let haxEnabled = false;
 let turns = 0;
@@ -72,43 +72,44 @@ let bigNumArray = (array) => array.map(x => BigNumber.from(x));
 
 const borrowFactor = .15;
 const borrowCap = 9232;
-const q1Cost = new FirstFreeCost(new ExponentialCost(1, 1.6));
+const q1Cost = new FirstFreeCost(new ExponentialCost(1, 1.5));
 const getq1BonusLevels = (bl) => bl ? Math.min((totalEclog + cLog) *
 borrowFactor, borrowCap) : 0;
 const getq1 = (level) => Utils.getStepwisePowerSum(level + Math.floor(
-getq1BonusLevels(q1BorrowMs.level)), 2, 8, 0);
+getq1BonusLevels(q1BorrowMs.level)), 2, 10, 0);
 
 const q1ExpInc = 0.02;
 const q1ExpMaxLevel = 6;
 const getq1Exponent = (level) => 1 + q1ExpInc * level;
 
-const q2Cost = new ExponentialCost(2.2e7, 6.4);
+const q2Cost = new ExponentialCost(2.2e7, 6);
 const getq2 = (level) => BigNumber.TWO.pow(level);
 
 const q3Cost = new ExponentialCost(BigNumber.from('1e301'), Math.log2(1e3));
 const getq3 = (level) => BigNumber.THREE.pow(level) + (marathonBadge ? 1 : 0);
 
-const extraIncCost = new ExponentialCost(BigNumber.from('1e1250'),
-Math.log2(1e5));
+const extraIncCost = new ExponentialCost(1e40, Math.log2(5));
 const getr = (level) => Utils.getStepwisePowerSum(level, 2, 6, 0);
 const getrPenalty = (level) => BigNumber.FOUR.pow(getr(level));
 
-const permaCosts = bigNumArray(['1e12', '1e22', '1e27', '1e56', '1e1250',
-'1e100']);
-// 44, 88, 176, 264, 352, 440, 528, 616, 704
+const permaCosts = bigNumArray(['1e12', '1e20', '1e24', '1e44', '1e1200',
+'1e80']);
+// 30, 60, 120, 180, 240, 300, 360, 420, 480
 // cap cap  cap  bor  q3  exp  exp  exp  exp
-const milestoneCost = new CompositeCost(2, new LinearCost(4.4, 4.4),
-new CompositeCost(9, new LinearCost(17.6, 8.8), new LinearCost(110, 13.2)));
+const milestoneCost = new CompositeCost(2, new LinearCost(6, 6),
+new CompositeCost(9, new LinearCost(24, 12), new LinearCost(120, 12)));
 
-const cLevelCap = [20, 28, 36, 48];
-const cooldown = [36, 30, 24, 18];
+const cLevelCap = [12, 20, 28, 36, 48];
+const cooldown = [36, 32, 28, 24, 18];
 
-const tauRate = 0.1;
+const tauRate = 0.2;
 const pubExp = 3.01;
+const CtRate = 2;
+const pubExpAfterRate = pubExp / CtRate;
 // const pubMult = 8;
-var getPublicationMultiplier = (tau) => tau.pow(pubExp);
+var getPublicationMultiplier = (tau) => tau.pow(pubExpAfterRate);
 var getPublicationMultiplierFormula = (symbol) =>
-`{${symbol}}^{${pubExp}}`;
+`{${symbol}}^{${pubExp}/${CtRate}}`;
 
 var freeze;
 var nudge, q1, q2, q3, extraInc;
@@ -116,7 +117,7 @@ var freezePerma, extraIncPerma, mimickPerma;
 var freeEclog;
 var cooldownMs, q1BorrowMs, q1ExpMs, q3UnlockMs;
 
-var currency;
+var currency, EcCurrency;
 
 var finalChapter;
 
@@ -124,7 +125,7 @@ const locStrings =
 {
     en:
     {
-        versionName: 'v0.09',
+        versionName: 'v0.10, WIP',
         longTick: 'Tick: {0}s',
 
         history: 'History',
@@ -671,6 +672,7 @@ let binarySearch = (arr, target) =>
 var init = () =>
 {
     currency = theory.createCurrency();
+    // EcCurrency = theory.createCurrency('Σc', '\\Sigma c');
     /* Freeze
     Freeze c's value and the timer in place, which allows for idling. This will
     become more important later on, and also helps with farming c levels.
@@ -808,6 +810,10 @@ var init = () =>
         extraInc.isAvailable = false;
     }
 
+    theory.createPublicationUpgrade(0, currency, permaCosts[0]);
+    theory.createBuyAllUpgrade(1, currency, permaCosts[1]);
+    theory.createAutoBuyerUpgrade(2, currency, permaCosts[2]);
+    theory.autoBuyerUpgrade.bought = (_) => updateAvailability();
     /* Toggle base
     QoL!
     */
@@ -825,10 +831,6 @@ var init = () =>
             theory.invalidateTertiaryEquation();
         }
     }
-    theory.createPublicationUpgrade(0, currency, permaCosts[0]);
-    theory.createBuyAllUpgrade(1, currency, permaCosts[1]);
-    theory.createAutoBuyerUpgrade(2, currency, permaCosts[2]);
-    theory.autoBuyerUpgrade.bought = (_) => updateAvailability();
     /* Unlocks freeze
     Shame that you unlock such a useful tool really late.
     */
@@ -1008,8 +1010,9 @@ var updateAvailability = () =>
     extraInc.isAvailable = extraIncPerma.level > 0 &&
     nudge.level == nudge.maxLevel;
 
-    q1ExpMs.isAvailable = theory.milestonesTotal > 3;
-    q3UnlockMs.isAvailable = theory.milestonesTotal > 3;
+    q1ExpMs.isAvailable = cooldownMs.level == cooldownMs.maxLevel &&
+    q1BorrowMs.level == q1BorrowMs.maxLevel;
+    q3UnlockMs.isAvailable = q1ExpMs.isAvailable;
     q3.isAvailable = q3UnlockMs.level > 0;
     marathonBadge = theory.achievements[1].isUnlocked;
 }
@@ -1019,7 +1022,7 @@ var tick = (elapsedTime, multiplier) =>
     nudge.isAutoBuyable = false;
     extraInc.isAutoBuyable = false;
 
-    if(freeze.level % 2 == 0)
+    if(nudge.level && freeze.level % 2 == 0)
     {
         time += elapsedTime * 10;
         let turned = false;
@@ -1074,6 +1077,7 @@ var tick = (elapsedTime, multiplier) =>
 
     currency.value += dt * tTerm * cSum.abs() * q1Term * q2Term * q3Term * bonus
     / rTerm;
+    // EcCurrency.value = cSum;
 }
 
 var getEquationOverlay = () =>
@@ -1147,7 +1151,7 @@ var getSecondaryEquation = () =>
     let EcStr = extraIncPerma.level > 0 && nudge.level == nudge.maxLevel ?
     '\\displaystyle\\frac{\\left|\\Sigma c\\right|}{2^{2r}}' :
     '\\left|\\sum c\\right|';
-    let result = `\\begin{matrix}\\dot{\\rho}=t\\times q_1
+    let result = `\\begin{matrix}\\dot{\\rho}=t{\\mkern 1mu}q_1
     ${q1ExpMs.level > 0 ?`^{${getq1Exponent(q1ExpMs.level)}}` : ''}q_2
     ${q3UnlockMs.level > 0 ? 'q_3' : ''}\\times${EcStr}\\\\\\\\
     ${theory.latexSymbol}=\\max{\\rho}^{0.1}\\end{matrix}`;
@@ -1157,16 +1161,14 @@ var getSecondaryEquation = () =>
 
 var getTertiaryEquation = () =>
 {
-    let mStr = `t=${turns},&`;
+    let tStr = `t=${turns}`;
     let cStr = '';
     if(historyNumMode & 2 || c > 1e9 || c < -1e8)
-        cStr =  `\\\\(${cBigNum < 0 ? '' : '+\\,'}${cBigNum.toString(0)})`;
-    
+        cStr = `,&c=${cBigNum.toString(0)}`;
     let csStr = `\\Sigma c=${cSum.toString(0)}`;
-    let mcStr = `\\begin{matrix}${mStr}${csStr}
-    \\end{matrix}`;
 
-    return `\\begin{array}{c}${mcStr}${cStr}\\end{array}`;
+    return `\\begin{array}{c}\\begin{matrix}${tStr}${cStr}\\end{matrix}\\\\
+    ${csStr}\\end{array}`;
 }
 
 let createHistoryMenu = () =>
