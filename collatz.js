@@ -1320,7 +1320,7 @@ let createHistoryMenu = () =>
                 // }),
                 ui.createScrollView
                 ({
-                    // heightRequest: ui.screenHeight * 0.32,
+                    heightRequest: ui.screenHeight * 0.32,
                     content: historyGrid,
                     orientation: ScrollOrientation.BOTH
                 }),
