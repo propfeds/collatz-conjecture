@@ -53,7 +53,7 @@ let time = 0;
 let c = 0n;
 let cBigNum = BigNumber.from(c);
 let cSum = cBigNum;
-let cLog = cSum.max(BigNumber.ONE).log2().toNumber();
+let cLog = cSum.max(BigNumber.ONE).log10().toNumber();
 let totalEclog = 0;
 let totalIncLevel = 0;
 let history = {};
@@ -70,16 +70,16 @@ let bigNumArray = (array) => array.map(x => BigNumber.from(x));
 
 // All balance parameters are aggregated for ease of access
 
-const borrowFactor = .15;
+const borrowFactor = 1;
 const borrowCap = 9232;
-const q1Cost = new FirstFreeCost(new ExponentialCost(1, 1.5));
+const q1Cost = new FirstFreeCost(new ExponentialCost(1000, 1.5));
 const getq1BonusLevels = (bl) => bl ? Math.min((totalEclog + cLog) *
 borrowFactor, borrowCap) : 0;
 const getq1 = (level) => Utils.getStepwisePowerSum(level + Math.floor(
 getq1BonusLevels(q1BorrowMs.level)), 2, 10, 0);
 
-const q1ExpInc = 0.02;
-const q1ExpMaxLevel = 6;
+const q1ExpInc = 0.03;
+const q1ExpMaxLevel = 4;
 const getq1Exponent = (level) => 1 + q1ExpInc * level;
 
 const q2Cost = new ExponentialCost(2.2e7, 6);
@@ -92,11 +92,24 @@ const extraIncCost = new ExponentialCost(1e40, Math.log2(5));
 const getr = (level) => Utils.getStepwisePowerSum(level, 2, 6, 0);
 const getrPenalty = (level) => BigNumber.FOUR.pow(getr(level));
 
-const permaCosts = bigNumArray(['1e12', '1e20', '1e24', '1e44', '1e1200',
-'1e80']);
-// 30, 60, 120, 180, 240, 300, 360, 420, 480
-// cap cap  cap  bor  q3  exp  exp  exp  exp
-const milestoneCost = new CompositeCost(2, new LinearCost(6, 6),
+const permaCosts = bigNumArray(['1e12', '1e20', '1e24', '1e36', '1e1200',
+'1e60']);
+
+const milestoneCost = new CustomCost((level) =>
+{
+    if(level == 0) return BigNumber.from(30 * tauRate);
+    if(level == 1) return BigNumber.from(45 * tauRate);
+    if(level == 2) return BigNumber.from(75 * tauRate);
+    if(level == 3) return BigNumber.from(105 * tauRate);
+    if(level == 4) return BigNumber.from(150 * tauRate);
+    if(level == 5) return BigNumber.from(210 * tauRate);
+    if(level == 6) return BigNumber.from(270 * tauRate);
+    if(level == 7) return BigNumber.from(330 * tauRate);
+    if(level == 8) return BigNumber.from(390 * tauRate);
+    if(level == 9) return BigNumber.from(450 * tauRate);
+    return BigNumber.from(-1);
+});
+const oldMilestoneCost = new CompositeCost(2, new LinearCost(6, 6),
 new CompositeCost(9, new LinearCost(24, 12), new LinearCost(120, 12)));
 
 const cLevelCap = [12, 20, 28, 36, 48];
@@ -150,7 +163,7 @@ const locStrings =
         cLevel: '1/{{{0}}}\\text{{{{ of }}}}c\\text{{{{ level}}}}',
         cLevelth: `1/{{{0}}}^\\text{{{{th}}}}\\text{{{{ of }}}}c
         \\text{{{{ level}}}}`,
-        Eclog: '{{{0}}}\\times\\log_{{2}}\\Sigma c\\text{{ (cumulative)}}',
+        Eclog: `\\log_{{2}}\\Pi(\\Sigma c)\\text{{ (across pubs)}}`,
         EclogInfo: 'Accumulates across publications (max {0})',
         cLevelCap: 'c\\text{{ level cap}}',
         cooldown: '\\text{{interval}}',
@@ -311,8 +324,8 @@ Note: q1 levels have stopped stacking.`,
         errorInvalidNumMode: 'Invalid number mode',
         errorBinExpLimit: 'Too big',
 
-        reset: `You are about to restart the current publication.
-Everything except Σc and nudge polarity will be reset.`
+        reset: `You are about to submit the current sequence.
+Everything except nudge polarity will be reset.`
     }
 };
 
@@ -918,7 +931,8 @@ var init = () =>
             nudge.maxLevel = cLevelCap[cooldownMs.level];
         };
         cooldownMs.canBeRefunded = (amount) => nudge.level <=
-        cLevelCap[cooldownMs.level - amount];
+        cLevelCap[cooldownMs.level - amount] && !q1ExpMs.level &&
+        !q3UnlockMs.level;
     }
     /* Level borrowing
     It'll be useless for a while at first when you unlock it at e44. But, it can
@@ -929,6 +943,7 @@ var init = () =>
         q1BorrowMs.description = Localization.getUpgradeIncCustomDesc(getLoc(
         'q1Level'), Localization.format(getLoc('Eclog'), borrowFactor));
         q1BorrowMs.info = Localization.format(getLoc('EclogInfo'), borrowCap);
+        q1BorrowMs.canBeRefunded = (_) => !q1ExpMs.level && !q3UnlockMs.level;
     }
     /* q1 exponent
     Standard exponent upgrade.
@@ -1035,7 +1050,7 @@ var tick = (elapsedTime, multiplier) =>
             0 : 33, Easing.LINEAR);
 
             cSum += cBigNum;
-            cLog = cSum.max(BigNumber.ONE).log2().toNumber();
+            cLog = cSum.max(BigNumber.ONE).log10().toNumber();
 
             if(c % 2n != 0)
                 c = 3n * c + 1n;
@@ -1367,7 +1382,7 @@ var get2DGraphValue = () =>
     if(cBigNum == BigNumber.ZERO)
         return 0;
     
-    return (cBigNum.abs().log2() * cBigNum.sign).toNumber();
+    return (cBigNum.abs().log10() * cBigNum.sign).toNumber();
 }
 
 var getTau = () => currency.value.pow(tauRate);
@@ -1403,7 +1418,7 @@ var postPublish = () =>
     c = 0n;
     cBigNum = BigNumber.from(c);
     cSum = cBigNum;
-    cLog = cSum.max(BigNumber.ONE).log2().toNumber();
+    cLog = cSum.max(BigNumber.ONE).log10().toNumber();
     cIterProgBar.progressTo(0, 220, Easing.CUBIC_INOUT);
 
     if(mimickLastHistory)
@@ -1428,27 +1443,8 @@ var resetStage = () =>
 
     currency.value = 0;
 
-    turns = 0;
-    time = 0;
-    // Disabling history write circumvents the extra levelling
-    writeHistory = false;
-    nudge.maxLevel = cLevelCap[cooldownMs.level];
-    nudge.level = 0;
-    writeHistory = true;
-    history = {};
-    // c is reset to 0 afterwards
-
-    c = 0n;
-    cBigNum = BigNumber.from(c);
-    cIterProgBar.progressTo(0, 220, Easing.CUBIC_INOUT);
-
-    if(mimickLastHistory)
-        nextNudge = binarySearch(Object.keys(lastHistory), turns);
-
-    theory.invalidatePrimaryEquation();
-    theory.invalidateSecondaryEquation();
-    theory.invalidateTertiaryEquation();
-    updateAvailability();
+    prePublish();
+    postPublish();
 
     theory.clearGraph();
 }
@@ -1500,7 +1496,7 @@ var setInternalState = (stateStr) =>
     if('cSum' in state)
     {
         cSum = BigNumber.fromBase64String(state.cSum);
-        cLog = cSum.max(BigNumber.ONE).log2().toNumber();
+        cLog = cSum.max(BigNumber.ONE).log10().toNumber();
     }
     if('totalEclog' in state)
         totalEclog = state.totalEclog;

@@ -5,6 +5,20 @@
 - [x] Extra increments are bought with Ec
   - [ ] Late game Ec no longer resets on publish
 
+- [ ] Explain 2nd stone in Pi product?
+- [x] Change log2 to log10
+
+- [x] Increase 2nd milestone rate
+- [x] Reset grants levels
+- [ ] Auto-nudge grants auto-reset at a specific amount of turns
+
+- [ ] Preserve bugged, not working?
+
+- [ ] Auto-publish
+  - Settings:
+    - Multiplier threshold (makes you think when to pub)
+    - Turn threshold (too easy)
+
 - Ask Gilles:
   - [ ] Make a bonus levels function like perma levels from stars
 
