@@ -163,7 +163,7 @@ const locStrings =
         cLevel: '1/{{{0}}}\\text{{{{ of }}}}c\\text{{{{ level}}}}',
         cLevelth: `1/{{{0}}}^\\text{{{{th}}}}\\text{{{{ of }}}}c
         \\text{{{{ level}}}}`,
-        Eclog: `\\log_{{2}}\\Pi(\\Sigma c)\\text{{ (across pubs)}}`,
+        Eclog: `\\log_{{10}}\\Pi(\\Sigma c)\\text{{ (across pubs)}}`,
         EclogInfo: 'Accumulates across publications (max {0})',
         cLevelCap: 'c\\text{{ level cap}}',
         cooldown: '\\text{{interval}}',
