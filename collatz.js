@@ -1169,7 +1169,7 @@ var getSecondaryEquation = () =>
     let result = `\\begin{matrix}\\dot{\\rho}=t{\\mkern 1mu}q_1
     ${q1ExpMs.level > 0 ?`^{${getq1Exponent(q1ExpMs.level)}}` : ''}q_2
     ${q3UnlockMs.level > 0 ? 'q_3' : ''}\\times${EcStr}\\\\\\\\
-    ${theory.latexSymbol}=\\max{\\rho}^{0.1}\\end{matrix}`;
+    ${theory.latexSymbol}=\\max{\\rho}^{${tauRate}}\\end{matrix}`;
 
     return result;
 }
