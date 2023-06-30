@@ -144,7 +144,7 @@ const locStrings =
         history: 'History',
         historyDesc: `\\begin{{array}}{{c}}\\text{{History}}\\\\{{{0}}}/{{{1}}}
         \\end{{array}}`,
-        historyInfo: 'Shows the last and current publications\' sequences',
+        historyInfo: 'Shows the last and current sequences',
         freezeDesc: ['Freeze {0}', 'Unfreeze {0}'],
         freezeInfo:
         [
@@ -157,14 +157,14 @@ const locStrings =
         permaIncrementInfo: `Dependent on {0}'s sign; incurs penalty ` +
 `on overall income`,
         permaMimick: 'Auto-nudge {0}',
-        permaMimickInfo: 'Mimicks your last publication',
+        permaMimickInfo: 'Mimicks your last sequence',
 
         q1Level: 'q_1\\text{{ level}}',
         cLevel: '1/{{{0}}}\\text{{{{ of }}}}c\\text{{{{ level}}}}',
         cLevelth: `1/{{{0}}}^\\text{{{{th}}}}\\text{{{{ of }}}}c
         \\text{{{{ level}}}}`,
-        Eclog: `\\log_{{10}}\\Pi(\\Sigma c)\\text{{ (across pubs)}}`,
-        EclogInfo: 'Accumulates across publications (max {0})',
+        Eclog: `\\log_{{10}}\\Pi(\\Sigma c)\\text{{ across sequences}}`,
+        EclogInfo: 'Preserved after publications (max {0})',
         cLevelCap: 'c\\text{{ level cap}}',
         cooldown: '\\text{{interval}}',
         cooldownInfo: 'Interval',
@@ -317,10 +317,10 @@ Note: q1 levels have stopped stacking.`,
         permaBaseInfo: 'Changes the display of {0} on the equation',
 
         menuHistory: 'Sequence History',
-        labelCurrentRun: 'Current publication:',
-        labelLastRun: 'Last publication:',
+        labelCurrentRun: 'Current sequence:',
+        labelLastRun: 'Last sequence:',
         labelMimick: 'Auto-nudge {0} (follows last pub): ',
-        labelPreserve: 'Preserve last publication: ',
+        labelPreserve: 'Lock last sequence: ',
         errorInvalidNumMode: 'Invalid number mode',
         errorBinExpLimit: 'Too big',
 
