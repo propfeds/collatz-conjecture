@@ -58,6 +58,7 @@ let totalEclog = 0;
 let totalIncLevel = 0;
 let history = {};
 let lastHistory;
+let lastHistoryStrings = [[], []];
 let writeHistory = true;
 let historyNumMode = 0;
 let historyIdxMode = 1;
@@ -1191,8 +1192,6 @@ let createHistoryMenu = () =>
         historyIdxMode ^= 1;
         currentPubHistory.text = getSequence(history, historyNumMode,
         historyIdxMode);
-        lastPubHistory.text = getSequence(lastHistory, historyNumMode,
-        historyIdxMode);
         toggleIdxButton.text = getLoc('btnIndexingMode')[historyIdxMode & 1];
     }
     let toggleIdxButton = ui.createButton
@@ -1209,8 +1208,6 @@ let createHistoryMenu = () =>
     {
         historyNumMode = historyNumMode ^ 1;
         currentPubHistory.text = getSequence(history, historyNumMode,
-        historyIdxMode);
-        lastPubHistory.text = getSequence(lastHistory, historyNumMode,
         historyIdxMode);
         toggleNumButton.text = getLoc('btnNotationMode')[historyNumMode & 1];
     };
@@ -1236,7 +1233,13 @@ let createHistoryMenu = () =>
     ({
         row: 2,
         column: 1,
-        text: getSequence(lastHistory, historyNumMode, historyIdxMode),
+        text: () =>
+        {
+            if(!lastHistoryStrings[historyIdxMode][historyNumMode])
+                lastHistoryStrings[historyIdxMode][historyNumMode] =
+                getSequence(lastHistory, historyNumMode, historyIdxMode);
+            return lastHistoryStrings[historyIdxMode][historyNumMode];
+        },
         margin: new Thickness(3, 0, 0, 0),
         horizontalTextAlignment: TextAlignment.CENTER,
     });
@@ -1397,7 +1400,10 @@ var prePublish = () =>
     totalEclog += cLog;
     totalIncLevel += nudge.level;
     if(!preserveLastHistory)
+    {
         lastHistory = history;
+        lastHistoryStrings = [[], []];
+    }
     lastHistoryLength = Object.keys(lastHistory).length;
 }
 
@@ -1478,6 +1484,7 @@ var getInternalState = () => JSON.stringify
     totalIncLevel: totalIncLevel,
     history: history,
     lastHistory: lastHistory,
+    lastHistoryStrings: lastHistoryStrings,
     historyNumMode: historyNumMode,
     historyIdxMode: historyIdxMode,
     mimickLastHistory: mimickLastHistory,
@@ -1540,6 +1547,8 @@ var setInternalState = (stateStr) =>
         if(mimickLastHistory)
             nextNudge = binarySearch(LHObj, turns);
     }
+    if('lastHistoryStrings' in state)
+        lastHistoryStrings = state.lastHistoryStrings;
     if('historyNumMode' in state)
         historyNumMode = state.historyNumMode;
     if('historyIdxMode' in state)
