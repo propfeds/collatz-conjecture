@@ -144,14 +144,14 @@ const locStrings =
         historyDesc: `\\begin{{array}}{{c}}\\text{{History}}\\\\{{{0}}}/{{{1}}}
         \\end{{array}}`,
         historyInfo: `Shows the last and current publications' sequences`,
-        freezeDesc: ['Freeze {0}', 'Unfreeze {0}'],
+        freezeDesc: ['Freeze {0} timer', 'Unfreeze {0} timer'],
         freezeInfo:
         [
             'Freezes the turn timer in place',
             'Resumes the turn timer'
         ],
 
-        permaFreeze: '\\text{{the ability to freeze }}c',
+        permaFreeze: 'c \\text{{ timer freezing}}',
         permaIncrement: `\\text{{extra in/decrements for }}c`,
         permaIncrementInfo: `Dependent on {0}'s sign; incurs penalty ` +
 `on overall income`,
