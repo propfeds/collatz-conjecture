@@ -144,7 +144,7 @@ const locStrings =
         history: 'History',
         historyDesc: `\\begin{{array}}{{c}}\\text{{History}}\\\\{{{0}}}/{{{1}}}
         \\end{{array}}`,
-        historyInfo: 'Shows the last and current sequences',
+        historyInfo: `Shows the last and current publications' sequences`,
         freezeDesc: ['Freeze {0}', 'Unfreeze {0}'],
         freezeInfo:
         [
@@ -163,7 +163,7 @@ const locStrings =
         cLevel: '1/{{{0}}}\\text{{{{ of }}}}c\\text{{{{ level}}}}',
         cLevelth: `1/{{{0}}}^\\text{{{{th}}}}\\text{{{{ of }}}}c
         \\text{{{{ level}}}}`,
-        Eclog: `\\log_{{10}}\\Pi(\\Sigma c)\\text{{ across sequences}}`,
+        Eclog: `\\log_{{10}}\\Pi(\\Sigma c)\\text{{ across publications}}`,
         EclogInfo: 'Preserved after publications (max {0})',
         cLevelCap: 'c\\text{{ level cap}}',
         cooldown: '\\text{{interval}}',
@@ -324,8 +324,8 @@ Note: q1 levels have stopped stacking.`,
         errorInvalidNumMode: 'Invalid number mode',
         errorBinExpLimit: 'Too big',
 
-        reset: `You are about to submit the current sequence.
-Everything except nudge polarity will be reset.`
+        reset: `You are about to restart the publication.
+Σc and nudge polarity will be preserved.`
     }
 };
 
@@ -1428,6 +1428,8 @@ var postPublish = () =>
     theory.invalidateSecondaryEquation();
     theory.invalidateTertiaryEquation();
     updateAvailability();
+
+    theory.clearGraph();
 }
 
 var canResetStage = () => true;
@@ -1443,10 +1445,27 @@ var resetStage = () =>
 
     currency.value = 0;
 
-    prePublish();
-    postPublish();
+    turns = 0;
+    time = 0;
+    // Disabling history write circumvents the extra levelling
+    writeHistory = false;
+    nudge.maxLevel = cLevelCap[cooldownMs.level];
+    nudge.level = 0;
+    writeHistory = true;
+    history = {};
+    // c is reset to 0 afterwards
 
-    theory.clearGraph();
+    c = 0n;
+    cBigNum = BigNumber.from(c);
+    cIterProgBar.progressTo(0, 220, Easing.CUBIC_INOUT);
+
+    if(mimickLastHistory)
+        nextNudge = binarySearch(Object.keys(lastHistory), turns);
+
+    theory.invalidatePrimaryEquation();
+    theory.invalidateSecondaryEquation();
+    theory.invalidateTertiaryEquation();
+    updateAvailability();
 }
 
 var getInternalState = () => JSON.stringify
