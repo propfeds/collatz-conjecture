@@ -45,7 +45,7 @@ what would you do?'`,
 var authors = 'propfeds\n\nThanks to:\nCipher#9599, the original suggester\n' +
 'XLII#0042, a computer pretending to be a normal player, acting at the speed ' +
 'of light';
-var version = 0.09;
+var version = 0.10;
 
 let haxEnabled = false;
 let turns = 0;
@@ -53,11 +53,12 @@ let time = 0;
 let c = 0n;
 let cBigNum = BigNumber.from(c);
 let cSum = cBigNum;
-let cLog = cSum.max(BigNumber.ONE).log2().toNumber();
+let cLog = cSum.max(BigNumber.ONE).log10().toNumber();
 let totalEclog = 0;
 let totalIncLevel = 0;
 let history = {};
 let lastHistory;
+let lastHistoryStrings = [[], []];
 let writeHistory = true;
 let historyNumMode = 0;
 let historyIdxMode = 1;
@@ -70,38 +71,50 @@ let bigNumArray = (array) => array.map(x => BigNumber.from(x));
 
 // All balance parameters are aggregated for ease of access
 
-const borrowFactor = .12;
+const borrowFactor = 1;
 const borrowCap = 9232;
-const q1Cost = new FirstFreeCost(new ExponentialCost(1, 1.6));
+const q1Cost = new FirstFreeCost(new ExponentialCost(1000, 1.5));
 const getq1BonusLevels = (bl) => bl ? Math.min((totalEclog + cLog) *
 borrowFactor, borrowCap) : 0;
 const getq1 = (level) => Utils.getStepwisePowerSum(level + Math.floor(
-getq1BonusLevels(q1BorrowMs.level)), 2, 8, 0);
+getq1BonusLevels(q1BorrowMs.level)), 2, 10, 0);
 
-const q1ExpInc = 0.02;
-const q1ExpMaxLevel = 6;
+const q1ExpInc = 0.03;
+const q1ExpMaxLevel = 4;
 const getq1Exponent = (level) => 1 + q1ExpInc * level;
 
-const q2Cost = new ExponentialCost(2.2e7, 6.4);
+const q2Cost = new ExponentialCost(2.2e7, 6);
 const getq2 = (level) => BigNumber.TWO.pow(level);
 
 const q3Cost = new ExponentialCost(BigNumber.from('1e301'), Math.log2(1e3));
 const getq3 = (level) => BigNumber.THREE.pow(level) + (marathonBadge ? 1 : 0);
 
-const extraIncCost = new ExponentialCost(BigNumber.from('1e1250'),
-Math.log2(1e5));
+const extraIncCost = new ExponentialCost(1e40, Math.log2(5));
 const getr = (level) => Utils.getStepwisePowerSum(level, 2, 6, 0);
 const getrPenalty = (level) => BigNumber.FOUR.pow(getr(level));
 
-const permaCosts = bigNumArray(['1e12', '1e22', '1e27', '1e56', '1e1250',
-'1e100']);
-// 44, 88, 176, 264, 352, 440, 528, 616, 704
-// cap cap  cap  bor  q3  exp  exp  exp  exp
-const milestoneCost = new CompositeCost(2, new LinearCost(4.4, 4.4),
-new CompositeCost(9, new LinearCost(17.6, 8.8), new LinearCost(110, 13.2)));
+const permaCosts = bigNumArray(['1e12', '1e20', '1e24', '1e36', '1e1200',
+'1e60']);
 
-const cLevelCap = [20, 28, 36, 48];
-const cooldown = [36, 30, 24, 18];
+const milestoneCost = new CustomCost((level) =>
+{
+    if(level == 0) return BigNumber.from(30 * tauRate);
+    if(level == 1) return BigNumber.from(45 * tauRate);
+    if(level == 2) return BigNumber.from(75 * tauRate);
+    if(level == 3) return BigNumber.from(105 * tauRate);
+    if(level == 4) return BigNumber.from(150 * tauRate);
+    if(level == 5) return BigNumber.from(210 * tauRate);
+    if(level == 6) return BigNumber.from(270 * tauRate);
+    if(level == 7) return BigNumber.from(330 * tauRate);
+    if(level == 8) return BigNumber.from(390 * tauRate);
+    if(level == 9) return BigNumber.from(450 * tauRate);
+    return BigNumber.from(-1);
+});
+const oldMilestoneCost = new CompositeCost(2, new LinearCost(6, 6),
+new CompositeCost(9, new LinearCost(24, 12), new LinearCost(120, 12)));
+
+const cLevelCap = [12, 20, 28, 36, 48];
+const cooldown = [36, 32, 28, 24, 18];
 
 const tauRate = 0.1;
 const pubExp = 3.01;
@@ -116,7 +129,7 @@ var freezePerma, extraIncPerma, mimickPerma;
 var freeEclog;
 var cooldownMs, q1BorrowMs, q1ExpMs, q3UnlockMs;
 
-var currency;
+var currency, EcCurrency;
 
 var finalChapter;
 
@@ -124,33 +137,33 @@ const locStrings =
 {
     en:
     {
-        versionName: 'v0.09',
+        versionName: 'v0.10',
         longTick: 'Tick: {0}s',
 
         history: 'History',
         historyDesc: `\\begin{{array}}{{c}}\\text{{History}}\\\\{{{0}}}/{{{1}}}
         \\end{{array}}`,
-        historyInfo: 'Shows the last and current publications\' sequences',
-        freezeDesc: ['Freeze {0}', 'Unfreeze {0}'],
+        historyInfo: `Shows the last and current publications' sequences`,
+        freezeDesc: ['Freeze {0} timer', 'Unfreeze {0} timer'],
         freezeInfo:
         [
             'Freezes the turn timer in place',
             'Resumes the turn timer'
         ],
 
-        permaFreeze: '\\text{{the ability to freeze }}c',
+        permaFreeze: 'c \\text{{ timer freezing}}',
         permaIncrement: `\\text{{extra in/decrements for }}c`,
         permaIncrementInfo: `Dependent on {0}'s sign; incurs penalty ` +
 `on overall income`,
         permaMimick: 'Auto-nudge {0}',
-        permaMimickInfo: 'Mimicks your last publication',
+        permaMimickInfo: 'Mimicks your last sequence',
 
         q1Level: 'q_1\\text{{ level}}',
         cLevel: '1/{{{0}}}\\text{{{{ of }}}}c\\text{{{{ level}}}}',
         cLevelth: `1/{{{0}}}^\\text{{{{th}}}}\\text{{{{ of }}}}c
         \\text{{{{ level}}}}`,
-        Eclog: '{{{0}}}\\times\\log_{{2}}\\Sigma c\\text{{ (cumulative)}}',
-        EclogInfo: 'Accumulates across publications (max {0})',
+        Eclog: `\\log_{{10}}\\Pi(\\Sigma c)\\text{{ across publications}}`,
+        EclogInfo: 'Preserved after publications (max {0})',
         cLevelCap: 'c\\text{{ level cap}}',
         cooldown: '\\text{{interval}}',
         cooldownInfo: 'Interval',
@@ -303,15 +316,15 @@ Note: q1 levels have stopped stacking.`,
         permaBaseInfo: 'Changes the display of {0} on the equation',
 
         menuHistory: 'Sequence History',
-        labelCurrentRun: 'Current publication:',
-        labelLastRun: 'Last publication:',
+        labelCurrentRun: 'Current sequence:',
+        labelLastRun: 'Last sequence:',
         labelMimick: 'Auto-nudge {0} (follows last pub): ',
-        labelPreserve: 'Preserve last publication: ',
+        labelPreserve: 'Lock last sequence: ',
         errorInvalidNumMode: 'Invalid number mode',
         errorBinExpLimit: 'Too big',
 
-        reset: `You are about to restart the current publication.
-Everything except Σc and nudge polarity will be reset.`
+        reset: `You are about to restart the publication.
+Σc and nudge polarity will be preserved.`
     }
 };
 
@@ -671,6 +684,7 @@ let binarySearch = (arr, target) =>
 var init = () =>
 {
     currency = theory.createCurrency();
+    // EcCurrency = theory.createCurrency('Σc', '\\Sigma c');
     /* Freeze
     Freeze c's value and the timer in place, which allows for idling. This will
     become more important later on, and also helps with farming c levels.
@@ -808,6 +822,10 @@ var init = () =>
         extraInc.isAvailable = false;
     }
 
+    theory.createPublicationUpgrade(0, currency, permaCosts[0]);
+    theory.createBuyAllUpgrade(1, currency, permaCosts[1]);
+    theory.createAutoBuyerUpgrade(2, currency, permaCosts[2]);
+    theory.autoBuyerUpgrade.bought = (_) => updateAvailability();
     /* Toggle base
     QoL!
     */
@@ -825,10 +843,6 @@ var init = () =>
             theory.invalidateTertiaryEquation();
         }
     }
-    theory.createPublicationUpgrade(0, currency, permaCosts[0]);
-    theory.createBuyAllUpgrade(1, currency, permaCosts[1]);
-    theory.createAutoBuyerUpgrade(2, currency, permaCosts[2]);
-    theory.autoBuyerUpgrade.bought = (_) => updateAvailability();
     /* Unlocks freeze
     Shame that you unlock such a useful tool really late.
     */
@@ -916,7 +930,8 @@ var init = () =>
             nudge.maxLevel = cLevelCap[cooldownMs.level];
         };
         cooldownMs.canBeRefunded = (amount) => nudge.level <=
-        cLevelCap[cooldownMs.level - amount];
+        cLevelCap[cooldownMs.level - amount] && !q1ExpMs.level &&
+        !q3UnlockMs.level;
     }
     /* Level borrowing
     It'll be useless for a while at first when you unlock it at e44. But, it can
@@ -927,6 +942,7 @@ var init = () =>
         q1BorrowMs.description = Localization.getUpgradeIncCustomDesc(getLoc(
         'q1Level'), Localization.format(getLoc('Eclog'), borrowFactor));
         q1BorrowMs.info = Localization.format(getLoc('EclogInfo'), borrowCap);
+        q1BorrowMs.canBeRefunded = (_) => !q1ExpMs.level && !q3UnlockMs.level;
     }
     /* q1 exponent
     Standard exponent upgrade.
@@ -983,7 +999,7 @@ var init = () =>
 
     theory.primaryEquationHeight = 66;
     theory.primaryEquationScale = 0.9;
-    theory.secondaryEquationHeight = 48;
+    theory.secondaryEquationHeight = 52;
 }
 
 var updateAvailability = () =>
@@ -1008,8 +1024,9 @@ var updateAvailability = () =>
     extraInc.isAvailable = extraIncPerma.level > 0 &&
     nudge.level == nudge.maxLevel;
 
-    q1ExpMs.isAvailable = theory.milestonesTotal > 3;
-    q3UnlockMs.isAvailable = theory.milestonesTotal > 3;
+    q1ExpMs.isAvailable = cooldownMs.level == cooldownMs.maxLevel &&
+    q1BorrowMs.level == q1BorrowMs.maxLevel;
+    q3UnlockMs.isAvailable = q1ExpMs.isAvailable;
     q3.isAvailable = q3UnlockMs.level > 0;
     marathonBadge = theory.achievements[1].isUnlocked;
 }
@@ -1019,7 +1036,7 @@ var tick = (elapsedTime, multiplier) =>
     nudge.isAutoBuyable = false;
     extraInc.isAutoBuyable = false;
 
-    if(freeze.level % 2 == 0)
+    if(nudge.level && freeze.level % 2 == 0)
     {
         time += elapsedTime * 10;
         let turned = false;
@@ -1032,7 +1049,7 @@ var tick = (elapsedTime, multiplier) =>
             0 : 33, Easing.LINEAR);
 
             cSum += cBigNum;
-            cLog = cSum.max(BigNumber.ONE).log2().toNumber();
+            cLog = cSum.max(BigNumber.ONE).log10().toNumber();
 
             if(c % 2n != 0)
                 c = 3n * c + 1n;
@@ -1074,6 +1091,7 @@ var tick = (elapsedTime, multiplier) =>
 
     currency.value += dt * tTerm * cSum.abs() * q1Term * q2Term * q3Term * bonus
     / rTerm;
+    // EcCurrency.value = cSum;
 }
 
 var getEquationOverlay = () =>
@@ -1147,26 +1165,24 @@ var getSecondaryEquation = () =>
     let EcStr = extraIncPerma.level > 0 && nudge.level == nudge.maxLevel ?
     '\\displaystyle\\frac{\\left|\\Sigma c\\right|}{2^{2r}}' :
     '\\left|\\sum c\\right|';
-    let result = `\\begin{matrix}\\dot{\\rho}=t\\times q_1
+    let result = `\\begin{matrix}\\dot{\\rho}=t{\\mkern 1mu}q_1
     ${q1ExpMs.level > 0 ?`^{${getq1Exponent(q1ExpMs.level)}}` : ''}q_2
     ${q3UnlockMs.level > 0 ? 'q_3' : ''}\\times${EcStr}\\\\\\\\
-    ${theory.latexSymbol}=\\max{\\rho}^{0.1}\\end{matrix}`;
+    ${theory.latexSymbol}=\\max{\\rho}^{${tauRate}}\\end{matrix}`;
 
     return result;
 }
 
 var getTertiaryEquation = () =>
 {
-    let mStr = `t=${turns},&`;
+    let tStr = `t=${turns}`;
     let cStr = '';
     if(historyNumMode & 2 || c > 1e9 || c < -1e8)
-        cStr =  `\\\\(${cBigNum < 0 ? '' : '+\\,'}${cBigNum.toString(0)})`;
-    
+        cStr = `,&c=${cBigNum.toString(0)}`;
     let csStr = `\\Sigma c=${cSum.toString(0)}`;
-    let mcStr = `\\begin{matrix}${mStr}${csStr}
-    \\end{matrix}`;
 
-    return `\\begin{array}{c}${mcStr}${cStr}\\end{array}`;
+    return `\\begin{array}{c}\\begin{matrix}${tStr}${cStr}\\end{matrix}\\\\
+    ${csStr}\\end{array}`;
 }
 
 let createHistoryMenu = () =>
@@ -1175,8 +1191,6 @@ let createHistoryMenu = () =>
     {
         historyIdxMode ^= 1;
         currentPubHistory.text = getSequence(history, historyNumMode,
-        historyIdxMode);
-        lastPubHistory.text = getSequence(lastHistory, historyNumMode,
         historyIdxMode);
         toggleIdxButton.text = getLoc('btnIndexingMode')[historyIdxMode & 1];
     }
@@ -1194,8 +1208,6 @@ let createHistoryMenu = () =>
     {
         historyNumMode = historyNumMode ^ 1;
         currentPubHistory.text = getSequence(history, historyNumMode,
-        historyIdxMode);
-        lastPubHistory.text = getSequence(lastHistory, historyNumMode,
         historyIdxMode);
         toggleNumButton.text = getLoc('btnNotationMode')[historyNumMode & 1];
     };
@@ -1221,7 +1233,13 @@ let createHistoryMenu = () =>
     ({
         row: 2,
         column: 1,
-        text: getSequence(lastHistory, historyNumMode, historyIdxMode),
+        text: () =>
+        {
+            if(!lastHistoryStrings[historyIdxMode][historyNumMode])
+                lastHistoryStrings[historyIdxMode][historyNumMode] =
+                getSequence(lastHistory, historyNumMode, historyIdxMode);
+            return lastHistoryStrings[historyIdxMode][historyNumMode];
+        },
         margin: new Thickness(3, 0, 0, 0),
         horizontalTextAlignment: TextAlignment.CENTER,
     });
@@ -1318,7 +1336,7 @@ let createHistoryMenu = () =>
                 // }),
                 ui.createScrollView
                 ({
-                    // heightRequest: ui.screenHeight * 0.32,
+                    heightRequest: ui.screenHeight * 0.32,
                     content: historyGrid,
                     orientation: ScrollOrientation.BOTH
                 }),
@@ -1365,7 +1383,7 @@ var get2DGraphValue = () =>
     if(cBigNum == BigNumber.ZERO)
         return 0;
     
-    return (cBigNum.abs().log2() * cBigNum.sign).toNumber();
+    return (cBigNum.abs().log10() * cBigNum.sign).toNumber();
 }
 
 var getTau = () => currency.value.pow(tauRate);
@@ -1382,7 +1400,10 @@ var prePublish = () =>
     totalEclog += cLog;
     totalIncLevel += nudge.level;
     if(!preserveLastHistory)
+    {
         lastHistory = history;
+        lastHistoryStrings = [[], []];
+    }
     lastHistoryLength = Object.keys(lastHistory).length;
 }
 
@@ -1401,7 +1422,7 @@ var postPublish = () =>
     c = 0n;
     cBigNum = BigNumber.from(c);
     cSum = cBigNum;
-    cLog = cSum.max(BigNumber.ONE).log2().toNumber();
+    cLog = cSum.max(BigNumber.ONE).log10().toNumber();
     cIterProgBar.progressTo(0, 220, Easing.CUBIC_INOUT);
 
     if(mimickLastHistory)
@@ -1411,6 +1432,8 @@ var postPublish = () =>
     theory.invalidateSecondaryEquation();
     theory.invalidateTertiaryEquation();
     updateAvailability();
+
+    theory.clearGraph();
 }
 
 var canResetStage = () => true;
@@ -1447,8 +1470,6 @@ var resetStage = () =>
     theory.invalidateSecondaryEquation();
     theory.invalidateTertiaryEquation();
     updateAvailability();
-
-    theory.clearGraph();
 }
 
 var getInternalState = () => JSON.stringify
@@ -1463,6 +1484,7 @@ var getInternalState = () => JSON.stringify
     totalIncLevel: totalIncLevel,
     history: history,
     lastHistory: lastHistory,
+    lastHistoryStrings: lastHistoryStrings,
     historyNumMode: historyNumMode,
     historyIdxMode: historyIdxMode,
     mimickLastHistory: mimickLastHistory,
@@ -1498,7 +1520,7 @@ var setInternalState = (stateStr) =>
     if('cSum' in state)
     {
         cSum = BigNumber.fromBase64String(state.cSum);
-        cLog = cSum.max(BigNumber.ONE).log2().toNumber();
+        cLog = cSum.max(BigNumber.ONE).log10().toNumber();
     }
     if('totalEclog' in state)
         totalEclog = state.totalEclog;
@@ -1525,6 +1547,8 @@ var setInternalState = (stateStr) =>
         if(mimickLastHistory)
             nextNudge = binarySearch(LHObj, turns);
     }
+    if('lastHistoryStrings' in state)
+        lastHistoryStrings = state.lastHistoryStrings;
     if('historyNumMode' in state)
         historyNumMode = state.historyNumMode;
     if('historyIdxMode' in state)
