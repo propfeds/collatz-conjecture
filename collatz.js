@@ -115,14 +115,12 @@ new CompositeCost(9, new LinearCost(24, 12), new LinearCost(120, 12)));
 const cLevelCap = [12, 20, 28, 36, 48];
 const cooldown = [36, 32, 28, 24, 18];
 
-const tauRate = 0.2;
+const tauRate = 0.1;
 const pubExp = 3.01;
-const CtRate = 2;
-const pubExpAfterRate = pubExp / CtRate;
 // const pubMult = 8;
-var getPublicationMultiplier = (tau) => tau.pow(pubExpAfterRate);
+var getPublicationMultiplier = (tau) => tau.pow(pubExp);
 var getPublicationMultiplierFormula = (symbol) =>
-`{${symbol}}^{${pubExp}/${CtRate}}`;
+`{${symbol}}^{${pubExp}}`;
 
 var freeze;
 var nudge, q1, q2, q3, extraInc;
