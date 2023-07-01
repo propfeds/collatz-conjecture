@@ -137,7 +137,7 @@ const locStrings =
 {
     en:
     {
-        versionName: 'v0.10, WIP',
+        versionName: 'v0.10',
         longTick: 'Tick: {0}s',
 
         history: 'History',
