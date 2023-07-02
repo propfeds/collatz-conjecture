@@ -137,7 +137,7 @@ const locStrings =
 {
     en:
     {
-        versionName: 'v0.10',
+        versionName: 'v0.10h1',
         longTick: 'Tick: {0}s',
 
         history: 'History',
@@ -927,6 +927,7 @@ var init = () =>
         }
         cooldownMs.boughtOrRefunded = (_) =>
         {
+            updateAvailability();
             nudge.maxLevel = cLevelCap[cooldownMs.level];
         };
         cooldownMs.canBeRefunded = (amount) => nudge.level <=
@@ -943,6 +944,10 @@ var init = () =>
         'q1Level'), Localization.format(getLoc('Eclog'), borrowFactor));
         q1BorrowMs.info = Localization.format(getLoc('EclogInfo'), borrowCap);
         q1BorrowMs.canBeRefunded = (_) => !q1ExpMs.level && !q3UnlockMs.level;
+        q1BorrowMs.boughtOrRefunded = (_) =>
+        {
+            updateAvailability();
+        };
     }
     /* q1 exponent
     Standard exponent upgrade.
@@ -952,7 +957,11 @@ var init = () =>
         q1ExpMs.description = Localization.getUpgradeIncCustomExpDesc('q_1',
         q1ExpInc);
         q1ExpMs.info = Localization.getUpgradeIncCustomExpInfo('q_1', q1ExpInc);
-        q1ExpMs.boughtOrRefunded = (_) => theory.invalidateSecondaryEquation();
+        q1ExpMs.boughtOrRefunded = (_) =>
+        {
+            updateAvailability();
+            theory.invalidateSecondaryEquation();
+        };
     }
     /* q3 unlock
     Standard unlock.
