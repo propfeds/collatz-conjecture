@@ -2,6 +2,17 @@
 
 ## In consideration
 
+- [ ] Read more mastigo and write story
+
+- [ ] Hint menu
+  - For a starter sequence, try to prevent c from becoming divisible by 4.
+  - Minus nudges are stronger than plus nudges.
+  - While long sequences can be deeper, short ones allow you to stack q1 levels faster.
+  - Try out base 2 to see some patterns that the Conjecture can make!
+
+- [ ] sqrt the Sigma c, but better q1 q2 scaling
+  - Negative Sigma c generates imaginary currency Xdddd
+
 - [x] Extra increments are bought with Ec
   - [ ] Late game Ec no longer resets on publish
 

@@ -114,7 +114,7 @@ const oldMilestoneCost = new CompositeCost(2, new LinearCost(6, 6),
 new CompositeCost(9, new LinearCost(24, 12), new LinearCost(120, 12)));
 
 const cLevelCap = [12, 20, 28, 36, 48];
-const cooldown = [36, 32, 28, 24, 18];
+const cooldown = [32, 28, 24, 20, 16];
 
 const tauRate = 0.1;
 const pubExp = 3.01;
