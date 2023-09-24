@@ -846,16 +846,16 @@ var init = () =>
     /* Unlocks freeze
     Shame that you unlock such a useful tool really late.
     */
-    {
-        freezePerma = theory.createPermanentUpgrade(3, currency,
-        new ConstantCost(permaCosts[3]));
-        freezePerma.description = Localization.getUpgradeUnlockDesc(getLoc(
-        'permaFreeze'));
-        freezePerma.info = Localization.getUpgradeUnlockInfo(getLoc(
-        'permaFreeze'));
-        freezePerma.bought = (_) => updateAvailability();
-        freezePerma.maxLevel = 1;
-    }
+    // {
+    //     freezePerma = theory.createPermanentUpgrade(3, currency,
+    //     new ConstantCost(permaCosts[3]));
+    //     freezePerma.description = Localization.getUpgradeUnlockDesc(getLoc(
+    //     'permaFreeze'));
+    //     freezePerma.info = Localization.getUpgradeUnlockInfo(getLoc(
+    //     'permaFreeze'));
+    //     freezePerma.bought = (_) => updateAvailability();
+    //     freezePerma.maxLevel = 1;
+    // }
     /* Mimick history
     Now that's quality of life.
     */
@@ -1019,8 +1019,8 @@ var updateAvailability = () =>
         historyLabel.isVisible = true;
     }
 
-    freezePerma.isAvailable = theory.autoBuyerUpgrade.level > 0;
-    freeze.isAvailable = freezePerma.level > 0;
+    // freezePerma.isAvailable = theory.autoBuyerUpgrade.level > 0;
+    // freeze.isAvailable = freezePerma.level > 0;
 
     mimickPerma.isAvailable = theory.autoBuyerUpgrade.level > 0;
     if(mimickPerma.level)
